@@ -1069,9 +1069,9 @@ $permittedFields = User::permissions();
                             <div class="panel panel-info" style="position:relative;">
                                 <div class="panel-heading">
                                     <?=$wcName?>
-                                    <button title="Раскрыть" onclick="event.preventDefault()" data-status="0" class="btn btn-sm btn-info statusesChevron"><span class="glyphicon glyphicon-menu-left"></span></button>
+                                    <button title="Раскрыть" onclick="event.preventDefault()" data-status="0" class="btn btn-sm btn-info <?= User::getAccess() == 4 ? "" : "statusesChevron";?> "><span class="glyphicon glyphicon-menu-left"></span></button>
                                 </div>
-                                <div class="panel-body pb-0 statusesPanelBody <?= User::getAccess() == 4 ? "" : "statusesPanelBodyHidden"?> "> <?php // Раскрываем все свернутые статусы для производства. На сих старых компах глючит! ?>
+                                <div class="panel-body pb-0 statusesPanelBody <?= User::getAccess() == 4 ? "" : "statusesPanelBodyHidden";?> "> <?php // Раскрываем все свернутые статусы для производства. На сих старых компах глючит! ?>
                                     <?php foreach ( $workingCenter as $subUnit ): ?>
                                         <div class="list-group">
                                             <a class="list-group-item active"><?=$subUnit['descr']?></a>

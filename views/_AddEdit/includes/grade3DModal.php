@@ -7,10 +7,17 @@
       </div>
       <div class="modal-body">
         <select class="form-control add3DGrade">
-          <option value="">---</option>
+		<?php $tmpWorkName = ''; ?>
       <?php foreach ( $gradingSystem3D??[] as $gs3DRow ): ?>
+	  
+	  <?php // Выведем черту после каждого типа оценок. Для лучшего восприятия ?>
+		<?php if ( $gs3DRow['work_name'] !== $tmpWorkName ):  ?>
+			<?php $tmpWorkName = $gs3DRow['work_name']; ?>
+			<option value="">---</option>
+		<?php endif; ?>
+	  
         <option data-workName="<?=$gs3DRow['work_name']?>" data-points="<?=$gs3DRow['points']?>" value="<?=$gs3DRow['id']?>" title="<?=$gs3DRow['description']?>" >
-          <?= $gs3DRow['work_name'] . " - ". $gs3DRow['points']?>
+          <?= $gs3DRow['work_name'] . " - " . (((float)$gs3DRow['points'] > 0.00) ? $gs3DRow['points'] : "(Индивид.)") ?>
           <?php
             $descr = $gs3DRow['description'];
             if ( mb_strlen( $descr, "UTF-8" ) > 50 ) $descr = mb_substr($gs3DRow['description'], 0, 50, "UTF-8") . "...";
