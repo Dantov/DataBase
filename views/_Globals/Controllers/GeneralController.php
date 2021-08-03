@@ -126,6 +126,8 @@ JS;
         $this->varBlock['designApproveModels'] = $general->getDesignApproveModels();
         if ( User::permission('repairs') )
             $this->varBlock['repairsToWork'] = $general->countRepairsToWork();
+		if ( User::permission('MA_modeller3D') )
+            $this->varBlock['models3DToWork'] = $general->countModels3DToWork();
     }
 
     protected function getCollections($coll_res)

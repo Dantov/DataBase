@@ -40,6 +40,9 @@ class GlobalsController extends Controller
 
                 if ( (int)$request->get('getRepairNotices') === 1 )
                     exit( json_encode( $this->actionRepairNotices() ) );
+				
+				if ( (int)$request->get('getNew3DNotices') === 1 )
+                    exit( json_encode( $this->actionNew3DNotices() ) );
 
             } catch (\TypeError | \Exception $e)
             {
@@ -174,6 +177,14 @@ class GlobalsController extends Controller
     protected function actionRepairNotices()
     {
         return (new PushNotice())->getRepairNoticesData();
+    }
+	
+	/**
+     * @throws \Exception
+     */
+    protected function actionNew3DNotices()
+    {
+        return (new PushNotice())->getNew3DNoticesData();
     }
     
 }

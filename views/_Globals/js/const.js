@@ -30,7 +30,7 @@ const _PNSHOW_ = approvedControllers.includes(_CONTROLLER_);
 /**
  *  подготовленные переменные для экземпляров классов
  */
-let main, pushNotice, repairNotices;
+let main, pushNotice, repairNotices, new3DNotices;
 
 
 

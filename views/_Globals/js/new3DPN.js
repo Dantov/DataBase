@@ -1,28 +1,28 @@
 "use strict";
 
-function RepairsPN()
+function New3DPN()
 {
-    this.repBadge = document.getElementById('repPNBadge');
+    this.badge = document.getElementById('new3DPNBadge');
     this.init();
 }
 
-RepairsPN.prototype.init = function()
+New3DPN.prototype.init = function()
 {
-    if ( !this.repBadge ) return;
+    if ( !this.badge ) return;
 
     this.buttonsToggle();
-    debug('RepairsPN Init ok!')
+    debug('New3DPN Init ok!')
 };
 
-RepairsPN.prototype.buttonsToggle = function() {
+New3DPN.prototype.buttonsToggle = function() {
 
     let that = this;
     // кнопка показать/скрыть все
-    let showRepairs = this.repBadge.querySelector('.pn_rep_show');
-    let hideRepairs = this.repBadge.querySelector('.pn_rep_hide');
-    if ( !showRepairs || !hideRepairs ) return;
+    let show = this.badge.querySelector('.pn_show');
+    let hide = this.badge.querySelector('.pn_hide');
+    if ( !show || !hide ) return;
 
-	hideRepairs.addEventListener('click',function(){
+	hide.addEventListener('click',function(){
         let showedToasts = that.showingToasts();
         for ( let i = 0; i < showedToasts.length; i++ )
         {
@@ -30,15 +30,15 @@ RepairsPN.prototype.buttonsToggle = function() {
         }
     });
 	
-    showRepairs.addEventListener('click',function(){
+    show.addEventListener('click',function(){
 		
-		hideRepairs.click();
+		hide.click();
 		
         $.ajax({
             url: "/globals/pushNotice",
             type: 'GET',
             data: {
-                getRepairNotices: 1,
+                getNew3DNotices: 1,
             },
             dataType:"json",
             success:function(resp) {
@@ -54,13 +54,13 @@ RepairsPN.prototype.buttonsToggle = function() {
                 }
                 if ( resp.error )
                 {
-                    AR.setDefaultMessage( 'error', 'subtitle', "Ошибка при сохранении." );
+                    AR.setDefaultMessage( 'error', 'subtitle', "Ошибка при получении уведомлений." );
                     AR.error( resp.error.message, resp.error.code, resp.error );
                     return;
                 }
 
                 $.each(resp, function (i, noticeData) {
-                    that.addRepairPN(noticeData);
+                    that.addPN(noticeData);
                 });
 
             },
@@ -71,9 +71,11 @@ RepairsPN.prototype.buttonsToggle = function() {
 
     });
 
+    
+
 };
 
-RepairsPN.prototype.addRepairPN = function(notice) {
+New3DPN.prototype.addPN = function(notice) {
 
     let url = _ROOT_ + "model-view/?id=" + notice.id;
 
@@ -87,12 +89,12 @@ RepairsPN.prototype.addRepairPN = function(notice) {
         timeout: 20000,
         maxWidth: 350,
         zindex: 998,
-        target: '#RepairsPNWrapp',
-        theme: 'dark', // light
+        target: '#new3DNoticeWrapp',
+        theme: 'light', // dark
 
-        id: "repairNotice_" + notice.id,
-        title: "<u>Ремонт: </u>" + notice.number_3d +'/'+ notice.vendor_code + ' - ' + notice.model_type,
-        message: " от <i><u>" + notice.sender + "</u></i>: " + notice.descrNeed,
+        id: "new3DNotice_" + notice.id,
+        title: '<u>В работу: </u>' + notice.number_3d +'/'+ notice.vendor_code + ' - ' + notice.model_type,
+        message: "<i><u>" + notice.description + "</u></i>",
         image: notice.img_name,
         icon: 'glyphicon glyphicon-'+ notice.glyphi,
         iconColor: '',
@@ -106,22 +108,22 @@ RepairsPN.prototype.addRepairPN = function(notice) {
     });
 
 };
-RepairsPN.prototype.showingToasts = function() {
-    return document.getElementById('RepairsPNWrapp').querySelectorAll('.iziToast');
+New3DPN.prototype.showingToasts = function() {
+    return document.getElementById('new3DNoticeWrapp').querySelectorAll('.iziToast');
 };
 
-RepairsPN.prototype.countComingNotice = function(notice) {
-    this.addRepairPN(notice);
-    let digit = this.repBadge.querySelector('.da_Badge').innerHTML;
-    this.repBadge.querySelector('.da_Badge').innerHTML = ++digit + '';
+New3DPN.prototype.countComingNotice = function(notice) {
+    this.addPN(notice);
+    let digit = this.badge.querySelector('.da_Badge').innerHTML;
+    this.badge.querySelector('.da_Badge').innerHTML = ++digit + '';
 };
 
-let rpn = function (){
+let new3DPN = function (){
     if ( wsUserData.fio === 'Гость' ) return;
     if ( !_PNSHOW_ ) return;
 
-    if ( !repairNotices )
+    if ( !new3DNotices )
     {
-        repairNotices = new RepairsPN();
+        new3DNotices = new New3DPN();
     }
 }();

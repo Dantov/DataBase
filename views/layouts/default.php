@@ -107,6 +107,23 @@ JS;
                     </form>
 
                     <form class="navbar-form topuserform navbar-right">
+						<?php /** Уведомления о новых моделях для 3Д */ ?>
+                        <?php if ( User::permission('MA_modeller3D') ): ?>
+                            <div class="btn-group" id="new3DPNBadge">
+                                <button title="Кол-во 3Д моделей в работу" type="button" class="btn btn-link topdividervertical dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="badge" style="background-color: #ffb317;!important;">
+                                        <i class="fab fa-modx"></i>&#160;
+                                        <span class="da_Badge"><?= $this->varBlock['models3DToWork'] ?></span>
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="pn_show"><span class="glyphicon glyphicon-eye-open"></span>&#160; Показать</a>
+                                        <a class="pn_hide"><span class="glyphicon glyphicon-eye-close"></span>&#160; Спрятать</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
                         <?php /** Уведомления о ремонтах */ ?>
                         <?php if ( User::permission('repairs') ): ?>
                             <div class="btn-group" id="repPNBadge">
@@ -324,12 +341,16 @@ JS;
             <?php if (User::permission('repairs')): ?>
                 <script defer src="/Views/_Globals/js/RepairsPN.js?ver=<?=time() ?>"></script>
             <?php endif; ?>
+			<?php if (User::permission('MA_modeller3D')): ?>
+                <script defer src="/Views/_Globals/js/new3DPN.js?ver=<?=time() ?>"></script>
+            <?php endif; ?>
             <script defer src="/Views/_Main/js/main.js?ver=<?=time()?>"></script>
             <script defer src="/Views/_Main/js/ProgressModal.js?ver=<?=time()?>"></script>
 
         </footer>
 
     </div><!--content-->
+	<div id="new3DNoticeWrapp" class="row notices_wrapper"></div>
 	<div id="RepairsPNWrapp" class="row notices_wrapper"></div>
 	<div id="pushNoticeWrapp" class="row notices_wrapper"></div>
     <div id="alertResponseModal" aria-hidden="true" aria-labelledby="alertResponseModal" role="dialog" class="iziModal">

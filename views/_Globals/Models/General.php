@@ -766,4 +766,14 @@ class General extends Model
         $userFIO = explode(' ', User::getFIO())[0];
         return $this->findOne("SELECT COUNT(toWhom) as c FROM repairs WHERE toWhom LIKE '%$userFIO%' AND status<>4 ",'c');
     }
+	
+	/**
+     * @throws \Exception
+     */
+    public function countModels3DToWork()
+    {
+        $userFIO = explode(' ', User::getFIO())[0];
+        return $this->findOne("SELECT COUNT(modeller3D) as c FROM stock WHERE modeller3D LIKE '%$userFIO%' AND status=89 ",'c');
+    }
+	
 }

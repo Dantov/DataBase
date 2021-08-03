@@ -1090,7 +1090,7 @@ body {
 	background-color: #FFF0F5;
 	cursor: default;
 }
-#pushNoticeWrapp, #RepairsPNWrapp {
+#pushNoticeWrapp, #RepairsPNWrapp, #new3DNoticeWrapp {
 	position: fixed !important;
 	width: 320px;
 	min-height: 1px;
@@ -1101,7 +1101,7 @@ body {
 	overflow-y: auto;
 	overflow-x: hidden;
 }
-#RepairsPNWrapp {
+#RepairsPNWrapp, #new3DNoticeWrapp {
 	right: 338px;
 }
 .notices_wrapper {
