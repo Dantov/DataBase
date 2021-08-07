@@ -176,6 +176,9 @@ class GlobalsController extends Controller
      */
     protected function actionRepairNotices()
     {
+		if ( User::getAccess() == 8 )
+			return (new PushNotice())->getRepairNoticesData('for_pdo');
+		
         return (new PushNotice())->getRepairNoticesData();
     }
 	

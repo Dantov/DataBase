@@ -9,6 +9,7 @@ return [
     'defaultController' => 'main',
     'version' => '2.203',
     'dataCompression' => true,
+	'assistUpdate' => 2,
 
     /**
      *  mode

@@ -169,11 +169,14 @@ class MainController extends GeneralController
 		}
 		
 		/** почистим старые уведомления */
-		if (User::getAccess() === 1 )
+		//(new PushNotice())->clearOldNotices();
+		/*
+		if (User::getAccess() === 9 )
 		{
 			$pn = new PushNotice();
 			$pn->clearOldNotices();
 		}
+		*/
 
 		//если нет поиска, выбираем из базы
 		if ( !trueIsset($this->foundRows) )

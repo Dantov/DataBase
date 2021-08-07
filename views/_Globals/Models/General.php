@@ -770,6 +770,14 @@ class General extends Model
 	/**
      * @throws \Exception
      */
+    public function countRepairsToShow()
+    {
+        return $this->findOne("SELECT COUNT(toWhom) as c FROM repairs WHERE status_date > '0000-00-00' AND status<>4 ",'c');
+    }
+	
+	/**
+     * @throws \Exception
+     */
     public function countModels3DToWork()
     {
         $userFIO = explode(' ', User::getFIO())[0];

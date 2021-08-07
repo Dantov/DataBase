@@ -72,7 +72,7 @@ JS;
         $access = $session->getKey('access');
         $assist = $session->getKey('assist');
 
-        if( $access !== true || $assist['update'] !== 8 ) $this->redirect('/auth/?a=exit');
+        if( $access !== true || $assist['update'] !== Config::get('assistUpdate') ) $this->redirect('/auth/?a=exit');
     }
 
     /**
@@ -124,8 +124,16 @@ JS;
         $this->navBar = $navBar;
 
         $this->varBlock['designApproveModels'] = $general->getDesignApproveModels();
+		
+		// Показать ремонты моделлерам
         if ( User::permission('repairs') )
             $this->varBlock['repairsToWork'] = $general->countRepairsToWork();
+		
+		// Для ПДО показать все не завершенные ремонты
+		if ( User::permission('repairs') && User::getAccess() == 8 )
+            $this->varBlock['repairsToWork'] = $general->countRepairsToShow();
+		
+		// Показать модели в работу
 		if ( User::permission('MA_modeller3D') )
             $this->varBlock['models3DToWork'] = $general->countModels3DToWork();
     }

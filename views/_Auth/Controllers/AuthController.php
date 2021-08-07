@@ -1,8 +1,9 @@
 <?php
 namespace Views\_Auth\Controllers;
-use Views\vendor\core\Controller;
-use Views\vendor\core\Cookies;
 
+use Views\vendor\core\{
+    Controller, Cookies, Config
+};
 
 class AuthController extends Controller
 {
@@ -104,7 +105,7 @@ class AuthController extends Controller
         $assist['collection_id']   = -1;		// все коллекции
         $assist['containerFullWidth'] = 2;		// на всю ширину
         $assist['PushNotice']      = 1;		// показываем уведомления
-        $assist['update']          = 8;
+        $assist['update']          = Config::get('assistUpdate');
         $assist['bodyImg']         = 'bodyimg0'; // название класса
         $session->setKey('assist', $assist);
         

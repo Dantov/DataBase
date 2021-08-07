@@ -21,6 +21,9 @@ class PushNotice extends General
 
     public function checkPushNotice()
     {
+		// почистим старые сперва
+		$this->clearOldNotices();
+		
         $noticesResult = [];
 
         $userId = 'a'.$this->userID.'a';
@@ -235,21 +238,33 @@ class PushNotice extends General
      * @return mixed
      * @throws \Exception
      */
-    public function getRepairNoticesData()
+    public function getRepairNoticesData( string $forWho = '' )
     {
         $surname = User::getSurname();
-
+		
         $sql = "SELECT s.id,s.number_3d,s.vendor_code,s.model_type,
                        i.img_name,
                        rp.sender,rp.descrNeed,
                        sr.glyphi,sr.title 
                 FROM stock as s
                   LEFT JOIN images as i ON i.pos_id = s.id AND i.main='1'
-                  LEFT JOIN repairs as rp ON rp.pos_id = s.id
+                  LEFT JOIN repairs as rp ON rp.pos_id = s.id AND rp.toWhom LIKE '%$surname%' AND rp.status<>4
                   LEFT JOIN service_arr as sr ON sr.id = s.status
                       WHERE s.id IN
                         (SELECT r.pos_id FROM repairs as r WHERE r.toWhom LIKE '%$surname%' AND r.status<>4)";
 
+		if ( $forWho === 'for_pdo' )
+			$sql = "SELECT s.id,s.number_3d,s.vendor_code,s.model_type,
+                       i.img_name,
+                       rp.sender,rp.descrNeed,
+                       sr.glyphi,sr.title 
+                FROM stock as s
+                  LEFT JOIN images as i ON i.pos_id = s.id AND i.main='1'
+                  LEFT JOIN repairs as rp ON rp.pos_id = s.id AND rp.status_date>'0000-00-00' AND rp.status<>4
+                  LEFT JOIN service_arr as sr ON sr.id = s.status
+                      WHERE s.id IN
+                        (SELECT r.pos_id FROM repairs as r WHERE r.status_date>'0000-00-00' AND r.status<>4)";
+		
         $repNotices = $this->findAsArray($sql);
         foreach ( $repNotices as &$repNotice )
         {
