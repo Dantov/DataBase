@@ -361,10 +361,8 @@ class PushNotice extends General
                 FROM stock as s
                   LEFT JOIN images as i ON i.pos_id = s.id
                   LEFT JOIN service_arr as sr ON sr.id = s.status
-                WHERE s.modeller3D LIKE '%$surname%' AND s.status=89 GROUP BY s.id";
-				
-		// LEFT JOIN images as i ON i.pos_id = s.id AND i.sketch='1'
-		// LEFT JOIN (SELECT img_name, pos_id FROM images LIMIT 1) images as i ON i.pos_id = s.id
+                WHERE s.modeller3D LIKE '%$surname%' AND (s.status=89 OR s.status=8) GROUP BY s.id";
+
         $repNotices = $this->findAsArray($sql);
         foreach ( $repNotices as &$repNotice )
         {

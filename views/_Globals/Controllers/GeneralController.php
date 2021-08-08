@@ -135,7 +135,11 @@ JS;
 		
 		// Показать модели в работу
 		if ( User::permission('MA_modeller3D') )
+        {
             $this->varBlock['models3DToWork'] = $general->countModels3DToWork();
+            $this->varBlock['models3DInWork'] = $general->countModels3DInWork();
+        }
+
     }
 
     protected function getCollections($coll_res)

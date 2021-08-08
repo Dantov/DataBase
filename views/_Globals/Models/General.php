@@ -783,5 +783,14 @@ class General extends Model
         $userFIO = explode(' ', User::getFIO())[0];
         return $this->findOne("SELECT COUNT(modeller3D) as c FROM stock WHERE modeller3D LIKE '%$userFIO%' AND status=89 ",'c');
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function countModels3DInWork()
+    {
+        $userFIO = explode(' ', User::getFIO())[0];
+        return $this->findOne("SELECT COUNT(modeller3D) as c FROM stock WHERE modeller3D LIKE '%$userFIO%' AND status=8  ",'c');
+    }
 	
 }

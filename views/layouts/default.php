@@ -110,10 +110,12 @@ JS;
 						<?php /** Уведомления о новых моделях для 3Д */ ?>
                         <?php if ( User::permission('MA_modeller3D') ): ?>
                             <div class="btn-group" id="new3DPNBadge">
-                                <button title="Кол-во 3Д моделей в работу" type="button" class="btn btn-link topdividervertical dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button title="Кол-во 3Д моделей в работу / в работе" type="button" class="btn btn-link topdividervertical dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <span class="badge" style="background-color: #ffb317;!important;">
                                         <i class="fab fa-modx"></i>&#160;
                                         <span class="da_Badge"><?= $this->varBlock['models3DToWork'] ?></span>
+                                        <span class="">/ </span>
+                                        <span class="da_BadgeInWork"><?= $this->varBlock['models3DInWork'] ?></span>
                                     </span>
                                 </button>
                                 <ul class="dropdown-menu">

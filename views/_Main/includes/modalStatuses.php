@@ -7,7 +7,7 @@
                 <button id="closeAll" title="Закрыть Все" onclick="event.preventDefault()" style="margin-bottom: 10px" class="pull-left hidden btn btn-sm btn-primary"><span class="glyphicon glyphicon-menu-down"></span> Закрыть Все</button>
             </div>
             <div class="col-xs-1" >
-                <a title="Сбросить" href="/?regStat=none" style="margin-bottom: 10px" class="pull-right btn btn-sm btn-success"><span class="glyphicon glyphicon-remove"></span> Нет</a>
+                <a title="Сбросить" href="/main/?regStat=none" style="margin-bottom: 10px" class="pull-right btn btn-sm btn-success"><span class="glyphicon glyphicon-remove"></span> Нет</a>
             </div>
             <div class="col-xs-10" >
                 <!-- Rounded switch -->
