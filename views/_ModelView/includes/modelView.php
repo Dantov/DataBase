@@ -41,7 +41,7 @@ $isView = true;
                     <? foreach ( isset($images)?$images:[] as $image ) :?>
                         <?php $borderDopImg = isset($image['active']) ? 'border-primary-1': 'border-secondary-1' ?>
                         <div class="col-xs-6 col-sm-3 pl-0 pr-2 mb-1">
-                            <div class="imageSmall cursorPointer border-radius-1 <?=$borderDopImg?> <?= isset($image['active']) ? 'activeImage':''?>" data-id="<?=$image['id']?>" style="background-image: url(<?= $image['img_name'] ?>); height: 10rem;"></div>
+                            <div class="imageSmall cursorPointer border-radius-1 <?=$borderDopImg?> <?= isset($image['active']) ? 'activeImage':''?>" data-id="<?=$image['id']?>" style="background-image: url(<?= $setPrevImg($image) ?>); height: 10rem;"></div>
                         </div>
                     <? endforeach; ?>
                 </div>

@@ -5,7 +5,9 @@ use Views\_AddEdit\Models\AddEdit;
 use Views\_SaveModel\Models\Handler;
 use Views\_Globals\Controllers\GeneralController;
 use Views\_Globals\Models\User;
+use Views\_SaveModel\Models\ImageConverter;
 use Views\vendor\core\Crypt;
+use Views\vendor\core\Files;
 use Views\vendor\libs\classes\AppCodes;
 
 class AddEditController extends GeneralController
@@ -177,23 +179,38 @@ class AddEditController extends GeneralController
 
             $images  = $addEdit->getImages();
             //debug($images,'images',1);
-            $mainImage = $mainImage = $images[0]['imgPath'];
+
+
+            // принимает массив с данными картинки
+            // Выберет картинку или превью, если она есть
+            $setPrevImg = function( $image )
+            {
+                if  ( !is_array($image) || !isset($image['imgPrevPath']) || !isset($image['imgPath']) )
+                    return '';
+
+                if ( empty($image['imgPrevPath']) )
+                    return $image['imgPath'];
+
+                return $image['imgPrevPath'];
+            };
+
+            $mainImage = $setPrevImg($images[0]);
             foreach ( $images as $image )
             {
                 if ( trueIsset($image['main']) )
                 {
-                    $mainImage = $image['imgPath'];
+                    $mainImage = $setPrevImg($image);
                     break;
                 }
                 if ( trueIsset($image['sketch']) )
                 {
-                    $mainImage = $image['imgPath'];
+                    $mainImage = $setPrevImg($image);
                     break;
                 }
             }
 
-            $gemsRow  = $addEdit -> getGems();
-            $dopVCs  = $addEdit -> getDopVC();
+            $gemsRow  = $addEdit->getGems();
+            $dopVCs  = $addEdit->getDopVC();
 
             $num3DVC_LI = $addEdit->getNum3dVCLi( $dopVCs );
 
@@ -302,23 +319,15 @@ JS;
         /** Смотрим можно ли изменять статус **/
         $toShowStatuses = $addEdit->statusesChangePermission($row['date']??date("Y-m-d"), $component);
 
-        //debug($statusesWorkingCenters,'$statusesWorkingCenters',1);
-		
-        /** Внесение стоимотей зависит от даты создания модели. На старые не вносим **/
-        // $changeCost =  new \DateTime($row['date']??date("Y-m-d")) < new \DateTime("2020-08-04") ? false : true;
-        /** участку ПДО нужно вносить стоимость мастер моделей, для старых моделей **/
-		// $oldModelsAccessPrice = [8,9,11];
-        // if ( in_array(User::getAccess(), $oldModelsAccessPrice) )
-            // $changeCost = true;
-		
+
 		$changeCost = in_array(User::getAccess(), [1,2,8,9,10,11]);
 
         $save = Crypt::strEncode("_".time()."!");
         $this->session->setKey('saveModel', $save);
         $compact2 = compact([
             'id','component','dellWD','prevPage','collLi','authLi','mod3DLi','jewelerNameLi','modTypeLi','gems_sizesLi','gems_cutLi','toShowStatuses','cT','dcT',
-            'gems_namesLi','gems_colorLi','vc_namesLI','permittedFields','collections_len','mainImage','notes','modelPrices','gradingSystem','countRepairs',
-            'row','stl_file','rhino_file','ai_file','repairs','images','materials', 'gemsRow','dopVCs','num3DVC_LI','save','changeCost',
+            'gems_namesLi','gems_colorLi','vc_namesLI','permittedFields','collections_len','mainImage','images','setPrevImg','notes','modelPrices','gradingSystem','countRepairs',
+            'row','stl_file','rhino_file','ai_file','repairs','materials', 'gemsRow','dopVCs','num3DVC_LI','save','changeCost',
             'dataArrays','materialsData','coveringsData','handlingsData', 'statusesWorkingCenters','material','covering','labels','complected',
         ]);
         return $this->render('addEdit', $compact2);

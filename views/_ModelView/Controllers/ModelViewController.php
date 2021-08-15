@@ -1,6 +1,7 @@
 <?php
 namespace Views\_ModelView\Controllers;
 
+use Views\_AddEdit\Models\ImageConverter;
 use Views\_SaveModel\Models\HandlerPrices;
 use Views\_Globals\Models\PushNotice;
 use Views\_Globals\Models\User;
@@ -114,6 +115,8 @@ class ModelViewController extends GeneralController
         $matsCovers = $modelView->getModelMaterials();
         $complectes = $modelView->getComplectes();
         $images = $modelView->getImages();
+
+        //-------------------
         $mainImg = [];
         $mainIsset = false;
         //debug($images,'$images',1);
@@ -125,7 +128,7 @@ class ModelViewController extends GeneralController
             foreach ( $images as &$image )
             {
                 if ($image[$which] == 1 ) {
-                    $mainImg['src'] = $image['img_name'];
+                    $mainImg['src'] = $image['imgPath'];
                     $mainImg['id'] = $image['id'];
                     $image['active'] = 1;
                     $mainIsset = true;
@@ -139,15 +142,30 @@ class ModelViewController extends GeneralController
         if ( !$mainIsset ) {
             foreach ( $images as &$image )
             {
-                $mainImg['src'] = $image['img_name'];
+                $mainImg['src'] = $image['imgPath'];
                 $mainImg['id'] = $image['id'];
                 $image['active'] = 1;
                 break;
             }
         }
+        //-------------------
+
+
+        // принимает массив с данными картинки
+        // Выберет картинку или превью, если она есть
+        $setPrevImg = function( $image )
+        {
+            if  ( !is_array($image) || !isset($image['imgPrevPath']) || !isset($image['imgPath']) )
+                return '';
+
+            if ( empty($image['imgPrevPath']) )
+                return $image['imgPath'];
+
+            return $image['imgPrevPath'];
+        };
+
 
         $usedInModels =$modelView->usedInModels();
-
         $descriptions = $modelView->getDescriptions();
         $labels = $modelView->getLabels();
         $gemsTR = $modelView->getGems();
@@ -207,7 +225,7 @@ JS;
         }
 
         $compacted = compact([
-            'id','row','coll_id','getStl','button3D','dopBottomScripts','complectes','images','mainImg', 'labels', 'str_mat','str_Covering','gemsTR',
+            'id','row','coll_id','getStl','button3D','dopBottomScripts','complectes','images','mainImg','setPrevImg', 'labels', 'str_mat','str_Covering','gemsTR',
             'dopVCTr','stts','stat_name','stat_date','stat_class','stat_title','stat_glyphi','statuses','ai_file','stl_file','thisPage','editBtn', 'isStatusPresentDesign',
             'btnlikes','repairs3D','repairsJew','repairs', 'matsCovers','rhino_file','usedInModels','descriptions','currentStatus', 'isStatusPresentTechJew',
         ]);

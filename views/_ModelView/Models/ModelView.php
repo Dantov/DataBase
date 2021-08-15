@@ -1,6 +1,7 @@
 <?php
 namespace Views\_ModelView\Models;
 use Views\_Globals\Models\General;
+use Views\_SaveModel\Models\ImageConverter;
 
 
 class ModelView extends General {
@@ -13,7 +14,8 @@ class ModelView extends General {
 	public  $coll_id;
 	public  $rep_Query;
 	
-	private $img_Query;
+	private $img;
+	//private $img_Query;
 	private $gems_Query;
 	private $dopVc_Query;
 	private $stl_Query;
@@ -40,8 +42,9 @@ class ModelView extends General {
      */
     public function dataQuery()
     {
-		$this->row         = $this->findOne( " SELECT * FROM stock     WHERE     id='$this->id' ");
-		$this->img_Query   = mysqli_query($this->connection, " SELECT * FROM images    WHERE pos_id='$this->id' ");
+		$this->row  = $this->findOne( " SELECT * FROM stock    WHERE     id='$this->id' ");
+		$this->img  = $this->findAsArray( " SELECT * FROM images   WHERE pos_id='$this->id' ");
+		//$this->img_Query   = mysqli_query($this->connection, " SELECT * FROM images    WHERE pos_id='$this->id' ");
         $this->gems_Query  = mysqli_query($this->connection, " SELECT * FROM gems      WHERE pos_id='$this->id' ");
         $this->dopVc_Query = mysqli_query($this->connection, " SELECT * FROM vc_links  WHERE pos_id='$this->id' ");
         $this->stl_Query   = mysqli_query($this->connection, " SELECT * FROM stl_files WHERE pos_id='$this->id' ");
@@ -142,23 +145,6 @@ class ModelView extends General {
     	if ( empty($this->complected) ) return [];
         if ($forPdf) return $this->complected;
 
-		// $ids = '(';
-		// foreach ($this->complected as $key => $complectedd) $ids .= $complectedd['id'] . ',';
-		// $ids = trim($ids,',') . ')';
-
-		// $images = $this->findAsArray( " SELECT img_name,pos_id FROM images WHERE pos_id IN $ids AND main='1' ");
-
-		// foreach ($images as &$image) 
-		// {
-		// 	$path = $this->number_3d.'/'.$image['pos_id'].'/images/'. $image['img_name'];
-  //           $image['img_name'] = _stockDIR_HTTP_ . $path;
-  //           if ( !file_exists(_stockDIR_ . $path) ) $image['img_name'] = _stockDIR_HTTP_."default.jpg";
-
-  //           foreach ($this->complected as &$complected) 
-		// 	{
-		// 		if ( $complected['id'] === $image['pos_id'] ) $complected['image'] = $image['img_name'];
-		// 	}
-		// }
 		foreach ($this->complected as &$complect) 
 		{
 			$imagePath = $this->number_3d.'/'.$complect['id'].'/images/'.$complect['img_name'];
@@ -171,16 +157,29 @@ class ModelView extends General {
 	public function getImages()
     {
 		$images = [];
+        //debug($this->img,'img');
 
-		while( $row_img = mysqli_fetch_assoc($this->img_Query) ) $images[$row_img['id']] = $row_img;
-		foreach ( $images as &$image )
+        foreach ( $this->img as &$img ) $images[$img['id']] = $img; // чтоб работали клики по мал. картинкам
+
+        foreach ( $images as &$image )
         {
-            $fileImg = $this->number_3d.'/'.$this->id.'/images/'.$image['img_name'];
-            $image['img_name'] = _stockDIR_HTTP_.$fileImg;
-            if ( !file_exists(_stockDIR_.$fileImg) ) $image['img_name'] = _stockDIR_HTTP_."default.jpg";
+            $path = $this->number_3d.'/'.$this->id.'/images/';
+            $fileImg = $image['img_name'];
+
+            if ( !file_exists(_stockDIR_.$path.$fileImg) )
+            {
+                $image['imgPath'] = _stockDIR_HTTP_."default.jpg";
+            } else {
+                // Файл Есть!
+                $image['imgPath'] = _stockDIR_HTTP_.$path.$fileImg;
+
+                // Проверим превьюшку
+                $prevImgName = $this->checkSetPreviewImg($path, $fileImg);
+                $image['imgPrevPath'] =  $prevImgName ? _stockDIR_HTTP_ . $path . $prevImgName : '';
+            }
+
         }
         //debug($images,'$images',1);
-
 
 		return $images;
 	}
@@ -198,78 +197,6 @@ class ModelView extends General {
         //$addEdit->closeDB();
         return $mats;
 	}
-
-	/*  Old
-	public function getModelMaterial() {
-		$str_material_arr = explode(";",$this->row['model_material']);
-		$metalColor = '';
-		foreach ( $str_material_arr as &$value ) {
-			
-			switch ( $value ) {
-				case "585":
-					$gSample = $value.'&#176;';
-					break;
-				case "750":
-					$gSample = $value.'&#176;';
-					break;
-				case "Золото":
-					$metal = $value.' ';
-					break;
-				case "Серебро":
-					$metal = $value;
-					break;
-				case "Белое":
-					$gColorWhite = 'style="background-color: #FAF0E6; padding:3px;  border-left: 2px solid #C71585;"';
-					$metalColor .= "<span $gColorWhite>&nbsp;$value&nbsp;</span>";
-					break;
-				case "Красное":
-					$gColorRed = 'style="background-color: #f9c0a9; padding:3px; border-left: 2px solid #C71585;"';
-					$metalColor .= "<span $gColorRed>&nbsp;$value&nbsp;</span>";
-					break;
-				case "Желтое(евро)":
-					$gColorYell = 'style="background-color: #FFD700; padding:3px;  border-left: 2px solid #C71585;"';;
-					$metalColor .= "<span $gColorYell>&nbsp;$value&nbsp;</span>";
-					break;
-			}
-		}
-		return  "<span>$metal&nbsp;$gSample</span>&nbsp;$metalColor";
-	}
-	public function getModelCovering() {
-		$str_mod_cov_arr = explode(";",$this->row['model_covering']);
-		$matCoveringR = '';
-		$coveringType = '';
-		foreach ( $str_mod_cov_arr as &$value ) {
-			switch ( $value ) {
-				case "Родирование":
-					$gColorR = 'style="background-color: #efebeb; border-left: 2px solid #C71585;"';;
-					$matCoveringR = "<span $gColorR>&nbsp;$value&nbsp;</span>";
-					break;
-				case "Золочение":
-					$gColorYell = 'style="background-color: #FFD700; border-left: 2px solid #C71585;"';;
-					$matCoveringG = "<span $gColorYell>&nbsp;$value&nbsp;</span>";
-					break;
-				case "Чернение":
-					$gColorB = 'style="background-color: #2F4F4F; color:#FDF5E6; border-left: 2px solid #C71585;"';;
-					$matCoveringB = "<span $gColorB>&nbsp;$value&nbsp;&nbsp;</span>";
-					break;
-				case "Полное":
-					$coveringType = $value;
-					break;
-				case "Частичное":
-					$coveringType = $value;
-					break;
-				case "По крапанам":
-					$coveringType .= ', '.$value.'.';
-					break;
-			}
-		}
-		$str_mod_priv_arr = explode("-",$this->row['model_covering']);
-		if ( $str_mod_priv_arr[1] ) $coveringPrivParts = '<span style="background-color: #00FFFF; border-bottom: 2px solid #C71585;">Части: <i>'.$str_mod_priv_arr[1].' </i></span>';
-		$str_Covering = "<span>$matCoveringR&nbsp;$coveringType</span>&nbsp;$coveringPrivParts<span>$matCoveringG$matCoveringB</span>";
-		if ( !$matCoveringR && !$matCoveringB && !$matCoveringB ) $str_Covering = 'Нет';
-		return $str_Covering;
-	}
-	*/
 
 
 	public function getGems() {

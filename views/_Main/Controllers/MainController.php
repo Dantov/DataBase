@@ -169,7 +169,7 @@ class MainController extends GeneralController
 		}
 		
 		/** почистим старые уведомления */
-		//(new PushNotice())->clearOldNotices();
+		(new PushNotice())->clearOldNotices();
 		/*
 		if (User::getAccess() === 9 )
 		{

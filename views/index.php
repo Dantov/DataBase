@@ -11,4 +11,13 @@ new Autoloader();
 require_once _vendorDIR_ . "autoload.php";
 
 $config = require_once _CONFIG_ . 'config.php';
-(new Application( $config ))->run();
+
+try {
+    (new Application($config))->run();
+} catch (Exception $e ) {
+    echo "Error in entry point. <br>";
+    echo "<b>Mess: </b>" . $e->getMessage() . PHP_EOL;
+    echo "<b>Code: </b>" . $e->getCode() . "<br>" . PHP_EOL;
+    echo "<b>In file: </b>" . $e->getFile() . "<br>" . PHP_EOL;
+    echo "<b>On line: </b>" . $e->getLine() . "<br>" . PHP_EOL;
+}

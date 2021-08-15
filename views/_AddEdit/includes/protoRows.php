@@ -336,7 +336,7 @@
                 <div class="ratio img-thumbnail">
                     <div class="ratio-inner ratio-4-3">
                         <div class="ratio-content">
-                            <img src="<?=$protoImgRow ? '': $image['imgPath']?>" class="imgThumbs" />
+                            <img src="<?=$protoImgRow ? '': $setPrevImg($image) ?>" class="imgThumbs" />
                         </div>
                         <div class="img_dell">
                             <?php if ( !$protoImgRow && $component === 3 ): $onClk = "dellImgPrew(this)";  endif; ?>

@@ -2,6 +2,7 @@
 namespace Views\_Main\Models;
 use Views\_Globals\Models\General;
 use Views\_Globals\Models\User;
+use Views\_SaveModel\Models\ImageConverter;
 use Views\vendor\libs\classes\AppCodes;
 
 class Main extends General {
@@ -791,13 +792,16 @@ class Main extends General {
 		if ( !empty($row['vendor_code']) ) $vc_show = " | ".$row['vendor_code'];
 		$columns = $comlectIdent === true ? 3 : 2;
 
+        $images = [];
+        foreach ($rowImages as &$thisImage)
+            if ( $thisImage['pos_id'] === $row['id'] )
+                $images[] = $thisImage;
+
+        //debug($images,'$images');
+
+        //-------------------
         $showimg = '';
         $mainIsset = false;
-        $images = [];
-		$rowId = $row['id'];
-
-		foreach ($rowImages as &$thisImage) if ( $thisImage['pos_id'] === $rowId ) $images[] = $thisImage;
-		//debug($images,'$images');
         $setMainImg = function($which) use (&$mainIsset, &$images, &$showimg)
         {
             foreach ( $images as &$image )
@@ -819,17 +823,23 @@ class Main extends General {
                 break;
             }
         }
+        //-------------------
+
 
         $path = $row['number_3d'].'/'.$row['id'].'/images/';
 		if ( !file_exists(_stockDIR_. $path . $showimg) ) // file_exists работает только с настоящим путём!! не с HTTP
 		{
 		    $showimg = _stockDIR_HTTP_ . "default.jpg";
 		} else {
-            $showimg = _stockDIR_HTTP_ . $path . $showimg;
+		    //Файл Есть!
+
+            //Проверим на наличие превью
+            $prevImgName = $this->checkSetPreviewImg($path, $showimg);
+            $showimg = $prevImgName ? _stockDIR_HTTP_.$path.$prevImgName : _stockDIR_HTTP_.$path.$showimg;
         }
 		
 		$btn3D = false;
-		if ( array_key_exists($rowId, $rowStls) ) $btn3D = true;
+		if ( array_key_exists($row['id'], $rowStls) ) $btn3D = true;
 
 		// смотрим отрисовывать ли нам кнопку едит
 		$editBtn = false;

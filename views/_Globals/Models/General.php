@@ -1,6 +1,7 @@
 <?php
 namespace Views\_Globals\Models;
 
+use Views\_SaveModel\Models\ImageConverter;
 use Views\vendor\core\{Config,Model,Sessions,Request};
 use Views\vendor\core\db\Database;
 use Views\vendor\core\Errors\Exceptions\DBConnectException;
@@ -598,8 +599,8 @@ class General extends Model
         $currentStatusesAccess = [
 
             35=>[ // Эскиз
-                'notPresent' => 89,
-                'preset' => [10], // access
+                'notPresent' => 89, // отсутствует
+                'preset' => [10], // пресеты user Access
             ],
             11=>[ // Отложено
                 'notPresent' => 89,
@@ -607,27 +608,29 @@ class General extends Model
             ],
             89=>[ // Диз. утв.
                 'notPresent' => 47,
-                'preset' => [2,9,11,3,8,4],
+                'preset' => [2,9,11],
             ],
             10=>[ // В ремонте 3D
                 'notPresent' => 2,
-                'preset' => [2,9,11,8,4],
+                'preset' => [2,9,11,8],
             ],
             47=>[ // Готово 3д
-                'notPresent' => 106,
-                'preset' => [2,9,11,3,8,4],
+                'notPresent' => 101, //106
+                'preset' => [2,9,11],
             ],
+            /*
             106=>[ // 3D дизайн утвержден
                 'notPresent' => 1,
-                'preset' => [2,9,11,8,4],
+                'preset' => [2,9,11],
             ],
-            101=>[ // Подпись технолога
+            */
+            1=>[ // На проверке
+                'notPresent' => 2,
+                'preset' => [9,7],
+            ],
+            101=>[// Подпись технолога
                 'notPresent' => 2,
                 'preset' => [9,11],
-            ],
-            1=>[ // На проверке
-                'notPresent' => 2, // статусы
-                'preset' => [9,7], // пресеты user Access
             ],
             2=>[ // Проверено
                 'notPresent' => 5,
@@ -747,6 +750,46 @@ class General extends Model
         $query = $this->baseSql( "SELECT date FROM statuses WHERE pos_id='$stock_id' AND status='$statusID' ORDER BY date DESC LIMIT 1" );
         while ( $data = mysqli_fetch_assoc($query) ) $result = $data;
         return isset($result['date']) ? $result['date'] : '';
+    }
+
+    /**
+     * // Проверим существование превьюшки
+     * @param string $imgPath
+     * @param string $imgName
+     * @return string
+     */
+    public function checkSetPreviewImg( string $imgPath, string $imgName ) : string
+    {
+        if ( empty($imgPath) || empty($imgName) )
+            throw new \Error("Path or img name can't be empty in checkPreviewImg", 500);
+        if ( !file_exists(_stockDIR_.$imgPath.$imgName) )
+            throw new \Error("Original img not found in checkPreviewImg", 500);
+
+        $name = pathinfo($imgName, PATHINFO_FILENAME);
+        $ext = pathinfo($imgName, PATHINFO_EXTENSION);
+        $prevImgName = $name . ImageConverter::getImgPrevPostfix() . '.' . $ext;
+
+        if ( file_exists(_stockDIR_.$imgPath.$prevImgName) )
+            return $prevImgName;
+
+        return '';
+    }
+
+    /**
+     * Из массива, выберет превью картинку или оригин. если превью нет
+     * используется в видах modelView и addEdit
+     * @param array $image
+     * @return mixed|string
+     */
+    public function origin_preview_ImgSelect( array $image ) : string
+    {
+        if  ( !is_array($image) || !isset($image['imgPrevPath']) || !isset($image['imgPath']) )
+            return '';
+
+        if ( empty($image['imgPrevPath']) )
+            return $image['imgPath'];
+
+        return $image['imgPrevPath'];
     }
 
 

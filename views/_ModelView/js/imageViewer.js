@@ -161,7 +161,7 @@ ImageViewer.prototype.init = function()
 ImageViewer.prototype.start = function()
 {
     let imgID = this.mainImage.getAttribute('data-id');
-    let imgSrc = this.images[imgID]['img_name'];
+    let imgSrc = this.images[imgID]['imgPath'];//['img_name'];
 
     this.setBackgroundImage(imgSrc);
     this.smallImagesRow(imgID);
@@ -314,7 +314,7 @@ ImageViewer.prototype.smallImagesRow = function()
     let flagActive = false;
     $.each(this.images, function(id, image) {
 
-        let src = image.img_name;
+        let src = image.imgPrevPath ? image.imgPrevPath : image.imgPath;//img_name;
         let div = document.createElement('div');
             div.classList.add('col-xs-2', 'col-sm-3', 'p-0', 'imageSmall');
         let mainImgID = that.mainImage.getAttribute('data-id');
@@ -340,7 +340,8 @@ ImageViewer.prototype.smallImagesRow = function()
         appended.onclick = function()
         {
             that.stop();
-            that.setBackgroundImage(this.style.backgroundImage.split("\"")[1]);
+            //that.setBackgroundImage(this.style.backgroundImage.split("\"")[1]);
+            that.setBackgroundImage(image.imgPath); // Оригин. размер
 
             that.activeImage.classList.remove('activeImage','border-primary-2');
             that.activeImage.classList.add('border-secondary-2');
@@ -586,8 +587,9 @@ ImageViewer.prototype.mainImageSetter = function()
 
         dopImage.addEventListener('click', function () {
             let dataID = this.getAttribute('data-id');
-            // console.log( dataID );
-            let src = that.images[dataID]['img_name'];
+            //console.log( dataID );
+            let src = that.images[dataID]['imgPath'];
+
             // debug(src,'SRC');
             that.mainImage.style.backgroundImage = "url("+ src +")";
             that.mainImage.setAttribute('data-id',dataID);
@@ -617,7 +619,7 @@ ImageViewer.prototype.mainImageLoupe = function()
         let that = this;
 
         let img = new Image(); // создаем картинку
-        img.src = imageViewer.images[ this.getAttribute('data-id') ]['img_name'];
+        img.src = imageViewer.images[ this.getAttribute('data-id') ]['imgPath'];//['img_name'];
         img.onload = function() {
 
             naturalWidth = this.naturalWidth;

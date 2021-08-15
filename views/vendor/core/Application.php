@@ -30,6 +30,8 @@ class Application
         Router::parseRout($_SERVER['REQUEST_URI']);
         $this->controllerPath = Router::getRout();
         $this->controllerName = Router::getControllerName();
+
+
     }
     public function __destruct()
     {

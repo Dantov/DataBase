@@ -8,7 +8,7 @@ use Views\vendor\libs\classes\AppCodes;
 use Views\_Globals\Controllers\GeneralController;
 use Views\_Globals\Models\{ PushNotice,SelectionsModel,User };
 use Views\_SaveModel\Models\{
-    Handler, HandlerPrices, Condition, HandlerRepairs, SaveModelProgressCounter
+    Handler, HandlerPrices, Condition, HandlerRepairs, ImageConverter, SaveModelProgressCounter
 };
 use Views\vendor\libs\classes\Validator;
 
@@ -467,7 +467,7 @@ class SaveModelController extends GeneralController
                 $uploadImages = $files->makeHUA('UploadImages');
                 foreach ( $uploadImages as $uploadImage )
                 {
-                    if ( $fileName = $this->h->uploadImageFile($uploadImage) )
+                    if ( $fileName = $this->h->uploadImageFile($uploadImage, true) )
                     {
                         $newImages[$i]['img_name'] = $fileName;
                     }
@@ -481,6 +481,7 @@ class SaveModelController extends GeneralController
                 if ( $insertImages === -1 )
                     throw new \Exception('Error in insertUpdateRows',1);
             }
+
         }
 
 

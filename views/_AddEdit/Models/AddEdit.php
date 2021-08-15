@@ -1,6 +1,7 @@
 <?php
 namespace Views\_AddEdit\Models;
 use Views\_Globals\Models\General;
+use Views\_SaveModel\Models\ImageConverter;
 
 class AddEdit extends General
 {
@@ -481,13 +482,19 @@ class AddEdit extends General
             $respArr[$i]['imgName'] = $row_img['img_name'];
             if ( $row_img['main'] ) $respArr[$i]['main'] = $row_img['main'];
 
-            $imgPath = $this->row['number_3d'].'/'.$this->id.'/images/'.$row_img['img_name'];
+            $imgPath = $this->row['number_3d'].'/'.$this->id.'/images/';
+            $imgName = $row_img['img_name'];
 
-            if ( !file_exists(_stockDIR_.$imgPath) )
+            if ( !file_exists(_stockDIR_.$imgPath.$imgName) )
             {
                 $respArr[$i]['imgPath'] = _stockDIR_HTTP_."default.jpg";
             } else {
-                $respArr[$i]['imgPath'] = _stockDIR_HTTP_.$imgPath;
+                // Файл есть!
+                $respArr[$i]['imgPath'] = _stockDIR_HTTP_.$imgPath.$imgName;
+
+                // проверим превьюшку
+                $prevImgName = $this->checkSetPreviewImg($imgPath, $imgName);
+                $respArr[$i]['imgPrevPath'] =  $prevImgName ? _stockDIR_HTTP_.$imgPath.$prevImgName : '';
             }
 
             //debug($row_img,'$row_img');

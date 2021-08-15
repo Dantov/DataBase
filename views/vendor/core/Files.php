@@ -108,7 +108,7 @@ class Files
             $extension = mb_strtolower( pathinfo($info->getFilename(), PATHINFO_EXTENSION) );
 
             if ( !in_array( $extension, $allowedExt ) )
-                throw new \Exception("NOT !!! ", 15);
+                throw new \Exception("Forbidden to upload this file types! ", 15);
                 //return false;
         }
 
@@ -166,4 +166,49 @@ class Files
         return $sorted;
     }
 
+    /**
+     * Вернуть MIME-TYPE файла
+     * @param string $pathToFile
+     * @return string
+     */
+    public function getFileMimeType( string $pathToFile ) : string
+    {
+        if ( !file_exists($pathToFile) || !is_file($pathToFile) )
+            throw new \Error("Wrong parameter path to file in getFileMimeType", 500);
+
+        $fInfo = new \finfo(FILEINFO_MIME); // возвращает mime-тип а-ля mimetype расширения
+
+        return $fInfo->file($pathToFile);
+    }
+
+
+    /**
+     * Вернет размер файла
+     * @param string $pathToFile
+     * @param string $measure
+     * @param int $precision
+     *
+     * @return float
+     * @throws \Exception
+     */
+    public function getFileSize( string $pathToFile, string $measure='b', int $precision = 2 ) : float
+    {
+        if ( !file_exists($pathToFile) || !is_file($pathToFile) )
+            throw new \Error("Wrong parameter path to file in getFileSize", 500);
+
+        $measureTypes = [
+            'b' => 1,
+            'kb' => 1024,
+            'mb' => 1e+6,
+            'gb' => 1e+9,
+            'tb' => 1e+12,
+            'pb' => 1e+15,
+        ];
+
+        if ( !array_key_exists($measure, $measureTypes) )
+            throw new \Error("Wrong parameter measure in getFileSize", 500);
+
+
+        return round(filesize($pathToFile) / $measureTypes[$measure], $precision );
+    }
 }

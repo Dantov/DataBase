@@ -442,7 +442,6 @@ class Handler extends General
 
     /**
      * для добавления эскиза в комплект
-     * @param $files
      * @param $newImages
      */
     public function addIncludedSketch( array &$newImages )
@@ -464,10 +463,11 @@ class Handler extends General
 
     /**
      * @param array $fileData
+     * @param bool $preview - Флаг для создания превьюшки
      * @return bool|string
      * @throws \Exception
      */
-    public function uploadImageFile( array $fileData )
+    public function uploadImageFile( array $fileData, bool $preview = false )
     {
         $randomString = randomStringChars(8,'en','symbols');
 
@@ -478,12 +478,18 @@ class Handler extends General
         $info = new \SplFileInfo($fileData['name']);
         $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
         $uploading_img_name = $this->number_3d."_".$randomString.mt_rand(0,98764321).".".$extension;
-        $destination = $this->number_3d.'/'.$this->id.'/images/'.$uploading_img_name;
+        $d = $this->number_3d.'/'.$this->id.'/images/';
         $tmpName = $fileData['tmp_name'];
 
         $files = Files::instance();
-        if ( $files->upload( $tmpName, $destination, ['png','gif','jpg','jpeg'] ) )
+        if ( $files->upload( $tmpName, $d.$uploading_img_name, ['png','gif','jpg','jpeg'] ) )
+        {
+            /** Сднлаем превью загруженного файла */
+            if ($preview)
+                ImageConverter::makePrev($d, $uploading_img_name);
+
             return $uploading_img_name;
+        }
 
         return false;
     }
@@ -1151,14 +1157,30 @@ class Handler extends General
         $dellQuery = mysqli_query($this->connection, " DELETE FROM {$config['table']} WHERE {$config['field']}='$fileName' ");
         if ( !$dellQuery ) throw new \Exception(__METHOD__.' Error '. mysqli_error($this->connection));
 
-        $file = _stockDIR_ . $modelData['number_3d']."/".$this->id."/{$config['folder']}/".$fileName;
-        if ( file_exists($file) )
+        $basePath = _stockDIR_ . $modelData['number_3d']."/".$this->id."/{$config['folder']}/";
+        $filePath = $basePath.$fileName;
+
+        $f = Files::instance();
+        $deletedOrigin = $f->delete($filePath);
+
+        /** Если это картинка, топроверим наличие превью */
+        $deletedPrev = false;
+        if ( $deletedOrigin && $fileType === 'image' )
         {
-            unlink($file);
-            return $config['text'];
-        } else {
-            return false;
+            $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+            $imgBaseName = pathinfo($fileName, PATHINFO_FILENAME); // вернет имя файла без расширения
+            $imgName = $imgBaseName . ImageConverter::getImgPrevPostfix() . "." . $ext;
+
+            $deletedPrev = $f->delete($basePath.$imgName);
         }
+
+        if ( $deletedOrigin && $deletedPrev )
+            return $config['text'] . " и превью - ";
+
+        if ( $deletedOrigin )
+            return $config['text'];
+
+        return false;
     }
 
 	public function deletePDF($pdfName) {
