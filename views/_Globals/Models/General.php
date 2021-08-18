@@ -754,7 +754,7 @@ class General extends Model
 
     /**
      * // Проверим существование превьюшки
-     * @param string $imgPath
+     * @param string $imgPath - не полный! Начинается с №3Д
      * @param string $imgName
      * @return string
      */

@@ -17,6 +17,7 @@ class ImageConverter
     /** Params  */
     const prevPostfix = "_prev";
 
+    protected static $lastPreviewImgName;
     public static $imgName;
 
     public static $resize = false;
@@ -62,6 +63,11 @@ class ImageConverter
         ];
 
         return $result;
+    }
+
+    public static function getLastImgPrevName()
+    {
+        return self::$lastPreviewImgName;
     }
 
     protected static function makeCommand( string $imgOriginPath, string $imgPrevPath ) : string
@@ -110,7 +116,7 @@ class ImageConverter
     }
 
     /**
-     * @param string $pathOrigin
+     * @param string $pathOrigin - Не полный путь к файлу!!! Начинается с №3Д
      * @param string $imgName
      * @return bool
      * @throws \Exception
@@ -129,14 +135,15 @@ class ImageConverter
 
         // перед тем как создавать превью, нужно узнать размер ориген. файла и его разрешение.
         // если он не большого размера, то превью не нужна
-        if ( !self::setConvertParamsByImg($pathOrigin.$imgName) )
+        if ( !self::setConvParamsForPreview(_stockDIR_.$pathOrigin.$imgName) )
             return false;
 
         $ext = pathinfo($imgName, PATHINFO_EXTENSION);
         $imgBaseName = pathinfo($imgName, PATHINFO_FILENAME); // вернет имя файла без расширения
 
         $imgOriginPath = _stockDIR_ . $pathOrigin . $imgName;
-        $imgPrevPath = _stockDIR_ . $pathOrigin . $imgBaseName . self::prevPostfix . '.' . $ext;
+        $lastPreviewImgName = $imgBaseName . self::prevPostfix . '.' . $ext;
+        $imgPrevPath = _stockDIR_ . $pathOrigin . $lastPreviewImgName;
 
         $output=null;
         $retVal=null;
@@ -145,11 +152,33 @@ class ImageConverter
         exec( $c,$output,$retVal );
         if ( $retVal ) return false;
 
+        self::$lastPreviewImgName = $lastPreviewImgName;
         return true;
     }
 
     /**
-     * Array
+     * @param string $fullPath - Не полный путь к файлу!!! Начинается с №3Д
+     * @return bool
+     * @throws \Exception
+     */
+    public static function optimizeUpload( string $fullPath ) : bool
+    {
+
+        if ( empty($fullPath) ) return false;
+
+        if ( !self::setConvParamsForUploadedImg(_stockDIR_.$fullPath) )
+            return false;
+
+        $c = self::makeCommand(_stockDIR_.$fullPath, _stockDIR_.$fullPath);
+        exec( $c,$output,$retVal );
+        if ( $retVal ) return false;
+
+        return true;
+    }
+
+    /**
+     * Задает параметры конвертауии дял превьюшки
+     * getimagesize = Array
      * (
      * [0] => 1080
      * [1] => 919
@@ -159,16 +188,15 @@ class ImageConverter
      * [channels] => 3
      * [mime] => image/jpeg
      * )
-     * @param string $pathOrigin
+     * @param string $pathOrigin - полный путь к файлу
      * @return bool
      * @throws \Exception
      */
-    protected static function setConvertParamsByImg( string $pathOrigin ) : bool
+    protected static function setConvParamsForPreview( string $pathOrigin ) : bool
     {
         $result = false;
 
         $files = Files::instance();
-        //$fInfo = new \finfo(FILEINFO_MIME); // возвращает mime-тип а-ля mimetype расширения
 
         /** проверим mime-type для указанного файла */
         $mimeType = $files->getFileMimeType($pathOrigin);
@@ -182,7 +210,7 @@ class ImageConverter
         $imgHeight = (int)$imgInfo[1];
 
         $totalPixels = $imgWidth * $imgHeight;
-        if ( $totalPixels > 160000 )
+        if ( $totalPixels > 160000 ) // 300 x 300
         {
             self::$resize = true; // добавим параметр "resize" в exec комманду
             // уменьшим по большей стороне до 300 пикс, и высчитаем процент на который уменьшать
@@ -194,7 +222,6 @@ class ImageConverter
         }
 
         /** Выставим качество превьюшки, в зависимости от размера оригинала */
-        //$size = (int)(filesize($pathOrigin) / 1024); //Kb
         $size = $files->getFileSize($pathOrigin, 'kb', 1);
         if ( $size > 100 )
         {
@@ -212,5 +239,48 @@ class ImageConverter
 
         return $result;
     }
+
+    /**
+     * Задает параметры конв. для только что загружаемой картинки
+     * @param string $pathOrigin - полный путь к файлу
+     * @return bool
+     * @throws \Exception
+     */
+    protected static function setConvParamsForUploadedImg( string $pathOrigin ) : bool
+    {
+        $result = false;
+
+        $files = Files::instance();
+
+        /** проверим mime-type для указанного файла */
+        $mimeType = $files->getFileMimeType($pathOrigin);
+
+        if ( mb_stripos($mimeType, 'image') === false )
+            return false;
+
+        $size = $files->getFileSize($pathOrigin, 'kb', 1);
+        if ( $size > 150 )
+        {
+            self::$quality = true; // добавим параметр "качество" в exec комманду
+
+            if ( mb_stripos($mimeType, 'jp') || mb_stripos($mimeType, 'webp') || mb_stripos($mimeType, 'gif') )
+            {
+                if ( $size > 150 && $size < 500  )
+                    self::$qualityValue = 70;
+                if ( $size > 500  )
+                    self::$qualityValue = 60;
+
+            } elseif ( mb_stripos($mimeType, 'png') ) {
+                // png не ужимается сильно, но если выставить quality близкое к 100, немного ужмется
+                // png можно конвертить в jpg!
+                self::$qualityValue = 100;
+            }
+
+            $result = true;
+        }
+
+        return $result;
+    }
+
 
 }

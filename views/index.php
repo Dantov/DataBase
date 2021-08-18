@@ -10,11 +10,11 @@ new Autoloader();
 
 require_once _vendorDIR_ . "autoload.php";
 
-$config = require_once _CONFIG_ . 'config.php';
 
 try {
+	$config = require_once _CONFIG_ . 'config.php';
     (new Application($config))->run();
-} catch (Exception $e ) {
+} catch ( Exception $e ) {
     echo "Error in entry point. <br>";
     echo "<b>Mess: </b>" . $e->getMessage() . PHP_EOL;
     echo "<b>Code: </b>" . $e->getCode() . "<br>" . PHP_EOL;

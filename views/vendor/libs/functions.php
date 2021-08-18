@@ -247,3 +247,21 @@ function in_array_recursive( $needle, array &$array, bool $strict = false ) : bo
 
     return isset($found) ? $found : false;
 }
+
+function timeElapsed($secs)
+{
+    $ret = [];
+    $bit = array(
+        'г' => $secs / 31556926 % 12,
+        'нед.' => $secs / 604800 % 52,
+        'дней' => $secs / 86400 % 7,
+        'час.' => $secs / 3600 % 24,
+        'мин.' => $secs / 60 % 60,
+        'сек.' => $secs % 60
+    );
+
+    foreach($bit as $k => $v)
+        if($v > 0)$ret[] = $v . $k;
+
+    return join(' ', $ret);
+}

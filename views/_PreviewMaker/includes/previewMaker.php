@@ -16,6 +16,6 @@
         0%
     </div>
 </div>
-<textarea class="form-control" rows="40" id="textBox"></textarea>
+<textarea class="form-control" onchange="scrollDown(this)" rows="40" id="textBox"></textarea>
 
 <br>

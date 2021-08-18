@@ -155,8 +155,12 @@ class ModelView extends General {
 		}
 		return $this->complected;
 	}
-	
-	public function getImages()
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getImages()
     {
 		$images = [];
         //debug($this->img,'img');
@@ -176,8 +180,16 @@ class ModelView extends General {
                 $image['imgPath'] = _stockDIR_HTTP_.$path.$fileImg;
 
                 // Проверим превьюшку
-                $prevImgName = $this->checkSetPreviewImg($path, $fileImg);
-                $image['imgPrevPath'] =  $prevImgName ? _stockDIR_HTTP_ . $path . $prevImgName : '';
+//                $prevImgName = $this->checkSetPreviewImg($path, $fileImg);
+//                $image['imgPrevPath'] =  $prevImgName ? _stockDIR_HTTP_ . $path . $prevImgName : '';
+                $image['imgPrevPath'] = '';
+                if ( $prevImgName = $this->checkSetPreviewImg($path, $fileImg) )
+                {
+                    $image['imgPrevPath'] = _stockDIR_HTTP_.$path.$prevImgName;
+                } elseif ( ImageConverter::makePrev( $path, $fileImg ) ) {
+                    // Превью создана!
+                    $image['imgPrevPath'] = _stockDIR_HTTP_ . $path . ImageConverter::getLastImgPrevName();
+                }
             }
 
         }

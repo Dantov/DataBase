@@ -493,8 +493,17 @@ class AddEdit extends General
                 $respArr[$i]['imgPath'] = _stockDIR_HTTP_.$imgPath.$imgName;
 
                 // проверим превьюшку
-                $prevImgName = $this->checkSetPreviewImg($imgPath, $imgName);
-                $respArr[$i]['imgPrevPath'] =  $prevImgName ? _stockDIR_HTTP_.$imgPath.$prevImgName : '';
+//                $prevImgName = $this->checkSetPreviewImg($imgPath, $imgName);
+//                $respArr[$i]['imgPrevPath'] =  $prevImgName ? _stockDIR_HTTP_.$imgPath.$prevImgName : '';
+
+                $respArr[$i]['imgPrevPath'] = '';
+                if ( $prevImgName = $this->checkSetPreviewImg($imgPath, $imgName) )
+                {
+                    $respArr[$i]['imgPrevPath'] = _stockDIR_HTTP_.$imgPath.$prevImgName;
+                } elseif ( ImageConverter::makePrev( $imgPath, $imgName ) ) {
+                    // Превью создана!
+                    $respArr[$i]['imgPrevPath'] = _stockDIR_HTTP_ . $imgPath . ImageConverter::getLastImgPrevName();
+                }
             }
 
             //debug($row_img,'$row_img');

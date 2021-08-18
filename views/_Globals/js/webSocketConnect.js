@@ -45,7 +45,7 @@ function wsEventHandlers()
         try
         {
             let dataObj = JSON.parse(evt.data);
-            debug(dataObj);
+            //debug(dataObj);
 
             if ( dataObj.message === 'progressBarPDF' )
             {

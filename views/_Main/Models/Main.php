@@ -829,8 +829,16 @@ class Main extends General {
 		    //Файл Есть!
 
             //Проверим на наличие превью
-            $prevImgName = $this->checkSetPreviewImg($path, $showimg);
-            $showimg = $prevImgName ? _stockDIR_HTTP_.$path.$prevImgName : _stockDIR_HTTP_.$path.$showimg;
+            if ( $prevImgName = $this->checkSetPreviewImg($path, $showimg) )
+            {
+                $showimg = _stockDIR_HTTP_.$path.$prevImgName;
+            } elseif ( ImageConverter::makePrev( $path, $showimg ) ) {
+                // Превью создана!
+                $showimg = _stockDIR_HTTP_ . $path . ImageConverter::getLastImgPrevName();
+            } else {
+                // оригин. картинка, если ничего не получилось
+                $showimg = _stockDIR_HTTP_ . $path . $showimg;
+            }
         }
 		
 		$btn3D = false;

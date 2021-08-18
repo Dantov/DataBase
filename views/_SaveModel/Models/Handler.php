@@ -462,6 +462,7 @@ class Handler extends General
     }
 
     /**
+     * этот метод расчитывает на то что chdir() установлена в Stock :)
      * @param array $fileData
      * @param bool $preview - Флаг для создания превьюшки
      * @return bool|string
@@ -484,6 +485,10 @@ class Handler extends General
         $files = Files::instance();
         if ( $files->upload( $tmpName, $d.$uploading_img_name, ['png','gif','jpg','jpeg'] ) )
         {
+
+            /** оптимизация размера файла */
+            ImageConverter::optimizeUpload($d.$uploading_img_name);
+
             /** Сднлаем превью загруженного файла */
             if ($preview)
                 ImageConverter::makePrev($d, $uploading_img_name);

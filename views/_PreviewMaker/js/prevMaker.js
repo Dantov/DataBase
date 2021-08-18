@@ -43,4 +43,19 @@ function previewsMakerProgressData( percent, message )
     progressBar.style.width = percent + "%";
     progressBar.innerHTML = percent + "%";
     textBox.textContent += message + '\n';
+
+    //let scrollBottom = textBox.scrollHeight - textBox.scrollTop - textBox.clientHeight;
+
+
+    //if ( scrollBottom )
+        textBox.scrollTop = textBox.scrollHeight;
+}
+
+
+function scrollDown(textArea) {
+    let scrollBottom = textArea.scrollHeight - textArea.scrollTop - textArea.clientHeight;
+
+
+    if ( scrollBottom )
+        textArea.scrollTop = Infinity;
 }

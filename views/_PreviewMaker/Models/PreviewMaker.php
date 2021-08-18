@@ -69,21 +69,36 @@ class PreviewMaker extends General
         $id = $images['pos_id'];
         $num3D = $images['number_3d'];
 
-        $path = _stockDIR_ . $num3D . '/' . $id . '/images/';
+        $path = $num3D . '/' . $id . '/images/';
+        $fullPath = _stockDIR_ . $num3D . '/' . $id . '/images/';
 
         foreach ( $images['names'] as $imgName )
         {
-            if ( !file_exists($path . $imgName) )
+            $this->currentImagesCount++;
+            if ( !file_exists($fullPath . $imgName) )
                 continue;
 
+            $mess = '';
+            /*
             if (ImageConverter::makePrev($path,$imgName))
             {
                 $mess = '.............Preview created!';
             } else {
                 $mess = '.............Preview not created!';
             }
+            */
 
-            $overallProgress = ceil(( ++$this->currentImagesCount * 100 ) / $this->totalImages);
+            /*
+            //
+            if (ImageConverter::optimizeUpload($path.$imgName))
+            {
+                $mess = '.............image optimized!';
+            } else {
+                $mess = '.............im not touch it!';
+            }
+            */
+
+            $overallProgress = ceil(( $this->currentImagesCount * 100 ) / $this->totalImages);
             $progressCounter->progressResponse['message']['progressMessage'] = 'Файл: ' . $path . $imgName . $mess;
             $progressCounter->progressResponse['message']['progressBarPercent'] = $overallProgress;
             $progressCounter->progressCount($overallProgress);
@@ -97,6 +112,7 @@ class PreviewMaker extends General
      */
     public function startOperation( string $tabID )
     {
+        $startTime = time();
         $progressCounter = new ProgressCounter();
         $progressCounter->progressResponse['message'] = [];
         $progressCounter->progressResponse['message']['prevMakerData'] = 1;
@@ -111,31 +127,12 @@ class PreviewMaker extends General
 
         sleep(0.5);
 
-        $progressCounter->progressResponse['message']['progressMessage'] = 'Обработано ' . $this->currentImagesCount . ' файлов.';
+        $endTime = time();
+        $totalSpendTime = $endTime - $startTime;
+
+        $progressCounter->progressResponse['message']['progressMessage'] = 'Обработано ' . $this->currentImagesCount . ' файлов. Затрачено: ' . timeElapsed($totalSpendTime);
         $progressCounter->progressResponse['message']['progressBarPercent'] = 100;
         $progressCounter->progressCount(100);
-
-        /*
-        $progressCounter->progressResponse['message']['progressMessage'] = 'file1.png';
-        $progressCounter->progressResponse['message']['progressBarPercent'] = 20;
-        $progressCounter->progressCount(20);
-
-        $progressCounter->progressResponse['message']['progressMessage'] = 'file2.png';
-        $progressCounter->progressResponse['message']['progressBarPercent'] = 40;
-        $progressCounter->progressCount(40);
-
-        $progressCounter->progressResponse['message']['progressMessage'] = 'file3.png';
-        $progressCounter->progressResponse['message']['progressBarPercent'] = 60;
-        $progressCounter->progressCount(60);
-
-        $progressCounter->progressResponse['message']['progressMessage'] = 'file4.png';
-        $progressCounter->progressResponse['message']['progressBarPercent'] = 80;
-        $progressCounter->progressCount(80);
-
-        $progressCounter->progressResponse['message']['progressMessage'] = 'file5.png';
-        $progressCounter->progressResponse['message']['progressBarPercent'] = 100;
-        $progressCounter->progressCount(100);
-        */
 
         return "DONE! " . $tabID;
     }
