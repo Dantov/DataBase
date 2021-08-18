@@ -64,10 +64,18 @@ class ProgressCounter extends General
         ];
 
         // выключает сообщения об ошибках
+//        set_error_handler(function(){return true;});
+//        $this->socketClientResource = @stream_socket_client($this->localSocket, $errNo, $errorMessage);
+//        restore_error_handler();
+        $this->socketConnect();
+    }
+
+    protected function socketConnect()
+    {
+        // выключает сообщения об ошибках
         set_error_handler(function(){return true;});
         $this->socketClientResource = @stream_socket_client($this->localSocket, $errNo, $errorMessage);
         restore_error_handler();
-
     }
 
     public function progressCount($newPercent)
@@ -76,7 +84,12 @@ class ProgressCounter extends General
 
         $this->progressResponse['progressBarPercent'] = $newPercent;
 
+        //debug($this->progressResponse);
+        //echo json_encode($this->progressResponse);
+
+        $this->socketConnect();
         fwrite($this->socketClientResource, json_encode($this->progressResponse));
+        fclose($this->socketClientResource);
     }
 
 }

@@ -66,6 +66,14 @@ function wsEventHandlers()
                 if ( !repairNotices ) repairNotices = new PushNotice();
                 repairNotices.countComingNotice(dataObj.newPushNoticeRepairs);
             }
+
+            if ( dataObj.prevMakerData === 1 )
+            {
+                if ( typeof (previewsMakerProgressData) === 'function' )
+                    previewsMakerProgressData(+dataObj.progressBarPercent, dataObj.progressMessage);
+
+                //debug(+dataObj.progressBarPercent);
+            }
         }
         catch(e)
         {
@@ -112,6 +120,7 @@ setInterval(function() {
 
     if ( ws.readyState === 3 )
     {
+        // console.log('Connection lost.');
         // console.log('Trying to reconnect...');
         // wsConnect();
     }

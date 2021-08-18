@@ -799,7 +799,7 @@ class Main extends General {
 
         //debug($images,'$images');
 
-        //-------------------
+        //-------------- Выбираем главную картинку ------
         $showimg = '';
         $mainIsset = false;
         $setMainImg = function($which) use (&$mainIsset, &$images, &$showimg)
@@ -815,14 +815,9 @@ class Main extends General {
         };
         if ( !$mainIsset ) $setMainImg('main');
         if ( !$mainIsset ) $setMainImg('sketch');
-        if ( !$mainIsset ) $setMainImg('onbody');
-        if ( !$mainIsset ) {
-            foreach ( $images as &$image )
-            {
-                $showimg = $image['img_name'];
-                break;
-            }
-        }
+        // если не нашли
+        if ( !$mainIsset )
+            $showimg = $images[array_key_first($images)]['img_name'];
         //-------------------
 
 

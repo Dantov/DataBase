@@ -181,33 +181,28 @@ class AddEditController extends GeneralController
             //debug($images,'images',1);
 
 
-            // принимает массив с данными картинки
-            // Выберет картинку или превью, если она есть
-            $setPrevImg = function( $image )
+            // Чтобы вызывать этот медод из Вида,
+            // создадим такой костыль
+            $setPrevImg = function( $image ) use (&$addEdit)
             {
-                if  ( !is_array($image) || !isset($image['imgPrevPath']) || !isset($image['imgPath']) )
-                    return '';
-
-                if ( empty($image['imgPrevPath']) )
-                    return $image['imgPath'];
-
-                return $image['imgPrevPath'];
+                return $addEdit->origin_preview_ImgSelect($image);
             };
 
-            $mainImage = $setPrevImg($images[0]);
+            $mainImage = $addEdit->origin_preview_ImgSelect($images[0]);
             foreach ( $images as $image )
             {
                 if ( trueIsset($image['main']) )
                 {
-                    $mainImage = $setPrevImg($image);
+                    $mainImage = $addEdit->origin_preview_ImgSelect($image);
                     break;
                 }
                 if ( trueIsset($image['sketch']) )
                 {
-                    $mainImage = $setPrevImg($image);
+                    $mainImage = $addEdit->origin_preview_ImgSelect($image);
                     break;
                 }
             }
+
 
             $gemsRow  = $addEdit->getGems();
             $dopVCs  = $addEdit->getDopVC();

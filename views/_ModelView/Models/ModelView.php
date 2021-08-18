@@ -1,7 +1,9 @@
 <?php
 namespace Views\_ModelView\Models;
 use Views\_Globals\Models\General;
+use Views\_Globals\Models\User;
 use Views\_SaveModel\Models\ImageConverter;
+use Views\vendor\core\Sessions;
 
 
 class ModelView extends General {
@@ -185,6 +187,47 @@ class ModelView extends General {
 	}
 
     /**
+     * проверим наличие статусов в картинках
+     * что бы выбрать, какую отобразить главной
+     * @param array $images
+     * @return array
+     */
+	public function choseMainImage( array &$images ) : array
+    {
+        $mainImg = [];
+        $mainIsset = false;
+        $setMainImg = function(&$image) use (&$mainIsset)
+        {
+            $mainImg['src'] = $image['imgPath'];
+            $mainImg['id'] = $image['id'];
+            $image['active'] = 1;
+            $mainIsset = true;
+
+            return $mainImg;
+        };
+
+        foreach ( $images as &$image )
+        {
+            if ( trueIsset($image['main']) )
+            {
+                $mainImg = $setMainImg($image);
+                break;
+            }
+            if ( trueIsset($image['sketch']) )
+            {
+                $mainImg = $setMainImg($image);
+                break;
+            }
+        }
+
+        //везьмем первую, если ничего не выбрали
+        if ( !$mainIsset )
+            $mainImg = $setMainImg($images[array_key_first($images)]);
+
+        return $mainImg;
+    }
+
+    /**
      * @return array|bool
      * @throws \Exception
      */
@@ -217,9 +260,10 @@ class ModelView extends General {
 		}
 		return $result;
 	}
+
 	public function getDopVC() {
 		
-		function links($connection, $id, $vc_3dnum, $stockDir) {
+		function links($connection, $id, $vc_3dnum) {
 			$compl_quer = mysqli_query($connection, " SELECT img_name FROM images WHERE pos_id='$id' AND main='1' ");
 			$querN3D = mysqli_query($connection, " SELECT number_3d FROM stock WHERE id='$id' ");
 			$n3d_row = mysqli_fetch_assoc($querN3D);
@@ -229,9 +273,9 @@ class ModelView extends General {
             $fileImg = _stockDIR_HTTP_.$n3d_row['number_3d'].'/'.$id.'/images/'.$compl_row['img_name'];
             if ( !file_exists(_stockDIR_.$file) ) $fileImg = _stockDIR_HTTP_."default.jpg";
 
-			return '<a imgtoshow="'.$fileImg.'" href="index.php?id='.$id.'">'.$vc_3dnum.'</a>';
+			return '<a imgtoshow="'.$fileImg.'" href="'. _rootDIR_HTTP_ .'model-view/?id='.$id.'">'.$vc_3dnum.'</a>';
 		}
-		function vc_3dnumExpl($connection, $vc_3dnum, $vc_name, $stockDir) {
+		function vc_3dnumExpl($connection, $vc_3dnum, $vc_name) {
 			$arr = explode('/',$vc_3dnum);
 			$quer = mysqli_query($connection, " SELECT id,number_3d,vendor_code FROM stock WHERE model_type='$vc_name' ");
 			
@@ -242,24 +286,24 @@ class ModelView extends General {
 					
 					if ( !empty($row_vc['vendor_code']) ) {
 						if ( trim($arr[0]) == $row_vc['vendor_code'] ) {
-							$link = links($connection, $row_vc['id'], $vc_3dnum, $stockDir);
+							$link = links($connection, $row_vc['id'], $vc_3dnum);
 							break;
 						}
 					}
 					if ( trim($arr[0]) == $row_vc['number_3d'] ) {
-						$link = links($connection, $row_vc['id'], $vc_3dnum, $stockDir);
+						$link = links($connection, $row_vc['id'], $vc_3dnum);
 						break;
 					}
 					
 					if ( isset($arr[1]) ) {
 						if ( !empty($row_vc['vendor_code']) ) {
 							if ( trim($arr[1]) == $row_vc['vendor_code'] ) {
-								$link = links($connection, $row_vc['id'], $vc_3dnum, $stockDir);
+								$link = links($connection, $row_vc['id'], $vc_3dnum);
 								break;
 							}
 						}
 						if ( trim($arr[1]) == $row_vc['number_3d'] ) {
-							$link = links($connection, $row_vc['id'], $vc_3dnum, $stockDir);
+							$link = links($connection, $row_vc['id'], $vc_3dnum);
 							break;
 						}
 					}
@@ -272,7 +316,7 @@ class ModelView extends General {
 		$c = 0;
 		while( $row_dop_vc = mysqli_fetch_assoc($this->dopVc_Query) ) {
 			
-			$linkVCnum = vc_3dnumExpl($this->connection, $row_dop_vc['vc_3dnum'], $row_dop_vc['vc_names'], $this->stockDir );
+			$linkVCnum = vc_3dnumExpl($this->connection, $row_dop_vc['vc_3dnum'], $row_dop_vc['vc_names'] );
 			$linkVCnum = $linkVCnum ? $linkVCnum : $row_dop_vc['vc_3dnum'];
 			
 			$result[$c]['vc_num'] = $c+1;
@@ -361,6 +405,38 @@ class ModelView extends General {
 
         }
         return $result;
+    }
+
+
+    /**
+     * смотрим отрисовывать ли нам кнопку едит
+     * @throws \Exception
+     */
+    public function editBtnShow() : bool
+    {
+        if ( User::permission('editModel') )
+        {
+            return true;
+        } elseif ( User::permission('editOwnModels') ) {
+            $userRowFIO = User::getSurname();
+            $authorFIO = $this->row['author'];
+            $modellerFIO = $this->row['modeller3D'];
+            $jewelerName = $this->row['jewelerName'];
+            if ( mb_stristr($authorFIO, $userRowFIO) !== FALSE || mb_stristr($modellerFIO, $userRowFIO) !== FALSE || mb_stristr($jewelerName, $userRowFIO) !== FALSE )
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * пока не нужно
+     */
+    private function setPrevPage()
+    {
+        $thisPage = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+        if ( $thisPage !== $_SERVER["HTTP_REFERER"] ) {
+            $_SESSION['prevPage'] = $_SERVER["HTTP_REFERER"];
+        }
     }
 
 }

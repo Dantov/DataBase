@@ -116,54 +116,16 @@ class ModelViewController extends GeneralController
         $complectes = $modelView->getComplectes();
         $images = $modelView->getImages();
 
-        //-------------------
-        $mainImg = [];
-        $mainIsset = false;
-        //debug($images,'$images',1);
+        //debug($images,'$images');
 
-        // проверим наличие статусов в картинках
-        // что б какую отобразить главной
-        $setMainImg = function($which) use (&$mainIsset, &$images, &$mainImg)
+        $mainImg = $modelView->choseMainImage($images);
+
+        // Чтобы вызывать этот медод из Вида,
+        // создадим такой костыль
+        $setPrevImg = function( $image ) use (&$modelView)
         {
-            foreach ( $images as &$image )
-            {
-                if ($image[$which] == 1 ) {
-                    $mainImg['src'] = $image['imgPath'];
-                    $mainImg['id'] = $image['id'];
-                    $image['active'] = 1;
-                    $mainIsset = true;
-                    break;
-                }
-            }
+            return $modelView->origin_preview_ImgSelect($image);
         };
-        if ( !$mainIsset ) $setMainImg('main');
-        if ( !$mainIsset ) $setMainImg('sketch');
-        if ( !$mainIsset ) $setMainImg('onbody');
-        if ( !$mainIsset ) {
-            foreach ( $images as &$image )
-            {
-                $mainImg['src'] = $image['imgPath'];
-                $mainImg['id'] = $image['id'];
-                $image['active'] = 1;
-                break;
-            }
-        }
-        //-------------------
-
-
-        // принимает массив с данными картинки
-        // Выберет картинку или превью, если она есть
-        $setPrevImg = function( $image )
-        {
-            if  ( !is_array($image) || !isset($image['imgPrevPath']) || !isset($image['imgPath']) )
-                return '';
-
-            if ( empty($image['imgPrevPath']) )
-                return $image['imgPath'];
-
-            return $image['imgPrevPath'];
-        };
-
 
         $usedInModels =$modelView->usedInModels();
         $descriptions = $modelView->getDescriptions();
@@ -183,24 +145,8 @@ class ModelViewController extends GeneralController
         $isStatusPresentTechJew = in_array_recursive(101,$statuses);
         $isStatusPresentDesign = in_array_recursive(89,$statuses);
 
-        $thisPage = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-        if ( $thisPage !== $_SERVER["HTTP_REFERER"] ) {
-            $_SESSION['prevPage'] = $_SERVER["HTTP_REFERER"];
-        }
-
         // смотрим отрисовывать ли нам кнопку едит
-        $editBtn = false;
-        if ( User::permission('editModel') )
-        {
-            $editBtn = true;
-        } elseif ( User::permission('editOwnModels') ) {
-            $userRowFIO = explode(' ', $_SESSION['user']['fio'])[0];
-            $authorFIO = $row['author'];
-            $modellerFIO = $row['modeller3D'];
-            $jewelerName = $row['jewelerName'];
-            if ( mb_stristr($authorFIO, $userRowFIO) !== FALSE || mb_stristr($modellerFIO, $userRowFIO) !== FALSE || mb_stristr($jewelerName, $userRowFIO) !== FALSE )
-                $editBtn = true;
-        }
+        $editBtn = $modelView->editBtnShow();
 
         $this->includeJSFile('show_pos_scrpt.js', ['defer','timestamp'] );
         $this->includeJSFile('imageViewer.js', ['timestamp'] );

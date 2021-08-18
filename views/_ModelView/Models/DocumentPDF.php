@@ -271,13 +271,18 @@ class DocumentPDF
 		$mainimg = '';
 		$onbodyimg = '';
 		//$imgPath = _stockDIR_ . $row['number_3d'].'/'.$id.'/images/';
-		foreach ( $images as $img_str )
+        //debugAjax($images,"images");
+		foreach ( $images as $image ) //$img_str
 		{
-	        $imgPath = _stockDIR_ . explode('Stock/', $img_str['img_name'])[1];
-			if ( $img_str['sketch'] == 1 ) $sketchimg = $imgPath;
-			if ( $img_str['main'] == 1 )   $mainimg =   $imgPath;
-			if ( $img_str['onbody'] == 1 ) $onbodyimg = $imgPath;
+	        //$imgPath = _stockDIR_ . explode('Stock/', $img_str['img_name'])[1];
+	        $imgPath = _stockDIR_ . explode('Stock/', $image['imgPath'])[1];
+            //debugAjax($imgPath,"imgPath");
+
+            if ( $image['sketch'] == 1 ) $sketchimg = $imgPath;
+			if ( $image['main'] == 1 )   $mainimg =   $imgPath;
+			if ( $image['onbody'] == 1 ) $onbodyimg = $imgPath;
 		}
+        //debugAjax("end","end", END_AB);
 		$realImgHeight = 100; // если нет эскиза - высота блока = 100пикс
 		if ( !empty($sketchimg) ) {
 			$befImgY = $pdf->GetY();
@@ -645,7 +650,7 @@ class DocumentPDF
 	    $sketchImg = '';
 	    foreach ( $images as $img_str )
 	    {
-	        $imgPath = _stockDIR_ . explode('Stock/',$img_str['img_name'])[1];
+	        $imgPath = _stockDIR_ . explode('Stock/',$img_str['imgPath'])[1];
 	        if ( $img_str['scheme'] == 1 ) $schemeImg = $imgPath;
 	        if ( $img_str['main'] == 1 )   $mainimg =   $imgPath;
 	        if ( $img_str['sketch'] == 1 ) $sketchImg =   $imgPath;
@@ -1011,14 +1016,14 @@ class DocumentPDF
             {
                 if ( (int)$image['id'] === $pictID )
                 {
-                    $imgName = $image['img_name'];
+                    $imgName = $image['imgPath'];
                     break;
                 }
             }
             $tr = '<tr><td><img src="'.$imgName.'"/></td></tr>';
         } else {
             $tds = [];
-            foreach ( $images as $image ) $tds[] = '<td><img src="'.$image['img_name'].'"/></td>';
+            foreach ( $images as $image ) $tds[] = '<td><img src="'.$image['imgPath'].'"/></td>';
 
             $div = 4;
             if ( count($tds) < 5 ) $div = 3;
