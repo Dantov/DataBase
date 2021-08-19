@@ -240,6 +240,13 @@ class AddEditController extends GeneralController
             $images  = $addEdit->getImages(true);
             $labels = $addEdit->getLabels($row['labels']);
 
+            // Чтобы вызывать этот медод из Вида,
+            // создадим такой костыль
+            $setPrevImg = function( $image ) use (&$addEdit)
+            {
+                return $addEdit->origin_preview_ImgSelect($image);
+            };
+
             $id = 0; // нужен 0 что бы добавилась новая модель
 
             // статус эскиз по умолчанию

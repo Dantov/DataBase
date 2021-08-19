@@ -54,7 +54,7 @@ $permittedFields = User::permissions();
 <!--MAIN FORM-->
 <form method="POST" id="addform" enctype="multipart/form-data">
 
-    <ul class="nav nav-tabs text-center">
+    <ul class="nav nav-tabs text-center" id="tab_roller">
         <li role="presentation" class="active" title="Текстовая информация"><a href="#baseData" role="tab" data-toggle="tab"><i class="fas fa-file-alt"></i> Текстовые Данные</a></li>
         <?php if ( $permittedFields['repairs'] ): ?>
             <li role="presentation" class="" title="Управление ремонтами"><a href="#repairsData" role="tab" data-toggle="tab"><i class="fas fa-tools"></i> Ремонты</a></li>
@@ -442,7 +442,7 @@ $permittedFields = User::permissions();
                             <?php foreach ( $images?:[] as $image ) : ?>
                                 <?php require _viewsDIR_."_AddEdit/includes/protoRows.php"?>
                             <?php endforeach; ?>
-                            <?php $protoImgRow = 1; require _viewsDIR_."_AddEdit/includes/protoRows.php" // Прототип ?>
+                            <?php $protoImgRow = 1; $image = []; require _viewsDIR_."_AddEdit/includes/protoRows.php" // Прототип ?>
                         </div>
                         <hr class=""/>
                     </div>

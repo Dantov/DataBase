@@ -26,6 +26,10 @@ Main.prototype.parseQueryString = function()
             let paramVal = params[i].split('=');
             this.queryParams[ paramVal[0] ] = paramVal[1];
         }
+
+        // вольмем и имя стр.
+        let path = url.split('?')[0].split('/');
+        this.queryParams.pageName= path[path.length-1] ? path[path.length-1] : path[path.length-2];
     }
 };
 

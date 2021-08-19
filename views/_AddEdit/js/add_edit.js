@@ -322,7 +322,7 @@ function removeNote(self)
 
 
 
-//-----  удаление превьюшек  -------//
+//-----  удаление превьюшек (Осталась, для удаления эскиза в добавлении компл.)  -------//
 function dellImgPrew(self)
 {
     let todell = self.parentElement.parentElement.parentElement.parentElement;
@@ -404,3 +404,38 @@ function addPrevImg( domEl, vert, horiz )
 	}
 }
 //---------END отображаем превью при наведении ----------//
+
+
+//--------- sessionStorage для вкладок ----------//
+let allTabs = document.getElementById('tab_roller').querySelectorAll('li > a');
+if ( allTabs )
+{
+    let lastActiveTab = JSON.parse( sessionStorage.getItem('activeTab') );
+    //debug(lastActiveTab, "saved lastActiveTab");
+
+    // сохранение этой вкладки
+    $.each(allTabs, function(i, a) {
+        let href = a.getAttribute('href');
+		a.addEventListener('click', function () {
+			sessionStorage.setItem('activeTab', JSON.stringify( {tab: href, url: window.location.href} ) );
+		}, false);
+    });
+
+    // после обновления стр.
+    if ( window.location.href === lastActiveTab.url )
+	{
+        //переход на сохраненную вкладку
+        $.each(allTabs, function(i, a) {
+            if ( a.getAttribute('href') === lastActiveTab.tab )
+            {
+                a.click();
+                return;
+            }
+        });
+	}
+
+}
+//--------- sessionStorage для вкладок END----------//
+
+
+

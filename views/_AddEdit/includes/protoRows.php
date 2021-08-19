@@ -348,7 +348,7 @@
                     </div>
                 </div>
                 <div class="img_inputs">
-                    <input type="hidden" class="rowID" <?=$protoImgRow ? '': 'name="image[id][]"'?> value="<?=!$protoImgRow && $component === 3 ? '': $image['id']?>">
+                    <input type="hidden" class="rowID" <?=$protoImgRow ? '': 'name="image[id][]"'?> value="<?= !$protoImgRow && $component === 3 ? '': $image['id']?>">
                     <select class="form-control input-sm" <?=$protoImgRow ? '': 'name="image[imgFor][]" onchange="handlerFiles.onSelect(this)"'?>>
                         <?php $statusImgArray = $protoImgRow ? $dataArrays : $image ?>
                         <?php foreach ( $statusImgArray['imgStat']??[] as $statusImg ): ?>

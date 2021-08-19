@@ -258,7 +258,9 @@ HandlerFiles.prototype.previewFile = function(file) {
             imgRow.classList.add('image_row');
             imgRow.classList.remove('hidden');
 
-        imgRow.querySelector('.img_dell').children[0].addEventListener('click',function () {
+        let dellButton = imgRow.querySelector('.img_dell').children[0];
+        dellButton.removeAttribute('onclick');
+        dellButton.addEventListener('click',function () {
             self.removeImg(this);
         });
         imgRow.querySelector('select').addEventListener('change',function () {
