@@ -52,7 +52,7 @@ class Registry
     public function __toString()
     {
         $str = "";
-        foreach ( $calledInClass as $class => $path )
+        foreach ( self::$calledInClass as $class => $path )
         {
             $str .= $class . "; ";
         }

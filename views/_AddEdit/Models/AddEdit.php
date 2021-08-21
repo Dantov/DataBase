@@ -819,4 +819,58 @@ class AddEdit extends General
         return $res;
     }
 
+
+
+    public function getModelsByType_old( string $modelType )
+    {
+        $names_quer = mysqli_query($this->connection, " SELECT id,number_3d,vendor_code FROM stock WHERE collections='Детали' AND model_type='$modelType' ");
+        $resp = [];
+
+        while( $names_row = mysqli_fetch_assoc($names_quer) ) {
+            $id = $names_row['id'];
+
+            $img_quer = mysqli_query($this->connection, " SELECT img_name,main,sketch FROM images WHERE pos_id='$id' ");
+            while( $img_row = mysqli_fetch_assoc($img_quer) ) {
+                if ( (int)$img_row['main'] == 1  ) $imgtoshow = $img_row['img_name'];
+            }
+
+            $file = $names_row['number_3d'].'/'.$id.'/images/'.$imgtoshow;
+            $fileImg = _stockDIR_HTTP_.$file;
+            if ( !file_exists(_stockDIR_.$file) ) $fileImg = _stockDIR_HTTP_."default.jpg";
+
+            $nameVC = $names_row['vendor_code'] ?: $names_row['number_3d'];
+
+            $resp[] = '<li><a class="imgPrev" elemToAdd imgtoshow="'. $fileImg .'">'.$nameVC.'</a></li>';
+        }
+        return $resp;
+    }
+
+
+    /**
+     * @param string $modelType
+     * @throws \Exception
+     * @return array
+     */
+    public function getModelsByType(string $modelType )
+    {
+        $sql = "SELECT s.number_3d,s.vendor_code,s.model_type,s.collections,  i.pos_id,i.img_name,i.main,i.sketch
+                FROM stock as s 
+                LEFT JOIN images as i ON (i.pos_id=s.id)
+                WHERE s.collections='Детали' AND s.model_type='$modelType'";
+
+        $query = $this->findAsArray($sql);
+        $sorted = $this->sortComplectedData($query,['number_3d','vendor_code','model_type','collections']);
+        //debugAjax($sorted, "sorted", END_AB);
+
+        $resp = [];
+        foreach ( $sorted as $detail )
+        {
+            $nameVC = $detail['vendor_code'] ?: $detail['number_3d'];
+            $resp[] = '<li><a class="imgPrev" elemToAdd imgtoshow="'. $detail['img_name'] .'">'.$nameVC.'</a></li>';
+        }
+
+        return $resp;
+    }
+
+
 }

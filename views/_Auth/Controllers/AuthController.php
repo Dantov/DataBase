@@ -80,6 +80,10 @@ class AuthController extends Controller
         return $this->render('auth', $compacted);
     }
 
+    /**
+     * @param $userRow
+     * @throws \Exception
+     */
     protected function actionEnter($userRow)
     {
         $session = $this->session;
@@ -91,7 +95,7 @@ class AuthController extends Controller
 
         $session->setKey('access', true);
 
-        $assist['maxPos']		    = 24; 		// кол-во выводимых позиций по дефолту
+        $assist['maxPos']		   = 48; 		// кол-во выводимых позиций по дефолту
         $assist['regStat']         = "Нет"; 	// выбор статуса по умоляанию
         $assist['byStatHistory']   = 0;  	// искать в истории статусов
         $assist['wcSort']          = []; 	    // выбор рабочего участка по умоляанию

@@ -62,6 +62,10 @@ class ModelView extends General {
 		$this->complected = $this->findAsArray( $sql );
 	}
 
+    /**
+     * @return array
+     * @throws \Exception
+     */
     public function getCollections()
     {
         $collections = explode(';',$this->row['collections']);
@@ -69,10 +73,7 @@ class ModelView extends General {
         foreach ( $collections as $collection ) $collectionStr .= "'".$collection."',";
         $collectionStr = "(". trim($collectionStr,",") . ")";
 
-        $collId_Query = mysqli_query($this->connection, " SELECT id,name FROM service_data WHERE name IN $collectionStr AND tab='collections' ");
-        $res = [];
-        while( $coll = mysqli_fetch_assoc($collId_Query) ) $res[] = $coll;
-        return $res;
+        return $this->findAsArray(" SELECT id,name FROM service_data WHERE name IN $collectionStr AND tab='collections' ");
     }
 	
 	public function getStl()
@@ -141,7 +142,7 @@ class ModelView extends General {
     	if ( empty($this->complected) ) return [];
         if ($forPdf) return $this->complected;
 
-        return $this->sortComplectedData($this->complected);
+        return $this->sortComplectedData($this->complected,['id','number_3d','model_type']);
 	}
 
     /**
@@ -273,7 +274,7 @@ class ModelView extends General {
 				WHERE st.id='$id' ";
         $linkQuery = $this->findAsArray( $sql );
 
-        $fileImg = $this->sortComplectedData($linkQuery)[$id]['img_name'];
+        $fileImg = $this->sortComplectedData($linkQuery,['id','number_3d'])[$id]['img_name'];
 
         return '<a imgtoshow="'.$fileImg.'" href="'. _rootDIR_HTTP_ .'model-view/?id='.$id.'">'.$vc_3dnum.'</a>';
     }

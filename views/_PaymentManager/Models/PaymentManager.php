@@ -57,9 +57,9 @@ class PaymentManager extends UserPouch
             if ( !empty($mID) ) $inModels .= (int)$mID . ',';
         if ( !empty($inModels) ) $inModels = "(" . rtrim($inModels,',') . ")";
 
-        $stockSql = "SELECT i.img_name as imgName, st.id as id, st.number_3d as number_3d, st.vendor_code as vendorCode, st.model_type as modelType
+        $stockSql = "SELECT i.img_name,i.pos_id,i.main,i.sketch,   st.id,st.number_3d,st.vendor_code as vendorCode, st.model_type as modelType
                     FROM stock as st
-                      LEFT JOIN images as i ON i.pos_id = st.id AND i.main='1'
+                      LEFT JOIN images as i ON i.pos_id = st.id
                           WHERE st.id IN $inModels";
 
         $pricesSql = "SELECT mp.id as pID, mp.pos_id as posID, mp.user_id as uID, mp.gs_id as gsID, mp.is3d_grade as is3dGrade, mp.cost_name as costName, 
@@ -69,20 +69,24 @@ class PaymentManager extends UserPouch
                           LEFT JOIN users as u ON mp.user_id = u.id
                           LEFT JOIN grading_system as gs ON gs.id = mp.gs_id
                               WHERE mp.id IN $inPrices AND (mp.status='1' AND mp.paid=0 AND mp.pos_id IN $inModels)";
+        //AND i.main='1'
         $prices = [];
         $stock = [];
         try {
-            $stock = $this->findAsArray($stockSql);
+            //$stock = $this->findAsArray($stockSql);
+            //debugAjax($stock, '$stock');
+            $stock = $this->sortComplectedData( $this->findAsArray($stockSql), ['id','number_3d','modelType','vendorCode'] );
+            //debugAjax($stock, '$stock2', END_AB);
+
             $prices = $this->findAsArray($pricesSql);
         } catch (\Exception $e) {
             $codes = Registry::init()->appCodes;
             return ['error'=>$codes->getCodeMessage($codes::SERVER_ERROR)];
         } finally {
+            $sStock = [];
             foreach ( $stock as &$model )
             {
-                $imagePath = $model['number_3d'].'/'.$model['id'].'/images/'.$model['imgName'];
-                $model['imgName'] = _stockDIR_HTTP_ . $imagePath;
-                if ( !file_exists(_stockDIR_ . $imagePath) ) $model['imgName'] = _stockDIR_HTTP_."default.jpg";
+                $model['imgName'] = $model['img_name'];
 
                 foreach ( $prices as &$price )
                     if ( $price['posID'] == $model['id'] )
@@ -91,9 +95,10 @@ class PaymentManager extends UserPouch
                         $price['pID'] = URLCrypt::strEncode($price['pID']);
                         $model['prices'][] = $price;
                     }
+                $sStock[] = $model;
             }
 
-            return $stock;
+            return $sStock;
         }
     }
 

@@ -795,15 +795,17 @@ class General extends Model
     /**
      * Из массива, выберет превью картинку или оригин. если превью нет
      * используется в видах modelView и addEdit
-     * @param $complected
+     * @param array $complected
+     * @param array $dopFields
      * @return mixed|string
      * @throws \Exception
      */
-    public function sortComplectedData( $complected=[] )
+    public function sortComplectedData( $complected=[], array $dopFields = [] )
     {
         if ( empty($complected) ) return [];
 
         $images = [];
+        $dop_iter = 0;
         foreach ( $complected as $image )
         {
             $main = 'main';
@@ -815,19 +817,39 @@ class General extends Model
             {
                 $images[$image['pos_id']]['img_names'][$sketch] = $image['img_name'];
             } else {
-                $images[$image['pos_id']]['img_names'][] = $image['img_name'];
+                $dopImg = 'dopimg_'.$dop_iter++;
+                $images[$image['pos_id']]['img_names'][$dopImg] = $image['img_name'];
             }
+
             $images[$image['pos_id']]['pos_id'] = $image['pos_id'];
+
+            /*
             $images[$image['pos_id']]['model_type'] = $image['model_type'];
 
             if ( trueIsset($image['number_3d']) )
                 $images[$image['pos_id']]['number_3d'] = $image['number_3d'];
+            if ( trueIsset($image['vendor_code']) )
+                $images[$image['pos_id']]['vendor_code'] = $image['vendor_code'];
+            if ( trueIsset($image['collections']) )
+                $images[$image['pos_id']]['collections'] = $image['collections'];
+            */
+
+            // доп данные
+            foreach ( $dopFields as $dopField )
+            {
+                if ( trueIsset($dopField) && is_string($dopField) )
+                {
+                    if ( trueIsset($image[$dopField]) )
+                        $images[$image['pos_id']][$dopField] = $image[$dopField];
+                }
+            }
         }
 
-        foreach ( $images as &$complect )
+        foreach ($images as &$complect )
         {
             $imgPath = $complect['number_3d'].'/'.$complect['pos_id'].'/images/';
             $imgName = $complect['img_names'][ array_key_first($complect['img_names']) ]; // первая попавшаяся
+
             foreach ( $complect['img_names'] as $iStat => $iName )
             {
                 if ( $iStat == 'main' )
@@ -838,6 +860,7 @@ class General extends Model
                 if ( $iStat == 'sketch' )
                     $imgName = $iName;
             }
+
 
             // проверка файла
             if ( !file_exists(_stockDIR_ . $imgPath . $imgName) )

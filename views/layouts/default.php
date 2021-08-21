@@ -31,7 +31,7 @@ JS;
     <link rel="stylesheet" href="/web/css/style_adm.css?ver=<?=time();?>">
     <link rel="stylesheet" href="/web/css/bodyImg.css?ver=<?=time();?>">
     <link rel="stylesheet" href="/web/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/web/css/bootstrap-theme.min.css">
+    <!-- <link rel="stylesheet" href="/web/css/bootstrap-theme.min.css"> -->
     <link rel="stylesheet" href="/web/css/iziModal.min.css">
     <link rel="stylesheet" href="/web/css/iziToast.min.css">
     <link rel="stylesheet" href="/web/fontawesome5.9.0/css/all.min.css">

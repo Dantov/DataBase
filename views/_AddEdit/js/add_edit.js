@@ -53,7 +53,13 @@ function getVCmenu( mType_name, targetEl )
 		},
 		dataType:"json",
 		success:function(dataLi) {
-			//debug(dataLi);
+
+            //debug(dataLi);
+			if ( dataLi.debug && (typeof debugModal === 'function') )
+			{
+				debugModal( dataLi.debug );
+				return;
+			}
 			let num3dVC_new = document.getElementById('num3dVC_proto').cloneNode(true);
 				num3dVC_new.removeAttribute('id');
 				num3dVC_new.classList.remove('hidden');
@@ -68,7 +74,7 @@ function getVCmenu( mType_name, targetEl )
 			dataLi = null;
 			//console.log('dataLi = ', typeof dataLi);
 		},
-		error:function(error){
+		error:function(error) {
 			debug(error,"getVCmenu error");
 		}
 	});

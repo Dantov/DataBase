@@ -4,6 +4,10 @@ function Repairs()
 {
     this.repairPricesModal = document.querySelector('#repairPricesModal');
     this.repairsBlock = document.querySelector('#repairsBlock');
+
+    if (!this.repairsBlock)
+        return;
+
     /**
      * Здесть ДОМ Ел табл прайсов в текущем ремонте
      * tbody

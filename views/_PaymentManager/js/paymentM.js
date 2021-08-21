@@ -269,6 +269,12 @@ PaymentManager.prototype.getPricesAllData = function(button)
         },
         dataType:"json",
         success:function(models) {
+            // ******* DEBUG ****** //
+            if ( models.debug )
+            {
+                debugModal(models.debug);
+                return;
+            }
             // ******* ERROR ****** //
             if ( models.error )
             {

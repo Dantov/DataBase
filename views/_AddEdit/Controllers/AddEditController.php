@@ -388,14 +388,14 @@ JS;
      */
     protected function actionVendorCodeNames($modelsTypeRequest)
     {
-        $handler = new Handler();
-        $handler->connectDBLite();
+        $addEdit = new AddEdit();
+        $addEdit->connectDBLite();
 
-        $resp = $handler->getModelsByType($modelsTypeRequest);
+        $resp = $addEdit->getModelsByType($modelsTypeRequest);
 
-        $handler->closeDB();
+        $addEdit->closeDB();
 
-        echo json_encode($resp);
+        exit( json_encode($resp) );
     }
 
     /**

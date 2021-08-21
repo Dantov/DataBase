@@ -158,15 +158,16 @@ class UserPouch extends Main
     {
         /*
         in (
-      SELECT * FROM (
-            SELECT id 
-            FROM posts 
-            ORDER BY timestamp desc limit 0, 15
-      ) 
-      as t);
-      SELECT DISTINCT pos_id FROM model_prices 
-                                    WHERE $this->worker $this->paidTab $this->date 
-                                    LIMIT $this->start, $this->perPage)
+          SELECT * FROM (
+                        SELECT id
+                        FROM posts
+                        ORDER BY timestamp desc limit 0, 15)
+          as t
+        );
+
+          SELECT DISTINCT pos_id FROM model_prices
+                                        WHERE $this->worker $this->paidTab $this->date
+                                        LIMIT $this->start, $this->perPage)
         */
         $limit = "LIMIT $this->start, $this->perPage";
         $limitMP = $this->searchInput ? "" : $limit ;
@@ -181,39 +182,18 @@ class UserPouch extends Main
         $this->inModels = $in = !trueIsset($in) ? '(0)' : '(' . rtrim($in, ',') . ')';
         //debug($in,'$in');
         $limitSt = $this->searchInput ? $limit : "" ;
-        $sqlStock = " SELECT s.id, s.number_3d, img.pos_id, img.img_name, s.vendor_code, s.model_type, s.status FROM stock as s 
-                      LEFT JOIN images as img ON ( s.id = img.pos_id AND img.main=1 )
+        $sqlStock = " SELECT s.id, s.number_3d, img.pos_id, img.img_name, img.main, img.sketch, s.vendor_code, s.model_type, s.status FROM stock as s 
+                      LEFT JOIN images as img ON ( s.id = img.pos_id )
                       WHERE $this->searchInput s.id IN $in ORDER BY s.id DESC $limitSt";
-                                     /*
+                                     /* AND img.main=1
                                         ( SELECT * FROM (
                                             SELECT DISTINCT pos_id FROM model_prices
                                                 WHERE $this->worker $this->paidTab $this->date
                                                 LIMIT $this->start, $this->perPage ) as temp )
                                     */
-        //debug($sqlStock,'$sqlStock');
         $result = $this->findAsArray($sqlStock);
-        //debug($result,'$result',1);
-        foreach ( $result as &$stockModel )
-        {
-            if ( empty($stockModel['img_name']) )
-            {
-                $allImages = $this->findAsArray("SELECT img_name,pos_id,sketch,onbody,detail FROM images WHERE pos_id={$stockModel['id']}");
-                $stockModel['img_name'] = $allImages[0]['img_name'];
-                foreach ( $allImages as $image )
-                {
-                    if ( trueIsset($image['sketch']) )
-                    {
-                        $stockModel['img_name'] = $image['img_name'];
-                        break;
-                    }
-                }
-            }
-            $imgPath = $stockModel['number_3d'] . "/" .$stockModel['id'] . "/images/".$stockModel['img_name'];
-            $imgSrc  = file_exists(_stockDIR_ . $imgPath);
-            $stockModel['img_name']  =  $imgSrc ? _stockDIR_HTTP_ . $imgPath : _stockDIR_HTTP_."default.jpg";
-        }
-        //debug($result,'$result',1);
-        return $this->stockData = $result;
+
+        return $this->stockData = $this->sortComplectedData($result, ['id','status','number_3d','model_type','vendor_code']);
     }
 
     /**
