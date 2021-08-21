@@ -46,27 +46,20 @@ class ModelView extends General {
     {
 		$this->row  = $this->findOne( " SELECT * FROM stock    WHERE     id='$this->id' ");
 		$this->img  = $this->findAsArray( " SELECT * FROM images   WHERE pos_id='$this->id' ");
-		//$this->img_Query   = mysqli_query($this->connection, " SELECT * FROM images    WHERE pos_id='$this->id' ");
         $this->gems_Query  = mysqli_query($this->connection, " SELECT * FROM gems      WHERE pos_id='$this->id' ");
         $this->dopVc_Query = mysqli_query($this->connection, " SELECT * FROM vc_links  WHERE pos_id='$this->id' ");
         $this->stl_Query   = mysqli_query($this->connection, " SELECT * FROM stl_files WHERE pos_id='$this->id' ");
         $this->ai_Query    = mysqli_query($this->connection, " SELECT * FROM ai_files  WHERE pos_id='$this->id' ");
         $this->rep_Query   = mysqli_query($this->connection, " SELECT * FROM repairs   WHERE pos_id='$this->id' ");
 		
-		//$this->row = mysqli_fetch_assoc($stock_Query);
 		$this->number_3d = $this->row['number_3d'];
 
-		$sql = " SELECT st.id, st.model_type, img.pos_id, img.img_name 
+		$sql = " SELECT st.id, st.model_type, st.number_3d, img.pos_id, img.img_name, img.main, img.sketch
 				FROM stock st 
-					LEFT JOIN images img 
-					ON (st.id = img.pos_id AND img.main=1) 
+					LEFT JOIN images img ON ( st.id = img.pos_id )
 				WHERE st.number_3d='{$this->number_3d}' 
-				AND st.id<>'{$this->id}' ";
-		//debug($sql,'$sql');
+				AND st.id<>'{$this->id}' ";                        //AND img.main=1
 		$this->complected = $this->findAsArray( $sql );
-		//debug($this->complected,'complected',1);
-
-
 	}
 
     public function getCollections()
@@ -141,19 +134,14 @@ class ModelView extends General {
     /**
      * @param bool $forPdf
      * @return array|string
+     * @throws \Exception
      */
 	public function getComplectes($forPdf=false)
     {
     	if ( empty($this->complected) ) return [];
         if ($forPdf) return $this->complected;
 
-		foreach ($this->complected as &$complect) 
-		{
-			$imagePath = $this->number_3d.'/'.$complect['id'].'/images/'.$complect['img_name'];
-			$complect['img_name'] = _stockDIR_HTTP_ . $imagePath;
-            if ( !file_exists(_stockDIR_ . $imagePath) ) $complect['img_name'] = _stockDIR_HTTP_."default.jpg";
-		}
-		return $this->complected;
+        return $this->sortComplectedData($this->complected);
 	}
 
     /**
@@ -163,7 +151,6 @@ class ModelView extends General {
     public function getImages()
     {
 		$images = [];
-        //debug($this->img,'img');
 
         foreach ( $this->img as &$img ) $images[$img['id']] = $img; // чтоб работали клики по мал. картинкам
 
@@ -180,8 +167,6 @@ class ModelView extends General {
                 $image['imgPath'] = _stockDIR_HTTP_.$path.$fileImg;
 
                 // Проверим превьюшку
-//                $prevImgName = $this->checkSetPreviewImg($path, $fileImg);
-//                $image['imgPrevPath'] =  $prevImgName ? _stockDIR_HTTP_ . $path . $prevImgName : '';
                 $image['imgPrevPath'] = '';
                 if ( $prevImgName = $this->checkSetPreviewImg($path, $fileImg) )
                 {
@@ -193,7 +178,6 @@ class ModelView extends General {
             }
 
         }
-        //debug($images,'$images',1);
 
 		return $images;
 	}
@@ -207,13 +191,12 @@ class ModelView extends General {
 	public function choseMainImage( array &$images ) : array
     {
         $mainImg = [];
-        $mainIsset = false;
-        $setMainImg = function(&$image) use (&$mainIsset)
+        $mainImgID = '';
+        $setMainImg = function(&$image)
         {
             $mainImg['src'] = $image['imgPath'];
             $mainImg['id'] = $image['id'];
             $image['active'] = 1;
-            $mainIsset = true;
 
             return $mainImg;
         };
@@ -222,19 +205,22 @@ class ModelView extends General {
         {
             if ( trueIsset($image['main']) )
             {
-                $mainImg = $setMainImg($image);
+                $mainImgID = $image['id'];
                 break;
             }
             if ( trueIsset($image['sketch']) )
             {
-                $mainImg = $setMainImg($image);
-                break;
+                $mainImgID = $image['id'];
             }
         }
 
         //везьмем первую, если ничего не выбрали
-        if ( !$mainIsset )
+        if ( !$mainImgID )
+        {
             $mainImg = $setMainImg($images[array_key_first($images)]);
+        } else {
+            $mainImg = $setMainImg($images[$mainImgID]);
+        }
 
         return $mainImg;
     }
@@ -273,62 +259,84 @@ class ModelView extends General {
 		return $result;
 	}
 
-	public function getDopVC() {
-		
-		function links($connection, $id, $vc_3dnum) {
-			$compl_quer = mysqli_query($connection, " SELECT img_name FROM images WHERE pos_id='$id' AND main='1' ");
-			$querN3D = mysqli_query($connection, " SELECT number_3d FROM stock WHERE id='$id' ");
-			$n3d_row = mysqli_fetch_assoc($querN3D);
-			$compl_row = mysqli_fetch_assoc($compl_quer);
+    /**
+     * @param $id
+     * @param $vc_3dnum
+     * @return string
+     * @throws \Exception
+     */
+    protected function links($id, $vc_3dnum)
+    {
+        $sql = " SELECT st.id, st.number_3d, img.pos_id, img.img_name, img.main, img.sketch
+				FROM stock st 
+					LEFT JOIN images img ON ( img.pos_id = $id )
+				WHERE st.id='$id' ";
+        $linkQuery = $this->findAsArray( $sql );
 
-            $file = $n3d_row['number_3d'].'/'.$id.'/images/'.$compl_row['img_name'];
-            $fileImg = _stockDIR_HTTP_.$n3d_row['number_3d'].'/'.$id.'/images/'.$compl_row['img_name'];
-            if ( !file_exists(_stockDIR_.$file) ) $fileImg = _stockDIR_HTTP_."default.jpg";
+        $fileImg = $this->sortComplectedData($linkQuery)[$id]['img_name'];
 
-			return '<a imgtoshow="'.$fileImg.'" href="'. _rootDIR_HTTP_ .'model-view/?id='.$id.'">'.$vc_3dnum.'</a>';
-		}
-		function vc_3dnumExpl($connection, $vc_3dnum, $vc_name) {
-			$arr = explode('/',$vc_3dnum);
-			$quer = mysqli_query($connection, " SELECT id,number_3d,vendor_code FROM stock WHERE model_type='$vc_name' ");
-			
-			$link  = null;
-			
-			if ( $quer->num_rows > 0 ) {
-				while( $row_vc = mysqli_fetch_assoc($quer) ) {
-					
-					if ( !empty($row_vc['vendor_code']) ) {
-						if ( trim($arr[0]) == $row_vc['vendor_code'] ) {
-							$link = links($connection, $row_vc['id'], $vc_3dnum);
-							break;
-						}
-					}
-					if ( trim($arr[0]) == $row_vc['number_3d'] ) {
-						$link = links($connection, $row_vc['id'], $vc_3dnum);
-						break;
-					}
-					
-					if ( isset($arr[1]) ) {
-						if ( !empty($row_vc['vendor_code']) ) {
-							if ( trim($arr[1]) == $row_vc['vendor_code'] ) {
-								$link = links($connection, $row_vc['id'], $vc_3dnum);
-								break;
-							}
-						}
-						if ( trim($arr[1]) == $row_vc['number_3d'] ) {
-							$link = links($connection, $row_vc['id'], $vc_3dnum);
-							break;
-						}
-					}
-				}
-			}
-			return $link;
-		}
+        return '<a imgtoshow="'.$fileImg.'" href="'. _rootDIR_HTTP_ .'model-view/?id='.$id.'">'.$vc_3dnum.'</a>';
+    }
+
+    /**
+     * @param $vc_3dnum
+     * @param $vc_name
+     * @return null|string
+     * @throws \Exception
+     */
+    protected function vc_3dnumExpl($vc_3dnum, $vc_name)
+    {
+        $arr = explode('/',$vc_3dnum);
+        $quer = mysqli_query($this->connection, " SELECT id,number_3d,vendor_code FROM stock WHERE model_type='$vc_name' ");
+
+        $link  = null;
+
+        if ( $quer->num_rows > 0 ) {
+            while( $row_vc = mysqli_fetch_assoc($quer) ) {
+
+                if ( !empty($row_vc['vendor_code']) )
+                {
+                    if ( trim($arr[0]) == $row_vc['vendor_code'] ) {
+                        $link = $this->links($row_vc['id'], $vc_3dnum);
+                        break;
+                    }
+                }
+
+                if ( trim($arr[0]) == $row_vc['number_3d'] )
+                {
+                    $link = $this->links($row_vc['id'], $vc_3dnum);
+                    break;
+                }
+
+                if ( isset($arr[1]) )
+                {
+                    if ( !empty($row_vc['vendor_code']) ) {
+                        if ( trim($arr[1]) == $row_vc['vendor_code'] ) {
+                            $link = $this->links($row_vc['id'], $vc_3dnum);
+                            break;
+                        }
+                    }
+                    if ( trim($arr[1]) == $row_vc['number_3d'] ) {
+                        $link = $this->links( $row_vc['id'], $vc_3dnum);
+                        break;
+                    }
+                }
+            }
+        }
+        return $link;
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getDopVC() {
 		
 		$result = array();
 		$c = 0;
 		while( $row_dop_vc = mysqli_fetch_assoc($this->dopVc_Query) ) {
 			
-			$linkVCnum = vc_3dnumExpl($this->connection, $row_dop_vc['vc_3dnum'], $row_dop_vc['vc_names'] );
+			$linkVCnum = $this->vc_3dnumExpl($row_dop_vc['vc_3dnum'], $row_dop_vc['vc_names'] );
 			$linkVCnum = $linkVCnum ? $linkVCnum : $row_dop_vc['vc_3dnum'];
 			
 			$result[$c]['vc_num'] = $c+1;
@@ -339,6 +347,7 @@ class ModelView extends General {
 		}
 		return $result;
 	}
+
 
 	public function getRepairs()
     {

@@ -102,7 +102,7 @@ $isView = true;
                             <li class="list-group-item" id="complects">
                                 <?php foreach ($complectes as $complect) : ?>
                                 <span class="badge badge-lg">
-                                    <a style="color:white!important;" imgtoshow="<?= $complect['img_name'] ?>" href="/model-view/?id=<?=$complect['id']?>"><?=$complect['model_type']?></a>
+                                    <a style="color:white!important;" imgtoshow="<?= $complect['img_name'] ?>" href="/model-view/?id=<?=$complect['pos_id']?>"><?=$complect['model_type']?></a>
                                 </span>
                                 <?php endforeach;?>
                                 <i class="fas fa-object-group"></i> В Комплекте:

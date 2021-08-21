@@ -792,6 +792,76 @@ class General extends Model
         return $image['imgPrevPath'];
     }
 
+    /**
+     * Из массива, выберет превью картинку или оригин. если превью нет
+     * используется в видах modelView и addEdit
+     * @param $complected
+     * @return mixed|string
+     * @throws \Exception
+     */
+    public function sortComplectedData( $complected=[] )
+    {
+        if ( empty($complected) ) return [];
+
+        $images = [];
+        foreach ( $complected as $image )
+        {
+            $main = 'main';
+            $sketch = 'sketch';
+            if ( trueIsset($image['main']) )
+            {
+                $images[$image['pos_id']]['img_names'][$main] = $image['img_name'];
+            } elseif ( trueIsset($image['sketch']) )
+            {
+                $images[$image['pos_id']]['img_names'][$sketch] = $image['img_name'];
+            } else {
+                $images[$image['pos_id']]['img_names'][] = $image['img_name'];
+            }
+            $images[$image['pos_id']]['pos_id'] = $image['pos_id'];
+            $images[$image['pos_id']]['model_type'] = $image['model_type'];
+
+            if ( trueIsset($image['number_3d']) )
+                $images[$image['pos_id']]['number_3d'] = $image['number_3d'];
+        }
+
+        foreach ( $images as &$complect )
+        {
+            $imgPath = $complect['number_3d'].'/'.$complect['pos_id'].'/images/';
+            $imgName = $complect['img_names'][ array_key_first($complect['img_names']) ]; // первая попавшаяся
+            foreach ( $complect['img_names'] as $iStat => $iName )
+            {
+                if ( $iStat == 'main' )
+                {
+                    $imgName = $iName;
+                    break;
+                }
+                if ( $iStat == 'sketch' )
+                    $imgName = $iName;
+            }
+
+            // проверка файла
+            if ( !file_exists(_stockDIR_ . $imgPath . $imgName) )
+            {
+                $complect['img_name'] = _stockDIR_HTTP_."default.jpg";
+            } else {
+                // Файл Есть
+                $complect['img_name'] = '';
+                if ( $prevImgName = $this->checkSetPreviewImg($imgPath, $imgName) )
+                {
+                    $complect['img_name'] = _stockDIR_HTTP_.$imgPath.$prevImgName;
+                } elseif ( ImageConverter::makePrev( $imgPath, $imgName ) ) {
+                    // Превью создана!
+                    $complect['img_name'] = _stockDIR_HTTP_ . $imgPath . ImageConverter::getLastImgPrevName();
+                } else {
+                    // подставим ьольшую картинку если не удалось создать превью
+                    $complect['img_name'] = _stockDIR_HTTP_.$imgPath.$imgName;
+                }
+            }
+        }
+
+        return $images;
+    }
+
 
     /**
      * @throws \Exception

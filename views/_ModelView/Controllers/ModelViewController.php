@@ -114,9 +114,8 @@ class ModelViewController extends GeneralController
 
         $matsCovers = $modelView->getModelMaterials();
         $complectes = $modelView->getComplectes();
+        //debug($complectes,'$complectes',1);
         $images = $modelView->getImages();
-
-        //debug($images,'$images');
 
         $mainImg = $modelView->choseMainImage($images);
 

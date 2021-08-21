@@ -17,7 +17,7 @@ $permittedFields = User::permissions();
                 <?php if ( count($complected??[]) ):?>
                     (<i>В Комплекте:
                     <?php foreach ($complected??[] as $complect) : ?>
-                        <a class="imgPrev" imgtoshow="<?= $complect['img_name'] ?>" href="/model-view/?id=<?=$complect['id']?>"><?=$complect['model_type']?></a>
+                        <a class="imgPrev" imgtoshow="<?= $complect['img_name'] ?>" href="/add-edit/?id=<?=$complect['pos_id']?>&component=2"><?=$complect['model_type']?></a>
                     <?php endforeach;?>
                     </i>)
                 <?php endif; ?>
@@ -27,7 +27,7 @@ $permittedFields = User::permissions();
                 <?php if ( count($complected??[]) ):?>
                     (<i>В Комплекте:
                         <?php foreach ($complected??[] as $complect) : ?>
-                            <a class="imgPrev" imgtoshow="<?= $complect['img_name'] ?>" href="/model-view/?id=<?=$complect['id']?>"><?=$complect['model_type']?></a>
+                            <a class="imgPrev" imgtoshow="<?= $complect['img_name'] ?>" href="/add-edit/?id=<?=$complect['pos_id']?>&component=2"><?=$complect['model_type']?></a>
                         <?php endforeach;?>
                     </i>)
                 <?php endif; ?>

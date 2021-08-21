@@ -130,19 +130,71 @@ class AddEdit extends General
     {
         $and = "";
         if ( $component === 2 ) $and = "AND st.id<>'{$this->id}'";
-        $sql = " SELECT st.id, st.model_type, img.pos_id, img.img_name 
+        $sql = " SELECT st.id, st.model_type, img.pos_id, img.img_name, img.main, img.sketch
 				FROM stock st 
-					LEFT JOIN images img 
-					ON (st.id = img.pos_id AND img.main=1) 
+					LEFT JOIN images img ON (st.id = img.pos_id) 
 				WHERE st.number_3d='{$this->row['number_3d']}' 
-				$and ";
+				$and ";                                           // AND img.main=1
         $complected = $this->findAsArray( $sql );
-        foreach ($complected as &$complect)
+
+        $images = [];
+        foreach ( $complected as $image )
         {
-            $imagePath = $this->row['number_3d'].'/'.$complect['id'].'/images/'.$complect['img_name'];
-            $complect['img_name'] = _stockDIR_HTTP_ . $imagePath;
-            if ( !file_exists(_stockDIR_ . $imagePath) ) $complect['img_name'] = _stockDIR_HTTP_."default.jpg";
+            $main = 'main';
+            $sketch = 'sketch';
+            if ( trueIsset($image['main']) )
+            {
+                $images[$image['pos_id']]['img_names'][$main] = $image['img_name'];
+            } elseif ( trueIsset($image['sketch']) )
+            {
+                $images[$image['pos_id']]['img_names'][$sketch] = $image['img_name'];
+            } else {
+                $images[$image['pos_id']]['img_names'][] = $image['img_name'];
+            }
+            $images[$image['pos_id']]['pos_id'] = $image['pos_id'];
+            $images[$image['pos_id']]['model_type'] = $image['model_type'];
+
+            if ( trueIsset($image['number_3d']) )
+                $images[$image['pos_id']]['number_3d'] = $image['number_3d'];
         }
+
+        $complected = $images;
+
+        foreach ( $complected as &$complect )
+        {
+            $imgPath = $this->row['number_3d'].'/'.$complect['pos_id'].'/images/';
+            $imgName = $complect['img_names'][ array_key_first($complect['img_names']) ]; // первая попавшаяся
+            foreach ( $complect['img_names'] as $iStat => $iName )
+            {
+                if ( $iStat == 'main' )
+                {
+                    $imgName = $iName;
+                    break;
+                }
+                if ( $iStat == 'sketch' )
+                    $imgName = $iName;
+            }
+
+            // проверка файла
+            if ( !file_exists(_stockDIR_ . $imgPath . $imgName) )
+            {
+                $complect['img_name'] = _stockDIR_HTTP_."default.jpg";
+            } else {
+                // Файл Есть
+                $complect['img_name'] = '';
+                if ( $prevImgName = $this->checkSetPreviewImg($imgPath, $imgName) )
+                {
+                    $complect['img_name'] = _stockDIR_HTTP_.$imgPath.$prevImgName;
+                } elseif ( ImageConverter::makePrev( $imgPath, $imgName ) ) {
+                    // Превью создана!
+                    $complect['img_name'] = _stockDIR_HTTP_ . $imgPath . ImageConverter::getLastImgPrevName();
+                } else {
+                    // подставим ьольшую картинку если не удалось создать превью
+                    $complect['img_name'] = _stockDIR_HTTP_.$imgPath.$imgName;
+                }
+            }
+        }
+
         return $complected;
     }
 
