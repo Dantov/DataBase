@@ -3,7 +3,7 @@ namespace Views\_ModelView\Models;
 use Views\_Globals\Models\General;
 use Views\_Globals\Models\User;
 use Views\_SaveModel\Models\ImageConverter;
-use Views\vendor\core\Sessions;
+use Views\vendor\core\HtmlHelper;
 
 
 class ModelView extends General {
@@ -262,13 +262,13 @@ class ModelView extends General {
 
     /**
      * @param $id
-     * @param $vc_3dnum
+     * @param $vc_3dNum
      * @return string
      * @throws \Exception
      */
-    protected function links($id, $vc_3dnum)
+    protected function links($id, $vc_3dNum)
     {
-        $sql = " SELECT st.id, st.number_3d, img.pos_id, img.img_name, img.main, img.sketch
+        $sql = "SELECT st.id, st.number_3d, img.pos_id, img.img_name, img.main, img.sketch
 				FROM stock st 
 					LEFT JOIN images img ON ( img.pos_id = $id )
 				WHERE st.id='$id' ";
@@ -276,7 +276,12 @@ class ModelView extends General {
 
         $fileImg = $this->sortComplectedData($linkQuery,['id','number_3d'])[$id]['img_name'];
 
-        return '<a imgtoshow="'.$fileImg.'" href="'. _rootDIR_HTTP_ .'model-view/?id='.$id.'">'.$vc_3dnum.'</a>';
+        $html = new HtmlHelper();
+        return $html->tag("a")
+                    ->setAttr(['imgtoshow'=>$fileImg, 'href'=>HtmlHelper::URL('/',['id'=>$id])]) //_rootDIR_HTTP_ .'model-view/?id='.$id
+                    ->setTagText($vc_3dNum)->create();
+
+        //return '<a imgtoshow="'.$fileImg.'" href="'. _rootDIR_HTTP_ .'model-view/?id='.$id.'">'.$vc_3dnum.'</a>';
     }
 
     /**
@@ -293,6 +298,8 @@ class ModelView extends General {
         $link  = null;
 
         if ( $quer->num_rows > 0 ) {
+
+
             while( $row_vc = mysqli_fetch_assoc($quer) ) {
 
                 if ( !empty($row_vc['vendor_code']) )

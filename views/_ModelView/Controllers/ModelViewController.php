@@ -7,6 +7,7 @@ use Views\_Globals\Models\PushNotice;
 use Views\_Globals\Models\User;
 use Views\_ModelView\Models\{ModelView,DocumentPDF};
 use Views\_Globals\Controllers\GeneralController;
+use Views\vendor\core\HtmlHelper;
 use Views\vendor\libs\classes\AppCodes;
 
 
@@ -168,6 +169,7 @@ JS;
             $this->includePHPFile('approve_modal.php');
             $this->includeJSFile('approveBtns.js',['defer','timestamp']);
         }
+
 
         $compacted = compact([
             'id','row','coll_id','getStl','button3D','dopBottomScripts','complectes','images','mainImg','setPrevImg', 'labels', 'str_mat','str_Covering','gemsTR',

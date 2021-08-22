@@ -10,7 +10,18 @@ use Views\vendor\core\Router;
 class HtmlHelper
 {
 
-    /*
+    /**
+     * Properties
+     */
+    protected $badChars = ['"', ',', '\\', '|', '<', '>'];
+    protected $activeTagName;
+    protected $activeTagAttributes = [];
+    protected $activeTagText;
+
+
+
+    /**
+     * Static Properties
      * @var string
      * содержит открывающий тег формы со всеми атрибутами
      * */
@@ -77,55 +88,115 @@ class HtmlHelper
     }
 
 
-    /*
-     * @param string $url
-     * @param bool $real - является флагом того что эта ссылка на реальный файл. Т.е будет игнорить наличие языка
-     * создает валидный урл
-     * return string
-     * */
-    public static function URL_old($url, $real = false)
+    protected function isOnlyLetters( string $str ) : bool
     {
-        $url = str_replace('\\', '/', trim($url));
-        $urlTrimmed = trim($url,'/');
-        // в константах в конце нет слэша, ставим его здесь
-        $url = "/" . $urlTrimmed;
+        // "/^[a-zA-Z0-9]+$/" - буквы и цифры
+        if ( !preg_match("/^[a-zA-Z]+$/", $str) )
+           return false;
 
-        $config = Config::getConfig();
-        $alias = $config['alias']; // array
-
-        /* проверим наличие языков */
-        $langEnable = $config['multiLanguage']['enable'];
-        //$language = AppProperties::getRout('language');
-        $lang = '';
-
-        if ( $url === '/' )
+        return true;
+    }
+    protected function checkAttrValue( string $value ) : bool
+    {
+        // проверить каждый символ поля
+        $symbols = preg_split('//u',$value,-1,PREG_SPLIT_NO_EMPTY);
+        foreach ( $symbols as $symbol )
         {
-            // вставим язык по умолчанию, если он включён и его нет в строке
-            if ( $langEnable && !stristr($url, $language) && !$real ) $lang = "$language/";
-            $url = _rootDIR_HTTP_ . '/' . $lang. AppProperties::getControllerName();
-        } else {
-            /* проверим наличие алиаса в первом параметре */
-            $params = explode('/', $urlTrimmed);
-            foreach ($alias as $key => $path)
-            {
-                if ( $key == $params[0] )
-                {
-                    $params[0] = trim($path,'/');
-                    $url = "/" . implode('/', $params);
-                    break;
-                }
-            }
-            // вставим язык по умолчанию, если он включён и его нет в строке
-            if ( $langEnable && !stristr($url, $language) && !$real ) $lang = "/$language";
-            $url = _rootDIR_HTTP_ . $lang . $url;
+            if ( in_array($symbol, $this->badChars) )
+                return false;
         }
-        return $url;
+
+        return true;
+    }
+    protected function flushTagData()
+    {
+        $this->activeTagName = '';
+        $this->activeTagAttributes = [];
+        $this->activeTagText = '';
     }
 
-    /*
+    /**
+     * Создадим произвольный тег
+     * @param string $name
+     * @return HtmlHelper
+     * @throws \Exception
+     */
+    public function tag( string $name ) : HtmlHelper
+    {
+        if ( !empty($this->activeTagName) )
+            throw new \Exception("Can't create multiple tags in one time in " . __CLASS__ );
+
+        if ( !trueIsset($name) )
+            throw new \Exception("Tag name can't be empty in " . __METHOD__ );
+
+        // only letters
+        if ( !$this->isOnlyLetters($name) )
+            throw new \Exception('Wrong tag name in ' . __METHOD__ );
+
+        $this->activeTagName = $name;
+        return $this;
+    }
+
+    /**
+     * Установим в тег аттрибуты
+     * @param array $attributes
+     * @return HtmlHelper
+     * @throws \Exception
+     */
+    public function setAttr( array $attributes ) : HtmlHelper
+    {
+
+        foreach ( $attributes as $attr => $value )
+        {
+            if ( !$this->checkAttrValue($attr) )
+                throw new \Exception('Wrong attribute name in ' . __METHOD__ , 500);
+
+            if ( !$this->checkAttrValue($value) )
+                throw new \Exception('Wrong attribute value in ' . __METHOD__ , 500);
+
+            $this->activeTagAttributes[] = $attr.'="'.$value.'" ';
+        }
+
+        return $this;
+    }
+
+    public function setTagText( string $text ) : HtmlHelper
+    {
+        $this->activeTagText .= $text;
+
+        return $this;
+    }
+
+    /**
+     * Завершим создание тега
+     * @return string
+     * @throws \Exception
+     */
+    public function create() : string
+    {
+        if ( empty($this->activeTagName) )
+            throw new \Exception("Have no tag names to create in " . __CLASS__ );
+
+        $tag = '<' . $this->activeTagName;
+
+        if ( count($this->activeTagAttributes) )
+            $tag .= ' ';
+        foreach ( $this->activeTagAttributes as $attrStr )
+            $tag .= $attrStr . " ";
+
+        $tag = trim($tag) . '>' . $this->activeTagText . '</' . $this->activeTagName . '>';
+
+        $this->flushTagData();
+        return $tag;
+    }
+
+    /**
      * a( $attributes = array )
      * ссылки
-     * */
+     * @param $text
+     * @param string $url
+     * @param array $attributes
+     */
     public static function a( $text, $url='', $attributes=[] )
     {
         $url = self::URL($url);
@@ -143,18 +214,20 @@ class HtmlHelper
         $a .= '</a>';
 
         echo $a;
-
     }
 
-    /*
-    * избавляет от дублирования кода
-    * */
-    public static function drawAttributes($attributes) {
+
+    /**
+     * избавляет от дублирования кода
+     * @param array $attributes
+     * @return string
+     */
+    public static function drawAttributes(array $attributes) {
         $attribStr = '';
+
         if ( !empty($attributes) ) {
-            foreach ( $attributes as $attr => $val ) {
+            foreach ( $attributes as $attr => $val )
                 $attribStr .= $attr.'="'.$val.'" ';
-            }
         }
         return $attribStr;
     }
@@ -202,6 +275,7 @@ class HtmlHelper
         ob_start();
         return new ActiveForm();
     }
+
     protected static function openFormTag()
     {
         $form = '<form ' . 'action="'.self::$action.'" ' . 'method="'.self::$method.'" ' . 'enctype="'. self::$enctype .'" ' . self::$attributes. '>';
@@ -233,5 +307,6 @@ class HtmlHelper
         echo $inpt_csrf_;
         echo '</form>';
     }
+
 
 }

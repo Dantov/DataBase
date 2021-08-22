@@ -1453,3 +1453,9 @@ body {
 	border: 0!important;
 	/*border-bottom: #4b4b4b 1px solid!important;*/
 }
+
+
+.badge-mw-complect {
+	font-size: small!important;
+	background-color: #5b5f4f;!important;
+}

@@ -110,8 +110,9 @@ class Model
 
     /**
      * @param string $sqlStr
-     * @param string $field
+     *
      * поле, элемент в массиве который надо венуть
+     * @param string $field
      * @return array|mixed
      * @throws \Exception
      */

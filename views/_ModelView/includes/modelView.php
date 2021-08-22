@@ -84,7 +84,7 @@ $isView = true;
                     <div class="panel-heading <?=$stat_class;?> cursorArrow mb-2" title="<?=$stat_title;?>"><span class="<?=$stat_glyphi?>"></span> <?=$stat_name;?><span title="Дата последнего изменения статуса"><?=$stat_date?" - " . $stat_date:''?></span></div>
                     <ul class="list-group">
                         <li class="list-group-item">
-                            <span class="badge badge-lg" id="modelType"><?=$row['model_type']?></span>
+                            <span class="badge badge-lg" style="background-color: #a28d1a!important;" id="modelType"><?=$row['model_type']?></span>
                             <?php if (isset($row['vendor_code']) && !empty($row['vendor_code'])): ?>
                                 <span class="badge badge-lg cursorPointer" id="articl" title="Скопировать" onclick="copyInnerHTMLToClipboard(this)"><?=$row['vendor_code']?></span>
                             <?php endif; ?>
@@ -93,7 +93,7 @@ $isView = true;
                         </li>
                         <li class="list-group-item">
                             <?php foreach ( isset($coll_id)?$coll_id:[] as $coll ) : ?>
-                                <span class="badge badge-lg" style="margin-bottom:2px;"><i><a style="color:white;" href="/main/?coll_show=<?=$coll['id']?>" id="collection"><?=$coll['name']?></a></i></span>
+                                <span class="badge badge-lg" style="margin-bottom:2px; background-color: #41aa76!important;"><i><a style="color:white;" href="/main/?coll_show=<?=$coll['id']?>" id="collection"><?=$coll['name']?></a></i></span>
                             <?php endforeach;?>
                             <i class="fas fa-gem"></i> Коллекции:
 							<div class="clearfix"></div>
@@ -101,7 +101,7 @@ $isView = true;
                         <?php if ( !empty($complectes) ): ?>
                             <li class="list-group-item" id="complects">
                                 <?php foreach ($complectes as $complect) : ?>
-                                <span class="badge badge-lg">
+                                <span class="badge badge-lg" style="background-color: #4eb5b2!important;font-size: small!important;">
                                     <a style="color:white!important;" imgtoshow="<?= $complect['img_name'] ?>" href="/model-view/?id=<?=$complect['pos_id']?>"><?=$complect['model_type']?></a>
                                 </span>
                                 <?php endforeach;?>
