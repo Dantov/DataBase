@@ -5,6 +5,7 @@
  */
 
 namespace Views\vendor\core;
+use Views\vendor\core\db\BaseSQL;
 use Views\vendor\core\db\Database;
 
 /**
@@ -12,31 +13,36 @@ use Views\vendor\core\db\Database;
  * Базовый класс для манипуляций с БД
  * @package Views\vendor\core
  */
-class Model
+class Model extends BaseSQL
 {
 
-    public static $connectObj;
-    public $connection;
+    /**
+     * @var Database
+     */
+    protected $dataBase;
+
 
     /**
      * @param array $dbConfig
      * @return \mysqli
      * @throws \Exception
      */
-    public function connectDB( array $dbConfig ) : \mysqli
+    public function connectDB( array $dbConfig=[] ) : \mysqli
     {
-        //if ( is_object($this->connection) ) return $this->connection;
         if ( $this->connection instanceof \mysqli )
             return $this->connection;
 
-        return $this->connection = self::$connectObj = (Database::instance($dbConfig))->getConnection();
+        $this->dataBase = Database::instance($dbConfig);
+        return $this->connection = self::$connectObj = $this->dataBase->getConnection();
     }
+
     /**
      * return bool
      * @throws \Exception
      */
     public function closeDB() : bool
     {
+        $this->dataBase->close();
         return false;
     }
 
@@ -63,33 +69,6 @@ class Model
         return false;
     }
 
-    /**
-     * @param $sqlStr
-     * @return bool|\mysqli_result
-     * @throws \Exception
-     */
-    public function baseSql(string $sqlStr)
-    {
-        if ( empty($sqlStr) ) throw new \Exception('Query string not valid!', 555);
-        $query = mysqli_query( $this->connection, $sqlStr );
-        if ( !$query )
-            throw new \Exception("Error in baseSql() --!! $sqlStr !!-- " . mysqli_error($this->connection), mysqli_errno($this->connection));
-
-        return $query;
-    }
-
-    /**
-     * @param $sqlStr
-     * @return bool
-     * @throws \Exception
-     */
-    public function sql($sqlStr)
-    {
-        $query = $this->baseSql( $sqlStr );
-        if ( !$query ) throw new \Exception(__METHOD__ . " Error: " . mysqli_error($this->connection), mysqli_errno($this->connection));
-
-        return $this->connection->insert_id ? $this->connection->insert_id : -1;
-    }
 
     /**
      * @param $sqlStr
@@ -139,24 +118,6 @@ class Model
         return [];
     }
 
-    /**
-     * @param $tableName
-     * @return array|bool
-     * @throws \Exception
-     */
-    public function getTableSchema( string $tableName )
-    {
-        if ( empty($tableName) ) throw new \Exception('Table name not valid! In ' . __METHOD__, 555);
-
-        $query = $this->baseSql('DESCRIBE ' . $tableName);
-        if ( !$query ) return [ 'error' => mysqli_error($this->connection) ];
-
-        $result = [];
-
-        while($row = mysqli_fetch_assoc($query)) $result[] = $row['Field'];
-
-        return $result;
-    }
 
     /**
      * @param string $tableName

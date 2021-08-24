@@ -4,7 +4,6 @@ use Views\vendor\libs\classes\AppCodes;
 
 
 /**
- * Class Database
  * Базовый класс БД
  * соединяет, разъединяет, проверяет подключение.
  * @package Views\vendor\core\db
@@ -63,7 +62,7 @@ class Database
      */
     public static function instance( array $dbConfig = [] ) : Database
     {
-        if ( !is_object(self::$instance) )
+        if ( !is_object(self::$instance) || !(self::$instance instanceof Database) )
         {
             if ( empty($dbConfig) ) {
                 if ( _DEV_MODE_ )

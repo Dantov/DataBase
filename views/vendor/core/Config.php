@@ -39,7 +39,7 @@ class Config
      * @return array|mixed
      * @throws \Exception
      */
-    public static function get(string $key='')
+    public static function get( string $key='')
     {
         if ( !empty($key) )
         {

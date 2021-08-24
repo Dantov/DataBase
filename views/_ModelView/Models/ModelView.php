@@ -44,8 +44,12 @@ class ModelView extends General {
      */
     public function dataQuery()
     {
+
+
 		$this->row  = $this->findOne( " SELECT * FROM stock    WHERE     id='$this->id' ");
 		$this->img  = $this->findAsArray( " SELECT * FROM images   WHERE pos_id='$this->id' ");
+
+
         $this->gems_Query  = mysqli_query($this->connection, " SELECT * FROM gems      WHERE pos_id='$this->id' ");
         $this->dopVc_Query = mysqli_query($this->connection, " SELECT * FROM vc_links  WHERE pos_id='$this->id' ");
         $this->stl_Query   = mysqli_query($this->connection, " SELECT * FROM stl_files WHERE pos_id='$this->id' ");
