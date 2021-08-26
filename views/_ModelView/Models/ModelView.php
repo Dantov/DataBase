@@ -118,7 +118,8 @@ class ModelView extends General {
         if ( !empty( $this->row['vendor_code'] ) ) $vc = "OR vc_3dnum LIKE '%{$this->row['vendor_code']}%'";
 
         $sql = " SELECT s.id, s.number_3d, s.vendor_code, s.model_type FROM stock as s WHERE s.id IN
-                  ( SELECT pos_id FROM vc_links WHERE vc_3dnum LIKE '%{$this->number_3d}%' $vc ) AND s.id <> {$this->row['id']}";
+                  ( SELECT pos_id FROM vc_links WHERE vc_3dnum LIKE '%{$this->number_3d}%' $vc ) 
+                  AND s.id <> {$this->row['id']}";
         return $this->findAsArray( $sql );
     }
 

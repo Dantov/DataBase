@@ -1,7 +1,6 @@
 <?php
 
 namespace Views\vendor\core\db;
-use Views\vendor\core\Config;
 
 
 /**

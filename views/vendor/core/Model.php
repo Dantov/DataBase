@@ -97,7 +97,8 @@ class Model extends BaseSQL
      */
     public function findOne(string $sqlStr, string $field = '')
     {
-        if ( !is_string($sqlStr) || empty($sqlStr) ) throw new \Exception('Query string not valid!', 555);
+        if ( !is_string($sqlStr) || empty($sqlStr) )
+            throw new \Exception('Query string not valid!', 555);
 
         $result = [];
 

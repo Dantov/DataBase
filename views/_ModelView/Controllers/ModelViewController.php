@@ -1,14 +1,11 @@
 <?php
 namespace Views\_ModelView\Controllers;
 
-use Views\_AddEdit\Models\ImageConverter;
 use Views\_SaveModel\Models\HandlerPrices;
 use Views\_Globals\Models\PushNotice;
 use Views\_Globals\Models\User;
 use Views\_ModelView\Models\{ModelView,DocumentPDF};
 use Views\_Globals\Controllers\GeneralController;
-use Views\vendor\core\db\QueryBuilder;
-use Views\vendor\core\HtmlHelper;
 use Views\vendor\libs\classes\AppCodes;
 
 
@@ -153,12 +150,12 @@ class ModelViewController extends GeneralController
         $this->includeJSFile('imageViewer.js', ['timestamp'] );
 
         $imgEncode = json_encode($images,JSON_UNESCAPED_UNICODE);
-        $js = <<<JS
+        $imgJs = <<<JS
         window.addEventListener('load',function() {
           new ImageViewer($imgEncode).init();
         }, false);
 JS;
-        $this->includeJS($js);
+        $this->includeJS($imgJs);
 
         $this->includePHPFile('imageWrapper.php');
         $this->includePHPFile('progressModal.php','','',_globDIR_.'includes/');
@@ -170,45 +167,6 @@ JS;
             $this->includePHPFile('approve_modal.php');
             $this->includeJSFile('approveBtns.js',['defer','timestamp']);
         }
-
-
-        /**  test area  **/
-        $qb = new QueryBuilder();
-        $qb->registerTable('stock');
-
-        $stock = $qb->stock??'';
-
-
-        //debug($stock->select(['id']),"Stock");
-        $res = $stock->select(['id','model_type','number_3d'])->where(['id','<',50])->exe();
-        debug($stock->getStatementQuery());
-        debug($res,'$res');
-
-//      debug($qb->getTables(),"All", 1);
-
-
-        /*
-        $stock = $qb->stock;
-
-        // строка запроса
-        $stock->select(['number_3d','id','model_type'])->where('a','>','b')->and('b','<','4')->orderBy('model_type')->limit(200)->build();
-
-        // одна запись
-        $stock->select(['number_3d','id','model_type'])->where('a','>','b')->and('b','<','4')->orderBy('model_type')->limit(200)->findOne();
-
-        // массив
-        $stock->select(['number_3d','id','model_type'])->where('a','>','b')->and('b','<','4')->orderBy('model_type')->limit(200)->findAsArray();
-
-        $this->row  = $queryBuilder->findOne( " SELECT * FROM stock    WHERE     id='$this->id' ");
-        $this->img  = $this->findAsArray( " SELECT * FROM images   WHERE pos_id='$this->id' ");
-        */
-
-
-        //$testform1 = $stock->findAll()->where(['id','>',70],['email','like','dant'])->with('files')->orderby('name')->limit(2)->go();
-        //$testform1 = $stock->findAll()->limit(1)->go();
-        //$testform1 = $stock->findOne()->where(['id','<',72])->with('files')->go();
-
-        /**  // test area  **/
 
         $compacted = compact([
             'id','row','coll_id','getStl','button3D','dopBottomScripts','complectes','images','mainImg','setPrevImg', 'labels', 'str_mat','str_Covering','gemsTR',

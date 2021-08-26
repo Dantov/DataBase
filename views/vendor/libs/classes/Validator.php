@@ -21,6 +21,12 @@ class Validator
     protected $badChars = ['\'', '.', ',', '\\', '/', '"', '%','&','?','*','|','^', '<', '>', ':',';','`'];
 
     /**
+     * Table name bad chars
+     * @var array
+     */
+    private $tnbc = ['\'','"', ',', '\\','/', '|', '<', '>','+','-','?','&'];
+
+    /**
      * Validator constructor.
      * @throws \Exception
      */
@@ -419,6 +425,13 @@ class Validator
 
     }
 
+    protected function baseValidate( string $str ) : string
+    {
+        $str = trim($str);
+        $str = strip_tags($str);
+        return mysqli_real_escape_string($this->connection, $str);
+    }
+
     /**
      * @param string $fieldName
      * @param string $fieldValue
@@ -428,9 +441,7 @@ class Validator
      */
     public function validateField( string $fieldName, string $fieldValue, array $rules = [] )
     {
-        $fieldValue = trim($fieldValue);
-        $fieldValue = strip_tags($fieldValue);
-        $fieldValue = mysqli_real_escape_string($this->connection, $fieldValue);
+        $fieldValue = $this->baseValidate($fieldValue);
 
         if ( empty($rules) )
             $rules = $this->fieldRules($fieldName);
@@ -514,6 +525,22 @@ class Validator
     {
         self::$lastError = $this->rulesErrorText($rule, $ruleName, $value);
         self::$errors[] = self::$lastError;
+    }
+
+
+    public function validateTableName( string $tName ) : bool
+    {
+        $tName = $this->baseValidate($tName);
+
+        // проверить каждый символ поля
+        $symbols = preg_split('//u',$tName,-1,PREG_SPLIT_NO_EMPTY);
+        foreach ( $symbols as $symbol )
+        {
+            if ( in_array($symbol, $this->tnbc) )
+                return false;
+        }
+
+        return true;
     }
 
 }
