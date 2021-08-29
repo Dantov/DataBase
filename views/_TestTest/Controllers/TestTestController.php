@@ -39,34 +39,39 @@ class TestTestController extends GeneralController
     {
         $hello = "Preview Test Area!";
 
+        $thisID = 2145;
+        $number_3d = '0008000';
+
+
 
         $aq = new ActiveQuery();
-        $aq->registerTable('stock');
-        $aq->registerTable('images');
-
-        $images = $aq->images??'';
-        $images->alias = 'img';
-        $stock = $aq->stock??'';
-        $stock->alias = 'st';
-
-        $red = $aq->link(['images'=>'pos_id'], ['stock'=>'id']);
-
-
-        //debug($red,'$red',1);
-
-        $res = $stock->select(['id','model_type','number_3d','model_weight'])
-
-                        ->join($images,['img_name','main'],'=') //
-
-                        ->where('model_type','=','Кольцо')
-                        ->and(['model_weight','>',5])
-                        ->or(['model_type','LIKE','%Серьги%'])
-                        ->and(['model_weight','IN','5,6,7'])
-                        ->limit(20)->orderBy('model_type','ASC')->asArray()
-            //->build();
+        $stock = $aq->registerTable('stock','st');
+        $images = $aq->registerTable(['images'=>'img']);
+        $aq->link(['id'=>$stock], '=' ,['pos_id'=>$images]);
+        $res = $stock
+            ->select(['id','model_type','number_3d'])
+            ->join($images,['pos_id','img_name','main','sketch'])
+            //->joinAnd($images,'sketch', '=', 1)
+            ->where('number_3d','=',$number_3d)->and('id','<>',$thisID)
+            ->asArray()
             ->exe();
 
-        $build = $stock->buildedQuery;
+
+
+
+        $sql = " SELECT st.id, st.model_type, st.number_3d, img.pos_id, img.img_name, img.main, img.sketch
+				FROM stock st 
+					LEFT JOIN images img ON ( st.id = img.pos_id ) AND img.sketch=1
+				WHERE st.number_3d='{$number_3d}' 
+				AND st.id<>'{$thisID}' ";
+        $old_style  = $aq->findAsArray( $sql );
+
+
+
+
+
+        //$build = $stock->buildedQuery;
+        //$where = $stock->statement_WHERE;
 
         //        $stock->setFieldsAlias([
 //            'model_type'=>'ModType',
@@ -75,14 +80,6 @@ class TestTestController extends GeneralController
         /*
         $stock = $qb->stock;
 
-        // строка запроса
-        $stock->select(['number_3d','id','model_type'])->where('a','>','b')->and('b','<','4')->orderBy('model_type')->limit(200)->build();
-
-        // одна запись
-        $stock->select(['number_3d','id','model_type'])->where('a','>','b')->and('b','<','4')->orderBy('model_type')->limit(200)->findOne();
-
-        // массив
-        $stock->select(['number_3d','id','model_type'])->where('a','>','b')->and('b','<','4')->orderBy('model_type')->limit(200)->findAsArray();
 
         $this->row  = $queryBuilder->findOne( " SELECT * FROM stock    WHERE     id='$this->id' ");
         $this->img  = $this->findAsArray( " SELECT * FROM images   WHERE pos_id='$this->id' ");
@@ -94,7 +91,7 @@ class TestTestController extends GeneralController
         //$testform1 = $stock->findOne()->where(['id','<',72])->with('files')->go();
 
 
-        $compacted = compact(['hello','res', 'build']);
+        $compacted = compact(['hello','res', 'build', 'where','old_style']);
         return $this->render('test', $compacted);
     }
 

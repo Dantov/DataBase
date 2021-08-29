@@ -23,7 +23,7 @@ class BaseSQL
         if ( empty($sqlStr) ) throw new \Exception('Query string not valid!', 555);
         $query = mysqli_query( $this->connection, $sqlStr );
         if ( !$query )
-            throw new \Exception("Error in baseSql() --!! $sqlStr !!-- " . mysqli_error($this->connection), mysqli_errno($this->connection));
+            throw new \Error("Error in baseSql() --!! $sqlStr !!-- " . mysqli_error($this->connection), mysqli_errno($this->connection));
 
         return $query;
     }
@@ -36,7 +36,7 @@ class BaseSQL
     public function sql($sqlStr)
     {
         $query = $this->baseSql( $sqlStr );
-        if ( !$query ) throw new \Exception(__METHOD__ . " Error: " . mysqli_error($this->connection), mysqli_errno($this->connection));
+        if ( !$query ) throw new \Error(__METHOD__ . " Error: " . mysqli_error($this->connection), mysqli_errno($this->connection));
 
         return $this->connection->insert_id ? $this->connection->insert_id : -1;
     }

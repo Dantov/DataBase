@@ -54,10 +54,11 @@ class Table extends QueryBuilder
     }
 
 
-    public function link( string $tName, string $tField, string $tSelfField )
+    public function link( string $tName, string $tField, string $operator, string $tSelfField )
     {
         $this->linkedTables[$tName] = [];
         $this->linkedTables[$tName][$tSelfField] = $tField;
+        $this->linkedTables[$tName]['operator'] = $operator;
 
         return $this->linkedTables;
     }

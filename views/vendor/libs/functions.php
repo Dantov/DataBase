@@ -80,6 +80,19 @@ if (!function_exists('array_key_first'))
         return null;
     }
 }
+
+if (!function_exists('array_key_last')) {
+// вернет ключ последенго элемента массива
+    function array_key_last(array $arr)
+    {
+        if (empty($arr))
+            return '';
+
+        $keys = array_keys($arr);
+        return $keys[count($keys) - 1];
+    }
+}
+
 function validateDate($date, $format = 'Y-m-d') //Y-m-d H:i:s
 {
     $d = DateTime::createFromFormat($format, $date);

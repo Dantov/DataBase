@@ -3,6 +3,7 @@ namespace Views\_ModelView\Models;
 use Views\_Globals\Models\General;
 use Views\_Globals\Models\User;
 use Views\_SaveModel\Models\ImageConverter;
+use Views\vendor\core\ActiveQuery;
 use Views\vendor\core\HtmlHelper;
 
 
@@ -114,13 +115,40 @@ class ModelView extends General {
      */
     public function usedInModels()
     {
+        /*
         $vc = "";
-        if ( !empty( $this->row['vendor_code'] ) ) $vc = "OR vc_3dnum LIKE '%{$this->row['vendor_code']}%'";
+        if ( !empty( $this->row['vendor_code'] ) )
+            $vc = "OR vc_3dnum LIKE '%{$this->row['vendor_code']}%'";
 
         $sql = " SELECT s.id, s.number_3d, s.vendor_code, s.model_type FROM stock as s WHERE s.id IN
                   ( SELECT pos_id FROM vc_links WHERE vc_3dnum LIKE '%{$this->number_3d}%' $vc ) 
                   AND s.id <> {$this->row['id']}";
-        return $this->findAsArray( $sql );
+        */
+
+        $aq = new ActiveQuery();
+        $stock = $aq->registerTable('stock','s');
+        $vc_links = $aq->registerTable(['vc_links'=>'vcl']);
+        $images = $aq->registerTable(['images'=>'img']);
+
+        $vclBuild = $vc_links->select(['pos_id'])->where('vc_3dnum','LIKE',"%{$this->number_3d}%");
+        if ( !empty( $this->row['vendor_code'] ) )
+            $vclBuild->or('vc_3dnum','LIKE',"%{$this->row['vendor_code']}%");
+
+        $vclBuild = $vclBuild->build();
+
+        $aq->link(['id'=>$stock],'=',['pos_id'=>$images]);
+        $res = $stock
+            ->select(['id','model_type','number_3d','vendor_code'])
+            ->join($images,['img_name'])
+            ->joinAnd($images,'main', '=', 1)
+            ->where('id','IN',$vclBuild)->and('id','<>',$this->row['id'])
+            ->asArray()
+            ->exe();
+
+        //debug($res,'$res',1);
+
+        return $res;
+        //return $this->findAsArray( $sql );
     }
 
     /**
@@ -284,7 +312,8 @@ class ModelView extends General {
         $html = new HtmlHelper();
         return $html->tag("a")
                     ->setAttr(['imgtoshow'=>$fileImg, 'href'=>HtmlHelper::URL('/',['id'=>$id])]) //_rootDIR_HTTP_ .'model-view/?id='.$id
-                    ->setTagText($vc_3dNum)->create();
+                    ->setTagText($vc_3dNum)
+                    ->create();
 
         //return '<a imgtoshow="'.$fileImg.'" href="'. _rootDIR_HTTP_ .'model-view/?id='.$id.'">'.$vc_3dnum.'</a>';
     }

@@ -65,40 +65,48 @@ class ActiveQuery extends Model
         }
     }
 
+
     /**
      * @param $tables
-     * @return bool
+     * @param string $alias
+     * @return Table
      * @throws \Exception
      */
-    public function registerTable( $tables ) : bool
+    public function registerTable( $tables, string $alias='' ) : Table
     {
-        if ( empty($tables) )
-            return false;
 
-        if ( is_string($tables) )
+        if ( !empty($tables) && is_string($tables) )
         {
-            if ( !$this->validator->validateTableName($tables) ) return false;
+            if ( !$this->validator->validateTableName($tables) )
+                throw new \Error("Table name '" . $tables . "' not valid.", 500 );
 
             $this->tables[] = $tables;
-            $this->TABLES[$tables] = new Table( $tables );
-
-            return true;
+            $TName = new Table( $tables );
+            if ( $alias )
+                $TName->alias = $alias;
+            return $this->TABLES[$tables] = $TName;
         }
 
-        if ( is_array($tables) )
+        if ( !empty($tables) && is_array($tables) )
         {
-            foreach ( $tables as $tableName )
+            foreach ( $tables as $tableName => $alias )
             {
-                if ( !$this->validator->validateTableName($tableName) ) return false;
+                if ( !$this->validator->validateTableName($tableName) )
+                    throw new \Error("Table name '" . $tableName . "' not valid.", 500 );
 
                 $this->tables[] = $tableName;
-                $this->TABLES[$tableName] = new Table( $tableName );
+                $TName = new Table( $tableName );
+
+                $TName->alias = $alias;
+
+                $this->TABLES[$tableName] = $TName;
             }
 
-            return true;
+            // вернет последнюю добавленную табл.
+            return $this->TABLES[array_key_last($this->TABLES)];
         }
 
-        return false;
+        throw new \Error("Table name '" . $tables . "' not valid.", 500 );
     }
 
     /**
@@ -137,34 +145,40 @@ class ActiveQuery extends Model
     }
 
 
-    /**Свяжем таблицы по полям
-     * @param array $keyFirst
-     * @param array $keySecond
+    /**
+     * Свяжем таблицы по полям
+     *
+     * @param array $key_table_first ---- [ 'id'=>$stock ]
+     * @param string $operator
+     * @param array $key_table_second ---- [ 'pos_id'=>$images ]
      * @return array
      */
-    public function link( array $keyFirst, array $keySecond )
+    public function link( array $key_table_first, string $operator ,array $key_table_second )
     {
-        // проверку ключей и таблиц!!!!!!!!!!!!
 
-        $tNameFirst = array_key_first($keyFirst);
-        $tFieldFirst = $keyFirst[$tNameFirst];
+        $nameKeyFirst = array_key_first($key_table_first); // имя ключа 1
+        $tableFirst = $key_table_first[$nameKeyFirst]; // таблица 1
 
-        $tNameSecond = array_key_first($keySecond);
-        $tFieldSecond = $keySecond[$tNameSecond];
+        $nameKeySecond = array_key_first($key_table_second); // имя ключа 2
+        $tableSecond = $key_table_second[$nameKeySecond]; // таблица 2
 
-        $res = [];
+        if ( !($tableFirst instanceof Table) || !($tableSecond instanceof Table) )
+            throw new \Error("Wrong tables objects given in: " . __METHOD__, 500 );
 
-        if ( array_key_exists( $tNameFirst, $this->TABLES ) )
-        {
+        if ( !in_array( $tableFirst, $this->TABLES ) && !in_array( $tableSecond, $this->TABLES ) )
+            throw new \Error("Some tables not register in : " . __CLASS__, 500 );
 
-            $res[] = $this->TABLES[ $tNameFirst ]->link($tNameSecond, $tFieldSecond, $tFieldFirst );
-        }
+        $tNameFirst = $tableFirst->getName();
+        $tNameSecond = $tableSecond->getName();
 
+        if ( !in_array($nameKeyFirst,$tableFirst->showSchema()) )
+            throw new \Error("Table '" . $tNameFirst ."' don't contain field '" . $nameKeyFirst . "'" . __CLASS__, 500 );
 
-        if ( array_key_exists( $tNameSecond, $this->TABLES ) )
-        {
-            $res[] = $this->TABLES[ $tNameSecond ]->link($tNameFirst, $tFieldFirst, $tFieldSecond );
-        }
+        if ( !in_array($nameKeySecond,$tableSecond->showSchema()) )
+            throw new \Error("Table '" . $tNameSecond ."' don't contain field '" . $nameKeySecond . "'" . __CLASS__, 500 );
+
+        $res[] = $this->TABLES[ $tNameFirst ]->link($tNameSecond, $nameKeySecond, $operator, $nameKeyFirst );
+        $res[] = $this->TABLES[ $tNameSecond ]->link($tNameFirst, $nameKeyFirst, $operator, $nameKeySecond );
 
         return $res;
     }

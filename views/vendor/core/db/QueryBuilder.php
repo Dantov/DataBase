@@ -12,22 +12,26 @@ use Views\vendor\libs\classes\Validator;
 
 
 /**
+ * Сделать:
+ * 1) Назначать алисы искомым полям
+ * 2) Добавить в QueryBuilder подклассы, QBWhere, QBJoin
+ * 3) Функции MySql типа DATE_FORMAT(d.date, '%d.%m.%Y') as date
+ * 4) Добавить метод with() - подставит даггые из др. табл в результирующий массив ( 2й запрос б бд )
+ * 5) в методе asArray() - сделать шруппировку данных из присоед. таблиц Join
+ *
  * Реализует общий функционал построения SQL запросов, для поиска в БД
  */
 class QueryBuilder extends Model
 {
 
     /**
-     * текущий запрос Select | Insert | Delete ...
+     * текущий запрос Select
      * @var string
      */
     protected $statement_SELECT = '';
 
     protected $statement_FROM = '';
-    /**
-     * mun3d,id,img_name ...
-     * @var array
-     */
+
     protected $statement_FIELDS = [];
     
     protected $statement_JOIN = [];
@@ -40,10 +44,14 @@ class QueryBuilder extends Model
 
     protected $statement_GROUP_BY = '';
 
-    public $buildedQuery = '';
+    protected $buildedQuery = '';
 
     protected $asIs = 'array';
     protected $asOneField = '';
+    protected $haveOR_AND = false;
+
+    protected $joinedTName = '';
+    protected $join_haveOR_AND = false;
 
     /**
      * Trusted Operators
@@ -71,6 +79,7 @@ class QueryBuilder extends Model
     }
 
 
+
     protected function currentQueryIs( bool $empty=false ) : bool
     {
 
@@ -82,6 +91,7 @@ class QueryBuilder extends Model
 
         return true;
     }
+
 
     protected function checkField( string $field ) : bool
     {
@@ -112,76 +122,6 @@ class QueryBuilder extends Model
     }
     
     
-    public function join( Table $table, array $select, string $on ) : QueryBuilder
-    {
-        $joined_TName = $table->getName();
-        $joined_TFields = $table->showSchema();
-
-        if ( !$table->alias )
-            throw new \Error("For Join operations table alias needed in " . $joined_TName, 500);
-
-        /*
-        $leftField = $on[0]??'';
-        $operator = $on[1]??'';
-        $rightField = $on[2]??'';
-        */
-
-        foreach ( $select as $fieldName )
-        {
-            if ( !in_array( $fieldName, $joined_TFields ) )
-                throw new \Error("Field " . $fieldName . " not found in table " . $joined_TName, 500);
-
-            $this->statement_FIELDS[] = $table->alias . "." . $fieldName;
-        }
-
-        $operator = $on;
-        $operator = mb_strtoupper($operator);
-        if ( !in_array($operator, $this->operators) )
-            throw new \Error("Wrong operator in " . __METHOD__, 500);
-
-
-
-        if ( !$this->linkedTables[$joined_TName] )
-            throw new \Error("Tables ". $joined_TName ." and ". $this->tableName ." need to be linked before by using ActiveQuery link() method " . __METHOD__, 500);
-
-            $joined_self_Field = array_key_first($this->linkedTables[$joined_TName]);
-            $joined_t_Field = $this->linkedTables[$joined_TName][$joined_self_Field];
-
-            $leftField = $this->alias .".". $joined_self_Field;
-            $rightField = $table->alias .".". $joined_t_Field;
-
-
-        /*
-        // Alias для левого поля
-        if ( in_array( $leftField, $joined_TFields ) )
-        {
-            $leftField = $table->alias . $leftField;
-        }
-        if ( in_array( $leftField, $this->fields ) )
-        {
-            $leftField = $this->alias . $leftField;
-        } else {
-            throw new \Error("Wrong field in ON clause " . __METHOD__, 500);
-        }
-
-        // Alias для Правого поля
-        if ( in_array( $rightField, $joined_TFields ) )
-        {
-            $rightField = $table->alias . $rightField;
-        }
-        if ( in_array( $rightField, $this->fields ) )
-        {
-            $rightField = $this->alias . $rightField;
-        } else {
-            throw new \Error("Wrong field in ON clause " . __METHOD__, 500);
-        }
-        */
-
-        $this->statement_JOIN[] = " LEFT JOIN " . $joined_TName . " as " . $table->alias . " ON " . $leftField . $operator .  $rightField;
-
-        return $this;
-    }
-
 
     public function where( $statementL, string $operator='', $statementR = '', string $andStatementR = null ) : QueryBuilder
     {
@@ -210,6 +150,7 @@ class QueryBuilder extends Model
         {
             case "IN":
                 $andWhere['op'] = " " . $andWhere['op'] . " ";
+
                 if ( is_array($statementR) && !empty($statementR) )
                 {
                     $statementRStr = '';
@@ -254,17 +195,233 @@ class QueryBuilder extends Model
         return $this;
     }
 
+    public function andWhere($statementL, string $operator='', $statementR = '', string $andStatementR = null)
+    {
+        $this->statement_WHERE[] = ') AND (';
+
+        $this->haveOR_AND = true;
+
+        return $this->where($statementL,$operator,$statementR,$andStatementR);
+    }
+
+    public function orWhere($statementL, string $operator='', $statementR = '', string $andStatementR = null)
+    {
+        $this->statement_WHERE[] = ') OR (';
+
+        $this->haveOR_AND = true;
+
+        return $this->where($statementL,$operator,$statementR,$andStatementR);
+    }
+
     public function and( $statementL, string $operator='', $statementR = '', string $andStatementR = null ) : QueryBuilder
     {
-        $this->statement_WHERE[] = 'and';
+        $this->statement_WHERE[] = ' AND ';
         return $this->where($statementL,$operator,$statementR,$andStatementR);
     }
 
     public function or( $statementL, string $operator='', $statementR = '', string $andStatementR = null ) : QueryBuilder
     {
-        $this->statement_WHERE[] = 'or';
+        $this->statement_WHERE[] = ' OR ';
         return $this->where($statementL,$operator,$statementR,$andStatementR);
     }
+
+
+
+    /**
+     * JOIN CLAUSE
+     */
+
+    /**
+     * @param Table $table
+     * @param $select
+     * @return bool
+     */
+    protected function is_join_table_valid( Table $table, $select ) : bool
+    {
+        $joined_TName = $table->getName();
+        $joined_TFields = $table->showSchema();
+
+        if ( !$this->linkedTables[$joined_TName] )
+            throw new \Error("Tables ". $joined_TName ." and ". $this->tableName ." need to be linked before by using ActiveQuery link() method " . __METHOD__, 500);
+
+        if ( !$table->alias )
+            throw new \Error("For Join operations table alias needed in " . $joined_TName, 500);
+
+        if ( !is_array($select) )
+        {
+            $str = $select;
+            $select = [];
+            $select[] = $str;
+        }
+
+        foreach ( $select as $fieldName )
+            if ( !in_array( $fieldName, $joined_TFields ) )
+                throw new \Error("Field " . $fieldName . " not found in table " . $joined_TName, 500);
+
+        return true;
+    }
+
+    protected function is_on_operator_valid(string $onOperator) : bool
+    {
+        $operator = $onOperator;
+        $operator = mb_strtoupper($operator);
+        if ( !in_array($operator, $this->operators) )
+            throw new \Error("Wrong operator in " . __METHOD__, 500);
+
+        return true;
+    }
+
+    /**
+     * @param Table $table
+     * @param array $select
+     *
+     * Условный оператор по которому соединить столбцы связанных таблиц, указанных в методе ActiveQuery -> Link()
+     * @param string $onOperator
+     * @return QueryBuilder
+     */
+    public function join( Table $table, array $select ) : QueryBuilder //, string $onOperator = '='
+    {
+        $this->is_join_table_valid($table, $select);
+
+        $joined_TName = $table->getName();
+        $onOperator = $this->linkedTables[$joined_TName]['operator'];
+
+        $this->is_on_operator_valid($onOperator);
+
+        /** Условие выполнится когда стартует новый join() */
+        /** Сверки имен таблиц, если они не совпадают и открыты скобки с andON()/orON(), закроем их в рамках текущей Join табл */
+        if ( $this->joinedTName !== $joined_TName )
+            if ( $this->join_haveOR_AND )
+            {
+                $this->statement_JOIN[$this->joinedTName][] = ')';
+                $this->join_haveOR_AND = false;
+            }
+
+        /** теперь условия Join будет писать в новую табл */
+        $this->joinedTName = $joined_TName;
+
+        foreach ( $select as $fieldName )
+            $this->statement_FIELDS[] = $table->alias . "." . $fieldName;
+
+
+        $joined_self_Field = array_key_first($this->linkedTables[$joined_TName]);
+        $joined_t_Field = $this->linkedTables[$joined_TName][$joined_self_Field];
+
+        $leftField = $this->alias .".". $joined_self_Field;
+        $rightField = $table->alias .".". $joined_t_Field;
+
+        $operator = mb_strtoupper($onOperator);
+        $this->statement_JOIN[$joined_TName][] = " LEFT JOIN " . $joined_TName . " as " . $table->alias;
+        $this->statement_JOIN[$joined_TName][] = "ON";
+        $this->statement_JOIN[$joined_TName][] = $leftField . $operator .  $rightField;
+
+        return $this;
+    }
+
+    /**
+     * Просто добавит AND в условие к текущему статементу без скобок
+     * @param Table $table
+     * @param string $field
+     * @param string $onOperator
+     * @param $value
+     * @return $this
+     */
+    public function joinAnd( Table $table, string $field, string $onOperator, $value )
+    {
+        $this->is_join_table_valid($table, $field);
+        $this->is_on_operator_valid($onOperator);
+
+        $operator = mb_strtoupper($onOperator);
+
+
+        $this->statement_JOIN[$table->getName()][] = " AND " . $table->alias .".". $field . $operator . "'".$value."'";
+
+        return $this;
+    }
+
+    /**
+     * Просто добавит OR в условие к текущему статементу без скобок
+     * @param Table $table
+     * @param string $field
+     * @param string $onOperator
+     * @param $value
+     * @return $this
+     */
+    public function joinOr( Table $table, string $field, string $onOperator, $value )
+    {
+        $this->is_join_table_valid($table, $field);
+        $this->is_on_operator_valid($onOperator);
+
+        $operator = mb_strtoupper($onOperator);
+        $this->statement_JOIN[$table->getName()][] = " OR " . $table->alias .".". $field . $operator . "'".$value."'";
+
+        return $this;
+    }
+
+    /**
+     * Оборачивает с скобки текущие условия и следующие вызовы  joinAnd() и joinOr()
+     * @param Table $table
+     * @param string $field
+     * @param string $onOperator
+     * @param $value
+     * @return $this
+     */
+    public function andON( Table $table, string $field, string $onOperator, $value )
+    {
+        $this->is_join_table_valid($table, $field);
+        $this->is_on_operator_valid($onOperator);
+
+        $this->join_haveOR_AND = true;
+
+        $arrayJoinTable = &$this->statement_JOIN[$table->getName()];
+        /** Откроет скобку для первого условия ON */
+        foreach ( $arrayJoinTable as &$statement )
+        {
+            if ( $statement === 'ON' )
+                $statement = " " . $statement . ' (';
+        }
+
+        $operator = mb_strtoupper($onOperator);
+        $this->statement_JOIN[$table->getName()][] = ") AND (" . $table->alias .".". $field . $operator . "'".$value."'";
+
+        return $this;
+    }
+
+
+    /**
+     * Оборачивает с скобки текущие условия и следующие вызовы  joinAnd() и joinOr()
+     * @param Table $table
+     * @param string $field
+     * @param string $onOperator
+     * @param $value
+     * @return $this
+     */
+    public function orON( Table $table, string $field, string $onOperator, $value )
+    {
+        $this->is_join_table_valid($table, $field);
+        $this->is_on_operator_valid($onOperator);
+
+        $this->join_haveOR_AND = true;
+
+        $arrayJoinTable = &$this->statement_JOIN[$table->getName()];
+        /** Откроет скобку для первого условия ON */
+        foreach ( $arrayJoinTable as &$statement )
+        {
+            if ( $statement === 'ON' )
+                $statement = " " . $statement . ' (';
+        }
+
+        $operator = mb_strtoupper($onOperator);
+        $this->statement_JOIN[$table->getName()][] = ") OR (" . $table->alias .".". $field . $operator . "'".$value."'";
+
+        return $this;
+    }
+
+
+
+    /**
+     * REST
+     */
 
     /**
      * @param int $count
@@ -292,7 +449,7 @@ class QueryBuilder extends Model
         if ( !in_array($direct, $trBy) )
             throw new \Error("Order BY direction can be DESC or ASC only! ", 500);
 
-        $this->statement_ORDER_BY = "ORDER BY " . $field . " " . $direct;
+        $this->statement_ORDER_BY = "ORDER BY " . $this->alias . '.' . $field . " " . $direct;
 
         return $this;
     }
@@ -327,60 +484,70 @@ class QueryBuilder extends Model
     {
         $BuildedQuery = $this->statement_SELECT . " ";
 
+        /**  FIELDS  */
         $statement_FIELDS = '';
         foreach ( $this->statement_FIELDS as $statementField )
             $statement_FIELDS .= $statementField . ", ";
-
         $statement_FIELDS = trim($statement_FIELDS,', ');
-
         $BuildedQuery .= $statement_FIELDS ." " . $this->statement_FROM;
 
-        // JOIN CLAUSE
+
+        /**  JOIN CLAUSE */
         if ( !empty($this->statement_JOIN) )
         {
-            foreach ( $this->statement_JOIN as $statementJoin )
-                $BuildedQuery .= $statementJoin;
+            //debug($this->statement_JOIN,"join");
+
+            $joinStr = '';
+            foreach ( $this->statement_JOIN as $tableName => $statementsJoin )
+            {
+                foreach ( $statementsJoin as $statementJoin )
+                {
+                    if ( $statementJoin === 'ON' )
+                    {
+                        // ни разу не были вызваны orON() / andON()
+                        $joinStr .= " " . $statementJoin . " ";
+                        continue;
+                    }
+                    $joinStr .= $statementJoin;
+                }
+            }
+
+            // ставит в конец ) если были вызваны orON() / andON()
+            $joinStr .= $this->join_haveOR_AND ? ")" : "";
+
+            $BuildedQuery .= $joinStr;
+            //debug($joinStr,"BuildedQuery",1);
         }
 
-        // WHERE CLAUSE
+
+        /** WHERE CLAUSE */
         if ( !empty($this->statement_WHERE) )
         {
-            //debug($this->statement_WHERE,"where");
             $whereStr = '';
-            $haveOR = false;
             foreach ( $this->statement_WHERE as $statWhere )
             {
-                if ( $statWhere === 'and' )
-                {
-                    $whereStr .= " AND ";
-                }
-
-                if ( $statWhere === 'or' )
-                {
-                    $haveOR = true;
-                    $whereStr .= ") OR (";
-                }
-
                 if ( is_array($statWhere) )
                 {
                     $whereStr .= ($this->alias ? $this->alias . "." :"") . $statWhere['left'] . $statWhere['op'] . $statWhere['right'];
+                } else {
+                    $whereStr .= $statWhere;
                 }
 
             }
-            $whereStr .= $haveOR ?  ")" :"";
-            $BuildedQuery .= " WHERE " . ($haveOR ?  "(" :"") . $whereStr;
-
-
-            //ORDER BY
-            if ( $this->statement_ORDER_BY )
-                $BuildedQuery .= " " . $this->statement_ORDER_BY;
-            //GROUP BY
-            if ( $this->statement_GROUP_BY )
-                $BuildedQuery .= " " . $this->statement_GROUP_BY;
-            //LIMIT
-            if ( $this->statement_LIMIT )
-                $BuildedQuery .= " " . $this->statement_LIMIT;
+            $BuildedQuery .= ' WHERE '.($this->haveOR_AND ?  "(" :"") . $whereStr . ($this->haveOR_AND ?  ")" :"");
         }
+
+
+        //ORDER BY
+        if ( $this->statement_ORDER_BY )
+            $BuildedQuery .= " " . $this->statement_ORDER_BY;
+        //GROUP BY
+        if ( $this->statement_GROUP_BY )
+            $BuildedQuery .= " " . $this->statement_GROUP_BY;
+        //LIMIT
+        if ( $this->statement_LIMIT )
+            $BuildedQuery .= " " . $this->statement_LIMIT;
+
 
         return $this->buildedQuery = $BuildedQuery;
     }
@@ -402,14 +569,16 @@ class QueryBuilder extends Model
             case "array":
                 return $this->findAsArray($this->buildedQuery);
                 break;
-            case "single":
 
-                $res = $this->findOne($this->buildedQuery,  $this->asOneField);
-                return $res;
+            case "single":
+                return $this->findOne($this->buildedQuery,  $this->asOneField);
+                break;
+
+            default :
+                return $this->baseSql( $this->buildedQuery );
                 break;
         }
-
-        return false;
+        //return false;
     }
 
 }
