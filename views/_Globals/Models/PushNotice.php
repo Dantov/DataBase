@@ -347,13 +347,18 @@ class PushNotice extends General
 	
 	
 	/**  ДЛЯ 3Д НОТАЙСОВ  */
-	/**
+    /**
+     * @param bool $all
      * @return mixed
      * @throws \Exception
      */
-    public function getNew3DNoticesData()
+    public function getNew3DNoticesData( bool $all = false )
     {
         $surname = User::getSurname();
+
+        $addQuery = "";
+        if ( !$all )
+            $addQuery = "s.modeller3D LIKE '%$surname%' AND";
 
         $sql = "SELECT s.id,s.number_3d,s.vendor_code,s.model_type, s.description, 
                        i.img_name,
@@ -361,7 +366,7 @@ class PushNotice extends General
                 FROM stock as s
                   LEFT JOIN images as i ON i.pos_id = s.id
                   LEFT JOIN service_arr as sr ON sr.id = s.status
-                WHERE s.modeller3D LIKE '%$surname%' AND (s.status=89 OR s.status=8) GROUP BY s.id";
+                WHERE $addQuery (s.status=89 OR s.status=8) GROUP BY s.id";
 
         $repNotices = $this->findAsArray($sql);
         foreach ( $repNotices as &$repNotice )

@@ -187,6 +187,10 @@ class GlobalsController extends Controller
      */
     protected function actionNew3DNotices()
     {
+        // для Богдана
+        if ( User::getAccess() == 10 )
+            return (new PushNotice())->getNew3DNoticesData(true);
+
         return (new PushNotice())->getNew3DNoticesData();
     }
     
