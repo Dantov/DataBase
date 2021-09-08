@@ -680,7 +680,6 @@ class Handler extends General
             }
         }
         $zip->close();
-        foreach ( $fileNames as $fileName ) if ( file_exists( $path.$fileName ) ) unlink($path.$fileName);
 
         $zipFile = $path.$zipArch['zipName'];
 
@@ -690,6 +689,13 @@ class Handler extends General
             $query = $this->baseSql(" INSERT INTO rhino_files (name, size, pos_id) VALUES ('{$zipArch['zipName']}', '$zipArchSize','$this->id') ");
             if ( !$query ) throw new \Exception(__METHOD__ . 'Error :' . mysqli_error($this->connection),412);
         }
+
+        // иногда выбивает ошибку: unlink(...) Resource temporarily unavailable
+        // поставим задержку что бы успел обработать файл
+        sleep(1);
+        foreach ( $fileNames as $fileName )
+            if ( file_exists( $path.$fileName ) ) unlink($path.$fileName);
+
         return true;
     }
 
