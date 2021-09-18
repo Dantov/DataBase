@@ -540,6 +540,7 @@ class AddEdit extends General
             if ( !file_exists(_stockDIR_.$imgPath.$imgName) )
             {
                 $respArr[$i]['imgPath'] = _stockDIR_HTTP_."default.jpg";
+                //$respArr[$i]['imgPrevPath'] = _stockDIR_HTTP_."default.jpg";
             } else {
                 // Файл есть!
                 $respArr[$i]['imgPath'] = _stockDIR_HTTP_.$imgPath.$imgName;

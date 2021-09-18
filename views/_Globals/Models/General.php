@@ -783,10 +783,10 @@ class General extends Model
      */
     public function origin_preview_ImgSelect( array $image ) : string
     {
-        if  ( !is_array($image) || !isset($image['imgPrevPath']) || !isset($image['imgPath']) )
+        if  ( !is_array($image) || !isset($image['imgPath']) )
             return '';
 
-        if ( empty($image['imgPrevPath']) )
+        if ( !isset($image['imgPrevPath']) || empty($image['imgPrevPath']) )
             return $image['imgPath'];
 
         return $image['imgPrevPath'];

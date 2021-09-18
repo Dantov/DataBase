@@ -301,6 +301,8 @@ $permittedFields = User::permissions();
                 </div>
 
 
+                <!-- кнопка заглушка ( при нажатии Enter на любом поле пытается нажать первую свободную кнопку - типа отправляет форму ) -->
+                <button class="hidden"></button>
                 <!-- Примечания / Описания -->
                 <?php if ( $permittedFields['description'] ): ?>
                     <div class="col-xs-12">
@@ -1147,5 +1149,4 @@ $permittedFields = User::permissions();
 </form>
 
 <img src="" id="imageBoxPrev" width="200px" class="img-thumbnail hidden"/>
-
 <?php $switchTableRow = 'notes'; require _viewsDIR_."_AddEdit/includes/protoRows.php";?>

@@ -639,9 +639,6 @@ class Handler extends General
     {
         $this->closeZip( $zipData['zip'] );
 
-        foreach ( $stlFileNames as $stlFN )
-            Files::instance()->delete($stlFN);
-
         if ( count($stlFileNames) )
         {
             $sql = "INSERT INTO stl_files (stl_name, pos_id) 
@@ -649,6 +646,12 @@ class Handler extends General
             if ( $this->sql($sql) === -1 )
                 throw new \Exception('Error adding STL files',2);
         }
+
+        // иногда выбивает ошибку: unlink(...) Resource temporarily unavailable
+        // поставим задержку что бы успел обработать файл
+        sleep(1);
+        foreach ( $stlFileNames as $stlFN )
+            Files::instance()->delete($stlFN);
     }
 
 
