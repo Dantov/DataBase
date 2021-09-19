@@ -92,6 +92,7 @@ class ModelViewController extends GeneralController
     {
         $id = $this->stockID;
         $modelView = new ModelView($id);
+
         if (!$modelView->checkID($id)) $this->redirect('/');
 
         $row = $modelView->row;
@@ -102,7 +103,7 @@ class ModelViewController extends GeneralController
         $button3D = '';
         if ( $stl_file = $modelView->getStl() )
         {
-            $button3D = $stl_file['stl_name'];
+            $button3D = $stl_file;
             // ПРИМЕР!!
             //$path = _webDIR_HTTP_ . 'js_lib/';
             //$this->includeJSFile( 'three.min.js', ['path'=> $path] );
@@ -110,6 +111,7 @@ class ModelViewController extends GeneralController
         }
         $ai_file = $modelView->getAi();
         $rhino_file = $modelView->get3dm();
+
 
         $matsCovers = $modelView->getModelMaterials();
         $complectes = $modelView->getComplectes();

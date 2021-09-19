@@ -108,7 +108,7 @@ define('_NUMBERS_', '0123456789' );
 define('_SYMBOLS_', '!@#№$%^&?_=+,-^:;{}[]' );
 define('_CHARS_RU_', 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'. strtoupper('абвгдеёжзийклмнопрстуфхцчшщъыьэюя') );
 define('_CHARS_EN_', 'abcdefghijklmnopqrstuvwxyz'. strtoupper('abcdefghijklmnopqrstuvwxyz') );
-/*
+/**
  * генератор случайной строки
  * @var string $language - ru|en
  * @var number $length - желаемая длинна
@@ -118,21 +118,13 @@ define('_CHARS_EN_', 'abcdefghijklmnopqrstuvwxyz'. strtoupper('abcdefghijklmnopq
  * symbols - буквы и цифры;
  * chars - только буквы;
  * numbers - только цифры;
- * return string
+ * @return string
  */
 function randomStringChars( $length=null, $language='en', $method='chars' )
 {
     $mixedCharsEn = '';
     $mixedCharsRu = '';
 
-    /* если в параметрах передали только число - то это будет длинна строки */
-    /*
-    if ( func_num_args() == 1 )
-    {
-        $arg = func_get_args();
-        if ( is_int($arg[0]) ) $length = $arg[0];
-    }
-    */
     if ( $length === null ) $length = mt_rand(1,10);
 
     switch ($method)
@@ -176,7 +168,7 @@ function randomStringChars( $length=null, $language='en', $method='chars' )
             break;
     }
     $str = '';
-    if ( !$length ) $length = mt_rand(2, iconv_strlen($characters));
+    //if ( !$length ) $length = mt_rand(2, iconv_strlen($characters));
     for ($i = 0; $i < $length; $i++) {
         $str .= mb_substr( $characters, mt_rand(0, iconv_strlen($characters)), 1);
     }

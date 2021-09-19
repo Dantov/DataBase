@@ -1,7 +1,7 @@
 let mainForm = document.getElementById('addform');
 
 mainForm.addEventListener('click',function (event) {
-    event.preventDefault();
+    //event.preventDefault();
     // что б не пытался отправить форму по нажатию Enter на любом поле
     // не выводит ошибку в консоли
 }, false);

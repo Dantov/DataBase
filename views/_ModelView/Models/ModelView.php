@@ -9,21 +9,19 @@ use Views\vendor\core\HtmlHelper;
 
 class ModelView extends General {
 
-	
 	private $id;
 	public $number_3d;
 
 	public  $row;
 	public  $coll_id;
-	public  $rep_Query;
 	
 	private $img;
-	//private $img_Query;
 	private $gems_Query;
 	private $dopVc_Query;
-	private $stl_Query;
+	private $coll_Query;
+    public  $rep_Query;
+	private $statuses_Query;
 	private $complected;
-	private $ai_Query;
 
     /**
      * ModelView constructor.
@@ -40,73 +38,116 @@ class ModelView extends General {
         $this->dataQuery();
     }
 
+
     /**
      * @throws \Exception
      */
     public function dataQuery()
     {
+        $aq = new ActiveQuery();
+        $aq->registerTable(['stock', 'images', 'rhino_files', 'stl_files', 'ai_files',
+            'service_data','vc_links', 'gems', 'repairs', 'statuses']);
+
+        $stock      = $aq->stock??null;
+        $images     = $aq->images??null;
+        $rhinoFiles = $aq->rhino_files??null;
+        $stlFiles   = $aq->stl_files??null;
+        $aiFiles    = $aq->ai_files??null;
+        $gems       = $aq->gems??null;
+        $vcLinks    = $aq->vc_links??null;
+        $repairs    = $aq->repairs??null;
+        $service_data = $aq->service_data??null;
+        $statuses     = $aq->statuses??null;
+
+        $aq->link(['id'=>$stock],'=',['pos_id'=>$images]);
+        $aq->link(['id'=>$stock],'=',['pos_id'=>$stlFiles]);
+        $aq->link(['id'=>$stock],'=',['pos_id'=>$aiFiles]);
+        $aq->link(['id'=>$stock],'=',['pos_id'=>$rhinoFiles]);
+
+        $stockRes = $stock
+            ->select(['*'])
+            ->join($images,['*'])
+            ->join($stlFiles,['stl_name','pos_id'])
+            ->join($aiFiles,['ai_name'=>'name','pos_id'])
+            ->join($rhinoFiles,['3dm_name'=>'name','pos_id'])
+            ->where('id','=',$this->id)
+            ->exe();
+        $this->row = $stockRes[0]??null;
+        $this->img = $stockRes;
 
 
-		$this->row  = $this->findOne( " SELECT * FROM stock    WHERE     id='$this->id' ");
-		$this->img  = $this->findAsArray( " SELECT * FROM images   WHERE pos_id='$this->id' ");
 
+        $this->rep_Query = $repairs->select(['*'])->where('pos_id','=',$this->id)->exe();
+        $this->dopVc_Query = $vcLinks->select(['*'])->where('pos_id','=',$this->id)->exe();
+        $this->gems_Query = $gems->select(['*'])->where('pos_id','=',$this->id)->exe();
+        $this->statuses_Query = $statuses->select(['status','name','date'])->where('pos_id','=',$this->id)->exe();
 
-        $this->gems_Query  = mysqli_query($this->connection, " SELECT * FROM gems      WHERE pos_id='$this->id' ");
-        $this->dopVc_Query = mysqli_query($this->connection, " SELECT * FROM vc_links  WHERE pos_id='$this->id' ");
-        $this->stl_Query   = mysqli_query($this->connection, " SELECT * FROM stl_files WHERE pos_id='$this->id' ");
-        $this->ai_Query    = mysqli_query($this->connection, " SELECT * FROM ai_files  WHERE pos_id='$this->id' ");
-        $this->rep_Query   = mysqli_query($this->connection, " SELECT * FROM repairs   WHERE pos_id='$this->id' ");
-		
-		$this->number_3d = $this->row['number_3d'];
+        $this->number_3d = $this->row['number_3d'];
+        $this->complected = $stock
+            ->select(['id','model_type','number_3d'])
+            ->join($images,['pos_id','img_name','main','sketch'])
+            ->where('number_3d','=',$this->number_3d)
+            ->and(['id','<>',$this->id])
+            ->asArray()
+            ->exe();
 
-		$sql = " SELECT st.id, st.model_type, st.number_3d, img.pos_id, img.img_name, img.main, img.sketch
-				FROM stock st 
-					LEFT JOIN images img ON ( st.id = img.pos_id )
-				WHERE st.number_3d='{$this->number_3d}' 
-				AND st.id<>'{$this->id}' ";                        //AND img.main=1
-		$this->complected = $this->findAsArray( $sql );
+        $this->coll_Query = $service_data
+            ->select(['id','name'])
+            ->where('name','IN',$this->getCollections(true))
+            ->and(['tab','=','collections'])
+            ->exe();
+
 	}
 
     /**
-     * @return array
+     * @param bool $getINStr
+     * @return array|string
      * @throws \Exception
      */
-    public function getCollections()
+    public function getCollections( $getINStr = false )
     {
-        $collections = explode(';',$this->row['collections']);
-        $collectionStr = '';
-        foreach ( $collections as $collection ) $collectionStr .= "'".$collection."',";
-        $collectionStr = "(". trim($collectionStr,",") . ")";
+        $IN = '';
+        if ( $getINStr )
+        {
+            $collections = explode(';',$this->row['collections']);
+            foreach ( $collections as $collection ) $IN .= "'".$collection."',";
+            $IN =  trim($IN,",");
+            return $IN;
+        }
 
-        return $this->findAsArray(" SELECT id,name FROM service_data WHERE name IN $collectionStr AND tab='collections' ");
+        return $this->coll_Query;
     }
-	
-	public function getStl()
-    {
-		if ( $this->stl_Query->num_rows > 0 ) {
-			$stl_file = mysqli_fetch_assoc($this->stl_Query);
-            return $stl_file;
-		}
-        return false;
-	}
 
-	public function getAi()
+    /**
+     * @throws \Exception
+     */
+    public function getStl()
     {
-		if ( $this->ai_Query->num_rows > 0 )
-		{
-			$ai_file = mysqli_fetch_assoc($this->ai_Query);
-			return $ai_file;
-		}
-		return false;
+        return $this->row['stl_name']??null;
 	}
 
     /**
-     * @return array|bool
+     * @throws \Exception
+     */
+    public function getAi()
+    {
+        return $this->row['ai_name']??null;
+	}
+
+    /**
      * @throws \Exception
      */
     public function get3dm()
     {
-        return $this->findOne( " SELECT * FROM rhino_files WHERE pos_id='$this->id' ");
+        return $this->row['3dm_name']??null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRepairs()
+    {
+        return $this->rep_Query;
     }
 
     /**
@@ -115,20 +156,10 @@ class ModelView extends General {
      */
     public function usedInModels()
     {
-        /*
-        $vc = "";
-        if ( !empty( $this->row['vendor_code'] ) )
-            $vc = "OR vc_3dnum LIKE '%{$this->row['vendor_code']}%'";
-
-        $sql = " SELECT s.id, s.number_3d, s.vendor_code, s.model_type FROM stock as s WHERE s.id IN
-                  ( SELECT pos_id FROM vc_links WHERE vc_3dnum LIKE '%{$this->number_3d}%' $vc ) 
-                  AND s.id <> {$this->row['id']}";
-        */
-
         $aq = new ActiveQuery();
-        $stock = $aq->registerTable('stock','s');
-        $vc_links = $aq->registerTable(['vc_links'=>'vcl']);
-        $images = $aq->registerTable(['images'=>'img']);
+        $stock = $aq->registerTable('stock');
+        $vc_links = $aq->registerTable(['vc_links']);
+        $images = $aq->registerTable(['images']);
 
         $vclBuild = $vc_links->select(['pos_id'])->where('vc_3dnum','LIKE',"%{$this->number_3d}%");
         if ( !empty( $this->row['vendor_code'] ) )
@@ -145,10 +176,7 @@ class ModelView extends General {
             ->asArray()
             ->exe();
 
-        //debug($res,'$res',1);
-
         return $res;
-        //return $this->findAsArray( $sql );
     }
 
     /**
@@ -157,12 +185,23 @@ class ModelView extends General {
      */
     public function getDescriptions()
     {
-        $sql = "SELECT d.num, d.text, DATE_FORMAT(d.date, '%d.%m.%Y') as date, d.pos_id, u.fio as userName
-                FROM description as d
-                  LEFT JOIN users as u
-                    ON (d.userID = u.id ) 
-                WHERE d.pos_id = $this->id";
-        return $this->findAsArray( $sql );
+        $aq = new ActiveQuery();
+        $description = $aq->registerTable(['users','description']);
+        $users = $aq->users??null;
+        $aq->link(['userID'=>$description],'=',['id'=>$users]);
+
+        $df = function()
+        {
+          return ['fieldNames'=>['dt'=>'date'], 'function'=>"DATE_FORMAT(%dt%, '%d.%m.%Y')" ];
+        };
+        $res = $description
+            ->select(['num','text','date'=>$df,'pos_id'])
+            ->join($users,['userName'=>'fio'])
+            ->where('pos_id','=',$this->id)
+            ->asArray()
+            ->exe();
+
+        return $res;
     }
 
     /**
@@ -224,7 +263,6 @@ class ModelView extends General {
      */
 	public function choseMainImage( array &$images ) : array
     {
-        $mainImg = [];
         $mainImgID = '';
         $setMainImg = function(&$image)
         {
@@ -269,27 +307,31 @@ class ModelView extends General {
 
         $addEdit->connectDBLite();
         $mats = $addEdit->getMaterials($this->row);
-        //$addEdit->closeDB();
         return $mats;
 	}
 
 
-	public function getGems() {
+	public function getGems()
+    {
 		$result = array();
+
 		$c = 0;
-		while( $row_gems = mysqli_fetch_assoc($this->gems_Query) ) {
-			if ( !empty($row_gems['gems_sizes']) ) {
-				$sizeGem = is_numeric($row_gems['gems_sizes']) ? "Ø".$row_gems['gems_sizes']." мм" : $row_gems['gems_sizes']." мм";	
-			}
-			if ( !empty($row_gems['value']) ) $valueGem = $row_gems['value']." шт";
-			$result[$c]['gem_num'] = $c+1;
-			$result[$c]['gem_size'] = $sizeGem;
-			$result[$c]['gem_value'] = $valueGem;
-			$result[$c]['gem_cut'] = $row_gems['gems_cut'];
-			$result[$c]['gem_name'] = $row_gems['gems_names'];
-			$result[$c]['gem_color'] = $row_gems['gems_color'];
-			$c++;
-		}
+		foreach ( $this->gems_Query as $row_gems )
+        {
+            if ( !empty($row_gems['gems_sizes']) )
+                $sizeGem = is_numeric($row_gems['gems_sizes']) ? "Ø".$row_gems['gems_sizes']." мм" : $row_gems['gems_sizes']." мм";
+
+            if ( !empty($row_gems['value']) )
+                $valueGem = $row_gems['value']." шт";
+
+            $result[$c]['gem_num'] = $c+1;
+            $result[$c]['gem_size'] = $sizeGem??'';
+            $result[$c]['gem_value'] = $valueGem??'';
+            $result[$c]['gem_cut'] = $row_gems['gems_cut'];
+            $result[$c]['gem_name'] = $row_gems['gems_names'];
+            $result[$c]['gem_color'] = $row_gems['gems_color'];
+            $c++;
+        }
 		return $result;
 	}
 
@@ -314,8 +356,6 @@ class ModelView extends General {
                     ->setAttr(['imgtoshow'=>$fileImg, 'href'=>HtmlHelper::URL('/',['id'=>$id])]) //_rootDIR_HTTP_ .'model-view/?id='.$id
                     ->setTagText($vc_3dNum)
                     ->create();
-
-        //return '<a imgtoshow="'.$fileImg.'" href="'. _rootDIR_HTTP_ .'model-view/?id='.$id.'">'.$vc_3dnum.'</a>';
     }
 
     /**
@@ -372,34 +412,23 @@ class ModelView extends General {
      * @return array
      * @throws \Exception
      */
-    public function getDopVC() {
-		
+    public function getDopVC()
+    {
 		$result = array();
 		$c = 0;
-		while( $row_dop_vc = mysqli_fetch_assoc($this->dopVc_Query) ) {
-			
-			$linkVCnum = $this->vc_3dnumExpl($row_dop_vc['vc_3dnum'], $row_dop_vc['vc_names'] );
-			$linkVCnum = $linkVCnum ? $linkVCnum : $row_dop_vc['vc_3dnum'];
-			
-			$result[$c]['vc_num'] = $c+1;
-			$result[$c]['vc_names'] = $row_dop_vc['vc_names'];
-			$result[$c]['vc_link'] = $linkVCnum;
-			$result[$c]['vc_descript'] = $row_dop_vc['descript'];
-			$c++;
-		}
+		foreach ( $this->dopVc_Query as $row_dop_vc )
+        {
+            $linkVCnum = $this->vc_3dnumExpl($row_dop_vc['vc_3dnum'], $row_dop_vc['vc_names'] );
+            $linkVCnum = $linkVCnum ? $linkVCnum : $row_dop_vc['vc_3dnum'];
+
+            $result[$c]['vc_num'] = $c+1;
+            $result[$c]['vc_names'] = $row_dop_vc['vc_names'];
+            $result[$c]['vc_link'] = $linkVCnum;
+            $result[$c]['vc_descript'] = $row_dop_vc['descript'];
+            $c++;
+        }
 		return $result;
 	}
-
-
-	public function getRepairs()
-    {
-        $repairs = [];
-
-        if ( $this->rep_Query )
-            while($repRow = mysqli_fetch_assoc($this->rep_Query)) $repairs[] = $repRow;
-
-        return $repairs;
-    }
 
 	public function getLabels($labelsStr=false)
     {
@@ -417,9 +446,10 @@ class ModelView extends General {
     {
         $statuses = $this->getStatLabArr('status');
         $result = [];
-        $stats_quer = mysqli_query($this->connection, " SELECT status,name,date FROM statuses WHERE pos_id='{$this->id}' ");
+        //$stats_quer = mysqli_query($this->connection, " SELECT status,name,date FROM statuses WHERE pos_id='{$this->id}' ");
 
-        if ( !mysqli_num_rows($stats_quer) )
+        //if ( !mysqli_num_rows($stats_quer) )
+        if ( !$this->statuses_Query )
         {
             $statusT = [];
             $statusT['pos_id'] = $this->id;
@@ -447,6 +477,7 @@ class ModelView extends General {
         }
 
         $c = 0;
+        /*
         while( $statuses_row = mysqli_fetch_assoc($stats_quer) )
         {
             foreach ( $statuses as $status )
@@ -467,6 +498,26 @@ class ModelView extends General {
             }
 
         }
+        */
+        foreach ( $this->statuses_Query as $statuses_row )
+        {
+            foreach ( $statuses as $status )
+            {
+                if ( $statuses_row['status'] === $status['id'] )
+                {
+                    $result[$c]['ststus_id'] = $status['id'];
+                    $result[$c]['class'] = $status['class'];
+                    $result[$c]['classMain'] = $status['name_en'];
+                    $result[$c]['glyphi'] = $status['glyphi'];
+                    $result[$c]['title'] = $status['title'];
+                    $result[$c]['status'] = $status['name_ru'];
+                    $result[$c]['name'] = $statuses_row['name'];
+                    $result[$c]['date'] = ($statuses_row['date'] == "0000-00-00") ? "" : date_create( $statuses_row['date'] )->Format('d.m.Y')."&#160;";
+                    $c++;
+                    break;
+                }
+            }
+        }
         return $result;
     }
 
@@ -481,13 +532,19 @@ class ModelView extends General {
         {
             return true;
         } elseif ( User::permission('editOwnModels') ) {
+
             $userRowFIO = User::getSurname();
             $authorFIO = $this->row['author'];
             $modellerFIO = $this->row['modeller3D'];
             $jewelerName = $this->row['jewelerName'];
-            if ( mb_stristr($authorFIO, $userRowFIO) !== FALSE || mb_stristr($modellerFIO, $userRowFIO) !== FALSE || mb_stristr($jewelerName, $userRowFIO) !== FALSE )
+
+            if (   mb_stristr($authorFIO, $userRowFIO)   !== FALSE
+                || mb_stristr($modellerFIO, $userRowFIO) !== FALSE
+                || mb_stristr($jewelerName, $userRowFIO) !== FALSE
+               )
                 return true;
         }
+
         return false;
     }
 
