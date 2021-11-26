@@ -52,6 +52,16 @@ class ImageConverter
         if ( empty($params) ) return;
     }
 
+    protected static function resetConvertParams()
+    {
+        self::$resize = false;
+        self::$resizePercent = 30;
+        self::$strip = true;
+        self::$quality = false;
+        self::$qualityValue = 85;
+    }
+
+
     public static function getConvertParams() : array
     {
         $result = [
@@ -82,37 +92,8 @@ class ImageConverter
         $command = 'convert ' . $imgOriginPath . $resize . $strip . $quality . $imgPrevPath;
         //debugAjax($command,"command",END_AB);
 
+        self::resetConvertParams();
         return $command;
-    }
-
-    /**
-     * Поока не нужно
-     * @param array $totalImages
-     * @return string
-     */
-    public static function findDecentImg( array &$totalImages ) : string
-    {
-        if (empty($totalImages)) return "";
-
-        $imgName = "";
-        $foundOne = false;
-        foreach ( $totalImages as $tImage )
-        {
-            if ( $tImage['main'] == 1 )
-            {
-                $imgName = $tImage['img_name'];
-                $foundOne = true;
-                break;
-            }
-            if ( $tImage['sketch'] == 1 )
-            {
-                $imgName = $tImage['img_name'];
-                $foundOne = true;
-            }
-        }
-        if ( !$foundOne ) $imgName = $totalImages[0]['img_name'];
-
-        return self::$imgName = $imgName;
     }
 
     /**
@@ -280,6 +261,40 @@ class ImageConverter
         }
 
         return $result;
+    }
+
+
+
+
+
+    /**
+     * Поока не нужно
+     * @param array $totalImages
+     * @return string
+     */
+    public static function findDecentImg( array &$totalImages ) : string
+    {
+        if (empty($totalImages)) return "";
+
+        $imgName = "";
+        $foundOne = false;
+        foreach ( $totalImages as $tImage )
+        {
+            if ( $tImage['main'] == 1 )
+            {
+                $imgName = $tImage['img_name'];
+                $foundOne = true;
+                break;
+            }
+            if ( $tImage['sketch'] == 1 )
+            {
+                $imgName = $tImage['img_name'];
+                $foundOne = true;
+            }
+        }
+        if ( !$foundOne ) $imgName = $totalImages[0]['img_name'];
+
+        return self::$imgName = $imgName;
     }
 
 

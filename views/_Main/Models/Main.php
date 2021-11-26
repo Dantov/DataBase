@@ -3,6 +3,7 @@ namespace Views\_Main\Models;
 use Views\_Globals\Models\General;
 use Views\_Globals\Models\User;
 use Views\_SaveModel\Models\ImageConverter;
+use Views\vendor\core\ActiveQuery;
 use Views\vendor\libs\classes\AppCodes;
 
 class Main extends General {
@@ -217,16 +218,16 @@ class Main extends General {
         $from = $this->assist['page'] * $this->assist['maxPos'];
         $to = ($this->assist['page'] + 1) * $this->assist['maxPos'];
 
-        $rowImages = [];
-        $rowStls = [];
+        $posIds = '';
+        for ( $i = $from; $i < $to; $i++ )
+            $posIds .= $this->row[$i]['id'].',';
+        $posIds = trim($posIds,',');
 
-        $posIds = '(';
-        for ( $i = $from; $i < $to; $i++ ) $posIds .= $this->row[$i]['id'].',';
-        $posIds = trim($posIds,',') . ')';
-        $imagesQuery = mysqli_query($this->connection, " SELECT pos_id,img_name FROM images WHERE pos_id IN $posIds AND main=1 ");
-        $stlQuer = mysqli_query($this->connection, " SELECT pos_id,stl_name FROM stl_files WHERE pos_id IN $posIds ");
-        while ( $image = mysqli_fetch_assoc($imagesQuery) ) $rowImages[$image['pos_id']] = $image;
-        while ( $stl = mysqli_fetch_assoc($stlQuer) ) $rowStls[$stl['pos_id']] = $stl;
+        $aq = new ActiveQuery();
+        $aq->registerTable(['images'=>'i','stl_files'=>'stlf']);
+
+        $rowImages = $aq->images->select(['pos_id','img_name'])->where(['pos_id','IN',$posIds])->asArray()->exe();
+        $rowStls = $aq->stl_files->select(['pos_id','stl_name'])->where(['pos_id','IN',$posIds])->asArray()->exe();
 
         ob_start();
         for ( $i = $from; $i < $to; $i++ )
@@ -807,11 +808,11 @@ class Main extends General {
 		$columns = $comlectIdent === true ? 3 : 2;
 
         $images = [];
-        foreach ($rowImages as &$thisImage)
-            if ( $thisImage['pos_id'] === $row['id'] )
+        foreach ($rowImages as $thisImage)
+            if ( $thisImage['pos_id'] == $row['id'] )
                 $images[] = $thisImage;
 
-        //debug($images,'$images');
+        //debug($images,'$images',1);
 
         //-------------- Выбираем главную картинку ------
         $showimg = '';
@@ -836,6 +837,10 @@ class Main extends General {
 
 
         $path = $row['number_3d'].'/'.$row['id'].'/images/';
+
+        if ( !$showimg )
+            $showimg = _stockDIR_HTTP_ . "default.jpg";
+
 		if ( !file_exists(_stockDIR_. $path . $showimg) ) // file_exists работает только с настоящим путём!! не с HTTP
 		{
 		    $showimg = _stockDIR_HTTP_ . "default.jpg";
@@ -853,6 +858,7 @@ class Main extends General {
                 // оригин. картинка, если ничего не получилось
                 $showimg = _stockDIR_HTTP_ . $path . $showimg;
             }
+
         }
 		
 		$btn3D = false;

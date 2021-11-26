@@ -13,10 +13,10 @@ class Search extends General
      */
     public function __construct()
     {
-
         parent::__construct();
+
         $this->connectDBLite();
-        
+
         $this->getStatLabArr('status');
     }
 
@@ -68,7 +68,6 @@ class Search extends General
             if ( trueIsset($assist['byStatHistoryTo'])) $dates['to'] = $assist['byStatHistoryTo'];
             self::byStatusesHistory($this->connection, $regStat, $foundAllRows, $dates);
         }
-        $this->closeDB();
 
         // если дата
         $date = false;

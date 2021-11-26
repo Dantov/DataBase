@@ -288,6 +288,7 @@ if ( gems_table )
 
 // ------- Описания -------//
 let addNote = document.querySelector('.addNote');
+
 if ( addNote )
 {
     let modelNotes = document.querySelector('.modelNotes');
@@ -299,16 +300,20 @@ if ( addNote )
 	}
 
     addNote.addEventListener('click', function(event) {
+
         event.preventDefault();
+        let click = event.target;
+        if ( !click.classList.contains('addNote') ) return;
 
         let newNote = document.querySelector('.proto-note').cloneNode(true);
 			newNote.classList.remove('proto-note', 'hidden');
 			newNote.querySelector('.note-num').innerHTML = ++lastNoteNum;
 			newNote.querySelector('.note_num').setAttribute('value', lastNoteNum);
-
         modelNotes.appendChild(newNote);
     });
+
 }
+
 function removeNote(self)
 {
     let notePanel = self.parentElement.parentElement;
@@ -323,7 +328,15 @@ function removeNote(self)
         notePanel.remove();
 	}
 }
+
 // ------- END Описания -------//
+
+
+
+
+
+
+
 
 
 

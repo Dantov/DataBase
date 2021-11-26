@@ -317,7 +317,7 @@ class Validator
                         'name'=> 'Камни: Размеры',
                         'rules' => [
                             'required' => true,
-                            'maxLength' => 12,
+                            'maxLength' => 24,
                         ],
                     ],
                     'value' => [

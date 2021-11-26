@@ -12,13 +12,46 @@ use Views\vendor\libs\classes\Validator;
 
 /**
  * Функционал взаимодействия с таблицами БД
+ *
+ * Примеры:
+    $aq = new ActiveQuery();
+    $stock = $aq->registerTable('stock','st');
+    $images = $aq->registerTable(['images'=>'img']);
+    $aq->link(['id'=>$stock], '=', ['pos_id'=>$images]);
+ *
+    $sum = function() {
+        $fNames = ['a'=>'model_weight','b'=>'status'];
+        return ['fieldNames'=>$fNames, 'function'=>"SUM(%a% + %b%)"];
+    };
+    $imgConcat = function() {
+        $fNames = ['a'=>'img_name','b'=>'pos_id'];
+        return ['fieldNames'=>$fNames, 'function'=>"CONCAT(%a%, '-', %b%)"];
+    };
+ *
+    $res = $stock
+    ->select(['mID'=>'id','model_type','number_3d'])
+    ->select(['model_weight','sumMW'=>$sum])
+    ->join($images,['pos_id','imgName'=>$imgConcat,'main','sketch'])
+    ->andON($images,'sketch', '=', 1)
+    ->joinOr($images,'main', '=', 1)
+    ->where('number_3d','=',$number_3d)->and('id','<>',$thisID)
+    ->asArray()
+    ->exe();
+ *
+    $countStock = function () {
+        return ['function'=>"COUNT(1)"];
+    };
+    $res2 = $stock
+    ->select(['countSt'=>$countStock])
+    ->where('model_type','=','Кольцо')
+    ->asOne('countSt')
+    ->exe();
+ *
  * Class ActiveQuery
  * @package Views\vendor\core
  */
 class ActiveQuery extends Model
 {
-
-
 
 
     /**
@@ -41,17 +74,26 @@ class ActiveQuery extends Model
 
     /**
      * ActiveQuery constructor.
+     *
+     * Пример:
+     * (new ActiveQuery('stl_files'))->stl_files->select(['*'])->where(['pos_id','=',$this->id])->asOne()->exe();
+     *
+     * @param null $tables
+     * @param string $alias
      * @throws \Exception
      */
-    public function __construct()
+    public function __construct( $tables = null, string $alias='')
     {
         $this->validator = new Validator();
-
         $this->connectDB();
+
+        if ( $tables )
+            $this->registerTable($tables,  $alias);
     }
 
 
     /**
+     * Вернет объект таблицы
      * @param string $tableName
      * @return Table
      */
@@ -65,6 +107,17 @@ class ActiveQuery extends Model
         }
     }
 
+
+    protected function createTableAlias()
+    {
+        $newAlias = randomStringChars(2).randomStringChars(5,'en','symbols');
+        foreach ( $this->tables as $alias => $tName )
+        {
+            if ( $alias == $newAlias )
+                $newAlias = $this->createTableAlias();
+        }
+        return $newAlias;
+    }
 
     /**
      * @param $tables
@@ -80,24 +133,44 @@ class ActiveQuery extends Model
             if ( !$this->validator->validateTableName($tables) )
                 throw new \Error("Table name '" . $tables . "' not valid.", 500 );
 
-            $this->tables[] = $tables;
             $TName = new Table( $tables );
             if ( $alias )
+            {
                 $TName->alias = $alias;
+            } else {
+                // create alias
+                $TName->alias = $this->createTableAlias();
+            }
+            $this->tables[$TName->alias] = $tables;
+
             return $this->TABLES[$tables] = $TName;
         }
 
         if ( !empty($tables) && is_array($tables) )
         {
-            foreach ( $tables as $tableName => $alias )
+            foreach ( $tables as $expTName => $expTAlias )
             {
+                // передано только имя табл. Теперь $expTAlias - имя табл.
+                $tableName = $expTName;
+                $alias = $expTAlias;
+                if ( is_int($tableName) )
+                {
+                    $tableName = $expTAlias;
+                    $alias = '';
+                }
+
                 if ( !$this->validator->validateTableName($tableName) )
                     throw new \Error("Table name '" . $tableName . "' not valid.", 500 );
 
-                $this->tables[] = $tableName;
                 $TName = new Table( $tableName );
-
-                $TName->alias = $alias;
+                if ( $alias )
+                {
+                    $TName->alias = $alias;
+                } else {
+                    // create alias
+                    $TName->alias = $this->createTableAlias();
+                }
+                $this->tables[$TName->alias] = $tableName;
 
                 $this->TABLES[$tableName] = $TName;
             }
@@ -121,7 +194,7 @@ class ActiveQuery extends Model
         if ( is_string($tables) && !empty($tables) )
         {
             if ( in_array($tables,$this->tables) )
-                return $result[$tables] = $this->TABLES[$tables]->getSchema();
+                return $result[$tables] = $this->TABLES[$tables]->showSchema();
 
             throw new \Error("No table registered under name: " . $tables, 500 );
         }
@@ -133,7 +206,7 @@ class ActiveQuery extends Model
             {
                 if ( in_array($tableName,$this->tables) )
                 {
-                    $result[$tableName] = $this->TABLES[$tableName]->getSchema();
+                    $result[$tableName] = $this->TABLES[$tableName]->showSchema();
                 } else {
                     throw new \Error("No table registered under name: " . $tableName, 500 );
                 }
@@ -141,12 +214,13 @@ class ActiveQuery extends Model
             return $result;
         }
 
-        return $result;
+        return $this->tables;
     }
 
 
     /**
-     * Свяжем таблицы по полям
+     * Свяжем таблицы по полям (Необходим для JOIN)
+     * Пример: $aq->link(['id'=>$stock], '=', ['pos_id'=>$images]);
      *
      * @param array $key_table_first ---- [ 'id'=>$stock ]
      * @param string $operator

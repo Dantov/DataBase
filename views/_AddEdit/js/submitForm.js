@@ -1,3 +1,10 @@
+let mainForm = document.getElementById('addform');
+
+mainForm.addEventListener('click',function (event) {
+    //event.preventDefault();
+    // что б не пытался отправить форму по нажатию Enter на любом поле
+    // не выводит ошибку в консоли
+}, false);
 
 //-------- ВАЛИДАЦИЯ ФОРМЫ ---------//
 function validateForm() {
@@ -154,7 +161,7 @@ function validateForm() {
 function submitForm() {
     if ( !validateForm() ) return null;
 
-    let formData = new FormData( document.getElementById('addform') );
+    let formData = new FormData( mainForm );
     formData.append('userName',userName);
     formData.append('tabID',tabName);
 

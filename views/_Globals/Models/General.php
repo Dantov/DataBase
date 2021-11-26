@@ -783,10 +783,10 @@ class General extends Model
      */
     public function origin_preview_ImgSelect( array $image ) : string
     {
-        if  ( !is_array($image) || !isset($image['imgPrevPath']) || !isset($image['imgPath']) )
+        if  ( !is_array($image) || !isset($image['imgPath']) )
             return '';
 
-        if ( empty($image['imgPrevPath']) )
+        if ( !isset($image['imgPrevPath']) || empty($image['imgPrevPath']) )
             return $image['imgPath'];
 
         return $image['imgPrevPath'];
@@ -910,21 +910,31 @@ class General extends Model
     {
         return $this->findOne("SELECT COUNT(toWhom) as c FROM repairs WHERE status_date > '0000-00-00' AND status<>4 ",'c');
     }
-	
-	/**
+
+    /**
+     * @param bool $all
+     * @return array|mixed
      * @throws \Exception
      */
-    public function countModels3DToWork()
+    public function countModels3DToWork( bool $all = false )
     {
+        if ( $all )
+            return $this->findOne("SELECT COUNT(*) as c FROM stock WHERE `status`=89",'c');
+
         $userFIO = explode(' ', User::getFIO())[0];
         return $this->findOne("SELECT COUNT(modeller3D) as c FROM stock WHERE modeller3D LIKE '%$userFIO%' AND status=89 ",'c');
     }
 
     /**
+     * @param bool $all
+     * @return array|mixed
      * @throws \Exception
      */
-    public function countModels3DInWork()
+    public function countModels3DInWork( bool $all = false )
     {
+        if ( $all )
+            return $this->findOne("SELECT COUNT(*) as c FROM stock WHERE `status`=8",'c');
+
         $userFIO = explode(' ', User::getFIO())[0];
         return $this->findOne("SELECT COUNT(modeller3D) as c FROM stock WHERE modeller3D LIKE '%$userFIO%' AND status=8  ",'c');
     }

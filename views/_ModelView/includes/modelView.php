@@ -170,19 +170,19 @@ $isView = true;
                         <?php endif; ?>
                         <?php if (  trueIsset($ai_file) ) : ?>
                             <li class="list-group-item" title="загрузить файл накладки">
-                                <span class="badge badge-lg"><a class="text-white" href="<?=_stockDIR_HTTP_.$row['number_3d'].'/'.$id.'/ai/'.$ai_file['name']?>" download="<?='ai_'.$ai_file['name']?>">Скачать</a></span>
+                                <span class="badge badge-lg"><a class="text-white" href="<?=_stockDIR_HTTP_.$row['number_3d'].'/'.$id.'/ai/'.$ai_file?>" download="<?='ai_'.$ai_file?>">Скачать</a></span>
                                 <span class="glyphicon glyphicon-floppy-save"></span> AI Файл накладки:
                             </li>
                         <?php endif; ?>
                         <?php if (  trueIsset($stl_file) && User::permission('stl') ) : ?>
                             <li class="list-group-item" title="загрузить STL файл">
-                                <span class="badge badge-lg"><a class="text-white" href="<?= _stockDIR_HTTP_.$row['number_3d'].'/'.$id.'/stl/'.$stl_file['stl_name'] ?>" download="<?='stl_'.$stl_file['stl_name']?>">Скачать</a></span>
+                                <span class="badge badge-lg"><a class="text-white" href="<?= _stockDIR_HTTP_.$row['number_3d'].'/'.$id.'/stl/'.$stl_file ?>" download="<?='stl_'.$stl_file?>">Скачать</a></span>
                                 <span class="glyphicon glyphicon-floppy-save"></span> Stl Файл модели:
                             </li>
                         <?php endif; ?>
                         <?php if (  trueIsset($rhino_file) && User::permission('rhino3dm') ) : ?>
                             <li class="list-group-item" title="загрузить 3dm файл">
-                                <span class="badge badge-lg"><a class="text-white" href="<?= _stockDIR_HTTP_.$row['number_3d'].'/'.$id.'/3dm/'.$rhino_file['name'] ?>" download="<?='3dm_'.$rhino_file['name']?>">Скачать</a></span>
+                                <span class="badge badge-lg"><a class="text-white" href="<?= _stockDIR_HTTP_.$row['number_3d'].'/'.$id.'/3dm/'.$rhino_file ?>" download="<?='3dm_'.$rhino_file?>">Скачать</a></span>
                                 <span class="glyphicon glyphicon-floppy-save"></span> 3dm Файл модели:
                             </li>
                         <?php endif; ?>

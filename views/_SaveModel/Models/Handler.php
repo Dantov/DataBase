@@ -639,9 +639,6 @@ class Handler extends General
     {
         $this->closeZip( $zipData['zip'] );
 
-        foreach ( $stlFileNames as $stlFN )
-            Files::instance()->delete($stlFN);
-
         if ( count($stlFileNames) )
         {
             $sql = "INSERT INTO stl_files (stl_name, pos_id) 
@@ -649,6 +646,12 @@ class Handler extends General
             if ( $this->sql($sql) === -1 )
                 throw new \Exception('Error adding STL files',2);
         }
+
+        // иногда выбивает ошибку: unlink(...) Resource temporarily unavailable
+        // поставим задержку что бы успел обработать файл
+        sleep(1);
+        foreach ( $stlFileNames as $stlFN )
+            Files::instance()->delete($stlFN);
     }
 
 
@@ -680,7 +683,6 @@ class Handler extends General
             }
         }
         $zip->close();
-        foreach ( $fileNames as $fileName ) if ( file_exists( $path.$fileName ) ) unlink($path.$fileName);
 
         $zipFile = $path.$zipArch['zipName'];
 
@@ -690,6 +692,13 @@ class Handler extends General
             $query = $this->baseSql(" INSERT INTO rhino_files (name, size, pos_id) VALUES ('{$zipArch['zipName']}', '$zipArchSize','$this->id') ");
             if ( !$query ) throw new \Exception(__METHOD__ . 'Error :' . mysqli_error($this->connection),412);
         }
+
+        // иногда выбивает ошибку: unlink(...) Resource temporarily unavailable
+        // поставим задержку что бы успел обработать файл
+        sleep(1);
+        foreach ( $fileNames as $fileName )
+            if ( file_exists( $path.$fileName ) ) unlink($path.$fileName);
+
         return true;
     }
 

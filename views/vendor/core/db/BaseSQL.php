@@ -49,7 +49,7 @@ class BaseSQL
      */
     public function getTableSchema( string $tableName )
     {
-        if ( empty($tableName) ) throw new \Exception('Table name not valid! In ' . __METHOD__, 555);
+        if ( empty($tableName) ) throw new \Exception('Table name can\'t be empty in: ' . __METHOD__, 555);
 
         $query = $this->baseSql('DESCRIBE ' . $tableName);
         if ( !$query ) return [ 'error' => mysqli_error($this->connection) ];

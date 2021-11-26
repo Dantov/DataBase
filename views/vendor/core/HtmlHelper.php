@@ -246,6 +246,7 @@ class HtmlHelper
      * @param array $attributes - доп аттрибуты
      * return object - методы по добалению полей
      * */
+    /*
     public static function beginForm($action, $attributes=[]) {
 
         self::setDefaultValues();
@@ -287,6 +288,7 @@ class HtmlHelper
      * выводит на экран
      * return void
      * */
+    /*
     public static function endForm() {
         $content = ob_get_contents();
         ob_end_clean();
@@ -307,6 +309,7 @@ class HtmlHelper
         echo $inpt_csrf_;
         echo '</form>';
     }
+    */
 
 
 }
