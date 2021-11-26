@@ -180,7 +180,8 @@ class MainController extends GeneralController
 
 		//если нет поиска, выбираем из базы
 		if ( !trueIsset($this->foundRows) )
-		    $main->getModelsFormStock();
+			$main->getModelsFormStock( array_key_exists("showall",$this->getQueryParams()) );
+		    
 
 		// начинаем вывод моделей
 		if ( !isset($_SESSION['nothing']) ) {
