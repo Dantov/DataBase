@@ -127,12 +127,26 @@ class Main extends General {
     }
 
 
-
-	public function getModelsFormStock()
+	/**
+	*  bool $showall  - Флаг исключающий коллекцию детали из выборки ( используется для выбора эсскизов со всех колл. для Богдана )
+	*/
+	public function getModelsFormStock( $showall = false )
     {
-
-        $where = "WHERE collections<>'Детали'";
-        if ( $this->assist['collectionName'] != 'Все Коллекции' ) $where = "WHERE collections like '%{$this->assist['collectionName']}%'";
+		//debug($showall);
+		$where = "";
+		$and = false;
+		
+		if ( !$showall )
+		{
+			$where = "WHERE collections<>'Детали'";
+			$and = true;
+		}
+		
+        if ( $this->assist['collectionName'] != 'Все Коллекции' ) 
+		{
+			$where = "WHERE collections like '%{$this->assist['collectionName']}%'";
+			$and = true;
+		}
 
         $regStat = 0;
         foreach ( $this->statuses as $status )
@@ -149,13 +163,13 @@ class Main extends General {
             if ( !empty($_SESSION['assist']['wcSort']['ids']) )
             {
                 $_SESSION['assist']['regStat'] = $this->assist['regStat'] = 'Нет';
-                if ( $in = $this->dopSortByWC() ) $where .= " AND status " . $in;
+                if ( $in = $this->dopSortByWC() ) $where .= ($and ? " AND " : " WHERE ") . " status " . $in;
             }
         }
 
         if ( $this->assist['regStat'] !== "Нет" && $this->assist['byStatHistory'] !== 1 )
         {
-            $where .= " AND status='$regStat'";
+            $where .= ($and ? " AND " : " WHERE ") . " status='$regStat'";
         }
 
 		$selectRow = "SELECT * FROM stock " . $where . " ORDER BY " .$this->assist['reg']." ".$this->assist['sortDirect'];

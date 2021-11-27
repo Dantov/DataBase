@@ -154,7 +154,7 @@ JS;
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a class="da_Show" href="/main/?regStat=35"><span class="glyphicon glyphicon-leaf"></span>&#160; Показать все</a>
+                                        <a class="da_Show" href="/main/?regStat=35&showall"><span class="glyphicon glyphicon-leaf"></span>&#160; Показать все</a>
                                     </li>
                                     <li>
                                         <a class="da_Show" href="/main/?regStat=none"><span class="glyphicon glyphicon-remove"></span>&#160; Сбросить</a>
