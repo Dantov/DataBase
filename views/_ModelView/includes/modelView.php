@@ -243,7 +243,7 @@ $isView = true;
 
     <div class="col-xs-12 col-sm-12 col-lg-6 pl-1 pr-0">
         <div class="panel mb-1 panel-success">
-            <div class="panel-heading"><i class="fab fa-codepen"></i> <b>Материалы:</b></div>
+            <div class="panel-heading"><i class="fab fa-codepen"></i> <b>Детали / Материалы:</b></div>
             <ul class="list-group">
                 <?php foreach ( isset($matsCovers)?$matsCovers:[] as $material ) : ?>
                 <li class="list-group-item brb-2-secondary bg-info-light">

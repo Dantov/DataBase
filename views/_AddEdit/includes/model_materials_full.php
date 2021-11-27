@@ -1,7 +1,7 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         <i class="fas fa-cubes"></i>
-        <strong> Материал изделия:</strong> <span id="model_material" class="hidden err-notice"></span>
+        <strong>Детали / Материалы изделия:</strong> <span id="model_material" class="hidden err-notice"></span>
         <button id="addMats" class="btn btn-sm btn-default pull-right" style="top:-5px !important; position:relative;" type="button" title="Добавить материал">
             <span class="glyphicon glyphicon-plus"></span>
         </button>

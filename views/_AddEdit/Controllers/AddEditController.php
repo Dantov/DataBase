@@ -188,20 +188,23 @@ class AddEditController extends GeneralController
                 return $addEdit->origin_preview_ImgSelect($image);
             };
 
-            $mainImage = $addEdit->origin_preview_ImgSelect($images[0]);
-            foreach ( $images as $image )
-            {
-                if ( trueIsset($image['main']) )
-                {
-                    $mainImage = $addEdit->origin_preview_ImgSelect($image);
-                    break;
-                }
-                if ( trueIsset($image['sketch']) )
-                {
-                    $mainImage = $addEdit->origin_preview_ImgSelect($image);
-                    break;
-                }
-            }
+			if ( $images )
+			{
+				$mainImage = $addEdit->origin_preview_ImgSelect($images[0]);
+				foreach ( $images as $image )
+				{
+					if ( trueIsset($image['main']) )
+					{
+						$mainImage = $addEdit->origin_preview_ImgSelect($image);
+						break;
+					}
+					if ( trueIsset($image['sketch']) )
+					{
+						$mainImage = $addEdit->origin_preview_ImgSelect($image);
+						break;
+					}
+				}
+			}
 
 
             $gemsRow  = $addEdit->getGems();

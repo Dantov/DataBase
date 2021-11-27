@@ -644,7 +644,7 @@ class General extends Model
 
         // Сделал привязку к конкретной дате, старые модели сделаны до неё не будут проверены на наличие нужных статусов
         // это сделано что бы участки могли принять старые модели в ремонт, в случае чего
-        $comp_date =  new \DateTime($modelDate) < new \DateTime("2021-01-01") ? false : true;
+        $comp_date =  new \DateTime($modelDate) < new \DateTime("2021-06-01") ? false : true;
 
         $toShowStatuses = true;
         if ( $comp_date && ($component !== 1) && ($component !== 3) )
