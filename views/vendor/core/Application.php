@@ -24,6 +24,20 @@ class Application
         if ( is_array($config) && !empty($config) ) $this->config = $config;
 
         Config::initConfig($config);
+		
+		//https redirect
+		if ( Config::get('https') === true )
+		{
+			if ( !isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' )
+			{
+				header("Location: https://". $_SERVER['HTTP_HOST'] . "/");
+				exit;
+			}
+		} elseif ( Config::get('https') === false && (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') )
+		{
+			header("Location: http://". $_SERVER['HTTP_HOST'] . "/");
+			exit;
+		}
 
         new ErrorHandler($config['errors']);
 

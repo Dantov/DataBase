@@ -15,7 +15,7 @@ define('_CONFIG_', _viewsDIR_.'config/');
 define('_coreDIR_', _viewsDIR_.'vendor/');
 define('_vendorDIR_', _rootDIR_.'vendor/');
 
-define('_rootDIR_HTTP_', 'http://'.$_SERVER['HTTP_HOST'].'/'); // для ссылок
+define('_rootDIR_HTTP_', 'https://'.$_SERVER['HTTP_HOST'].'/'); // для ссылок
 define('_webDIR_HTTP_', _rootDIR_HTTP_ . 'web/'); // для ссылок
 
 define('_views_HTTP_', _rootDIR_HTTP_.'Views/'); // для ссылок

@@ -7,6 +7,7 @@
 /vendor/
 /Views/config/db_config.php
 favicon.ico
+Apache-PHP-7.2_vhost.conf
 =======
 /nbproject/
 .htaccess

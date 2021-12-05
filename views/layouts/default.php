@@ -308,6 +308,7 @@ JS;
     if ( _DEV_MODE_ )
     {
         debug($_GET,'$_GET');
+        debug($_SERVER,'$_SERVER');
         debug($this->getQueryParams(),'QueryParams');
         debug($_SESSION,'$_SESSION');
         debug($_COOKIE,'$_COOKIE');
