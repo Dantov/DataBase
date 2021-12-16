@@ -24,7 +24,32 @@ class EditStatusesController extends GeneralController
         $request = $this->request;
         if ( $request->isAjax() )
         {
-            if ( $request->isPost() && $request->post('save') ) $this->actionSaveStatuses();
+			try 
+			{
+				if ( $request->isPost() && $request->post('save') ) $this->actionSaveStatuses();
+			} catch (\TypeError | \Error | \Exception $e) {
+				if ( _DEV_MODE_ )
+                {
+                    exit( json_encode([
+                        'error'=>[
+                            'message'=>$e->getMessage(),
+                            'code'=>$e->getCode(),
+                            'file'=>$e->getFile(),
+                            'line'=>$e->getLine(),
+                            'trace'=>$e->getTrace(),
+                            'previous'=>$e->getPrevious(),
+                        ]
+                    ]) );
+                } else {
+                    exit( json_encode([
+                        'error'=>[
+                            'message'=>AppCodes::getMessage(AppCodes::SERVER_ERROR)['message'],
+                            'code'=>$e->getCode(),
+                        ],
+                    ]) );
+                }
+			}
+            //if ( $request->isPost() && $request->post('save') ) $this->actionSaveStatuses();
             exit;
         }
     }
@@ -39,6 +64,7 @@ class EditStatusesController extends GeneralController
         $permittedFields = $edit->permittedFields();
         $prevPage = $edit->setPrevPage();
 
+		// Не будет ставить чекбокс. У моделей бывают разные статусы, отобразить их все "не возможно"!
         $status = $edit->getStatus();
 
         $header = "Проставить статус для моделей: ";
@@ -92,26 +118,27 @@ class EditStatusesController extends GeneralController
         $payments = new HandlerPrices(false);
         $payments->connectDBLite();
 
-        $pricesController = new SaveModelController('1');
-
-
+        $pricesController = new SaveModelController('1'); // Не запустит Action()
+		//debugAjax(getType(123, "123","end_ajax_buffer");
+		
         // флаги редакт. модели
-        //$isEdit = 1; // Нужен!!!
         $component = 2;
         Condition::set($component);
 
         $in = "";
 
+		//Внесем статусы в табл. Statuses для каждой модели. И, добавим стоимости, если необходимо
         foreach ( $selectionMode['models'] as $model )
         {
             $modelID = $model['id'];
             $payments->setId($modelID);
+			
             // пропустим итерацию, если статусы в данной модели менять запрещено!
             $modelDate =  $payments->findOne("SELECT date FROM stock WHERE id='$modelID'")['date'];
             if ( !$payments->statusesChangePermission($modelDate, $component) ) //
                 continue;
+				
             $isCurrentStatusPresent = $payments->isStatusPresent($status);
-
             $statusT = [
                 'pos_id' => $modelID,
                 'status' => $status,
@@ -119,19 +146,12 @@ class EditStatusesController extends GeneralController
                 'UPdate'   => $date
             ];
             $payments->addStatusesTable($statusT);
-
+			
             $pricesController->isCurrentStatusPresent = $isCurrentStatusPresent;
-            $pricesController->paymentsRequisite['status'] = $status;
+            $pricesController->paymentsRequisite['status'] = (int)$status;
 
-//            $pricesController->paymentsRequisite['author'] = $author;
-//            $pricesController->paymentsRequisite['modeller3d'] = $modeller3d;
-//            $pricesController->paymentsRequisite['jewelerName'] = $jewelerName;
-
+			//Зачисление стоимостей на каждую модель
             $pricesController->actionSaveData_Prices($payments);
-
-
-            //Зачисление стоимостей на каждую модель, если позволяет статус
-            //require _viewsDIR_ . "_SaveModel/Controllers/paymentsController.php";
 
             $names = explode(' | ', $model['name']);
             $addPush = $pn->addPushNotice($modelID, 2, $names[0], $names[1], $model['type'], $date, $status, User::getFIO());
@@ -148,6 +168,7 @@ class EditStatusesController extends GeneralController
         }
         //debug('','last',1);
 
+		// Изменим статусы в табл. Stock
         $update = false;
         $in = rtrim($in,',');
         if ( !empty($in) )

@@ -36,7 +36,16 @@ function submitForm() {
 		},
 		success:function(resp) {
 			resp = JSON.parse(resp);
-			debug(resp);
+			//debug(resp);
+			//debugModal(resp.debug);
+			if ( resp.error )
+            {
+                AR.setDefaultMessage( 'error', 'subtitle', "Ошибка при сохранении." );
+                AR.error( resp.error.message, resp.error.code, resp.error );
+                
+                edit.classList.remove('hidden');
+                return;
+            }
 
 			if ( +resp.done === 1 ) {
 				modal.iziModal('setIcon', 'glyphicon glyphicon-floppy-saved');
@@ -53,8 +62,10 @@ function submitForm() {
 			back.classList.remove('hidden');
 		},
 		error: function(error) { // Данные не отправлены
-			modal.iziModal('setTitle', 'Ошибка отправки! Попробуйте снова.');
-			modal.iziModal('setHeaderColor', '#95ffb1');
+			AR.serverError( error.status, error.responseText );
+		
+			//modal.iziModal('setTitle', 'Ошибка отправки! Попробуйте снова.');
+			//modal.iziModal('setHeaderColor', '#95ffb1');
 
 			edit.onclick = function() {
 				document.location.reload(true);

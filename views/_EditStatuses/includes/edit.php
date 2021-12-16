@@ -73,12 +73,12 @@
                             <?php foreach ( $workingCenter as $subUnit ) :?>
                                 <div class="list-group">
                                     <a class="list-group-item active"><?=$subUnit['descr']?></a>
-                                    <?php foreach ( $subUnit['statuses'] as $status ) :?>
+                                    <?php foreach ( $subUnit['statuses'] as $stat ) :?>
                                         <a class="list-group-item">
-                                            <input type="radio" <?=$status['check'];?> name="status" id="<?=$status['name_en'];?>" aria-label="..." value="<?=$status['id'];?>">
-                                            <label for="<?=$status['name_en'];?>" title="<?=$status['title'];?>">
-                                                <span class="glyphicon glyphicon-<?=$status['glyphi'];?>"></span>
-                                                <?=$status['name_ru'];?>
+                                            <input type="radio" <?=$stat['check'];?> name="status" id="<?=$stat['name_en'];?>" aria-label="..." value="<?=$stat['id'];?>">
+                                            <label for="<?=$stat['name_en'];?>" title="<?=$stat['title'];?>">
+                                                <span class="glyphicon glyphicon-<?=$stat['glyphi'];?>"></span>
+                                                <?=$stat['name_ru'];?>
                                             </label>
                                         </a>
                                     <?php endforeach; ?>

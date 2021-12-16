@@ -123,7 +123,7 @@ class HandlerPrices extends Handler
      */
     public function addTechPrices(string $priceType )
     {
-        if ( $priceType === 'onVerify' )
+        if ( $priceType === 'onVerify' ) // на проверке
         {
             // Возможно, должно выбрать из базы юзера с доступом MA_techCoord
             $userID = User::getID(); // Будет зачислено тому кто поставил статус, если у него есть MA_techCoord
