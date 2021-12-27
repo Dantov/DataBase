@@ -457,4 +457,50 @@ if ( allTabs )
 //--------- sessionStorage для вкладок END----------//
 
 
+//--------- Модальное окно для удаления статуса ----------//
+let dellCurrStat = document.getElementById("dellCurrentStatus");
+if ( dellCurrStat )
+{
+    dellCurrStat.addEventListener("click", function (event) {
+        event.preventDefault();
 
+        if ( confirm("Удалмть текущий статус?") )
+		{
+			let modelID = document.getElementById("edit").previousElementSibling.getAttribute('value');
+            $.ajax({
+                url: "/add-edit/dellCurrentStatus",
+                type: "POST",
+                data: {
+                    dellCurrentStatus: 1,
+                    modelID: modelID,
+                },
+                //dataType:"json",
+                success:function(result) {
+
+                    //debug(result);
+                    result = JSON.parse(result);
+
+                    debug(result);
+                    if ( result.debug )
+                    	debugModal( result.debug );
+
+                    if ( result.ok )
+                    {
+                        alert(result.ok);
+                        reload();
+					}
+                    if ( result.error )
+					{
+						let err = result.error;
+                        alert("Code: " + err.code + '\n' + err.message);
+					}
+
+                },
+                error:function(error) {
+                    debug(error,"dell status error");
+                }
+            });
+		}
+
+    }, false)
+}

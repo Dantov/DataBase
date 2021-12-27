@@ -28,6 +28,8 @@ class QueryBuilder extends Model
      * текущий запрос Select
      * @var string
      */
+    protected $statement_COUNT = false;
+
     protected $statement_SELECT = '';
 
     protected $statement_FROM = '';
@@ -59,6 +61,13 @@ class QueryBuilder extends Model
      */
     protected $operators = [];
 
+    /**
+     * Tables Data
+     */
+    protected $tableName = '';
+    protected $linkedTables = [];
+    protected $fields = [];
+    public $alias = '';
 
     /**
      * @var Validator
@@ -80,6 +89,7 @@ class QueryBuilder extends Model
 
     protected function reset()
     {
+        $this->statement_COUNT = '';
         $this->statement_SELECT = '';
         $this->statement_FROM = '';
         $this->statement_FIELDS = [];
@@ -112,9 +122,7 @@ class QueryBuilder extends Model
     /**
      * @param string $field
      *
-     * @param array $tFields
      * список полей в которых проверять. Например из др. табл.
-     * @param string $tName
      * @param Table|null $table
      * @return bool
      */
@@ -175,9 +183,44 @@ class QueryBuilder extends Model
         return $functStr;
     }
 
+    /**
+     * Агрегатные функции
+     */
+    /**
+     * Бедет считеть строки
+     * @param string $field
+     * @param string $alias
+     * @return QueryBuilder
+     */
+    public function count( string $alias = '', string $field='' ) : QueryBuilder
+    {
+        if ( $this->statement_SELECT )
+            throw new \Error("You cannot do SELECT and COUNT statements at once!");
+
+        $this->statement_SELECT = "SELECT COUNT";
+        $this->statement_COUNT = true;
+
+        if ( $alias )
+            $alias = " as " . $alias;
+
+        if ( $field )
+        {
+            $this->checkField($field);
+            $this->statement_SELECT .= "(" . ($this->alias ? $this->alias . "." :"") . $field . ")" . $alias;
+        } else {
+            $this->statement_SELECT .= "(1)" . $alias;
+        }
+
+        $this->statement_FROM = 'FROM ' . $this->tableName . ($this->alias ? " as " . $this->alias :"");
+
+        return $this;
+    }
 
     public function select( array $fields ) : QueryBuilder
     {
+        if ( $this->statement_COUNT )
+            throw new \Error("You cannot do SELECT and COUNT statements at once!");
+
         $this->statement_SELECT = "SELECT";
         $allFields = false;
 
@@ -378,7 +421,6 @@ class QueryBuilder extends Model
      * @param array $select
      *
      * Условный оператор по которому соединить столбцы связанных таблиц, указанных в методе ActiveQuery -> Link()
-     * @param string $onOperator
      * @return QueryBuilder
      */
     public function join( Table $table, array $select ) : QueryBuilder //, string $onOperator = '='
@@ -701,9 +743,12 @@ class QueryBuilder extends Model
                 break;
 
             case "single":
-                $res = $this->findOne( $this->build(),  $this->asOneField);
-                //debug($this->buildedQuery,'buildedQuery');
-                //debug($res,'res',1);
+                $asOneField = $this->asOneField; // $this->build() - стирает поле $this->asOneField!!
+                $res = $this->findOne( $this->build(),  $asOneField);
+                break;
+
+            case "aggregateFuncts":
+
                 break;
 
             default :
@@ -712,6 +757,11 @@ class QueryBuilder extends Model
         }
 
         return $res;
+    }
+
+    protected function aggregateFuncts()
+    {
+
     }
 
 }

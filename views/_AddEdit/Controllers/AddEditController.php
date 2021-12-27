@@ -2,6 +2,7 @@
 namespace Views\_AddEdit\Controllers;
 
 use Views\_AddEdit\Models\AddEdit;
+use Views\_AddEdit\Models\Statuses;
 use Views\_SaveModel\Models\Handler;
 use Views\_Globals\Controllers\GeneralController;
 use Views\_Globals\Models\User;
@@ -53,6 +54,9 @@ class AddEditController extends GeneralController
 
                 if ( $request->isGet() && $this->isQueryParam('masterLI') )
                     $this->getMasterLI( (int)$request->get('masterLI') );
+
+                if ( $request->post('dellCurrentStatus') && $modelID = $request->post('modelID') )
+                    $this->dellCurrentStatus($modelID);
 
 
             } catch (\TypeError | \Error | \Exception $e) {
@@ -324,6 +328,16 @@ JS;
         /** Смотрим можно ли изменять статус **/
         $toShowStatuses = $addEdit->statusesChangePermission($row['date']??date("Y-m-d"), $component);
 
+        $toDellLastStatus = false;
+        if ( $toShowStatuses )
+        {
+            $s = new Statuses($id);
+            $lastStatusArray = $s->findLastStatus();
+
+            if ( !$s->isSingle() && $s->checkStatusBelongUser($lastStatusArray['status']) )
+                $toDellLastStatus = true;
+        }
+
 
 		$changeCost = in_array(User::getAccess(), [1,2,8,9,10,11]);
 
@@ -333,7 +347,7 @@ JS;
             'id','component','dellWD','prevPage','collLi','authLi','mod3DLi','jewelerNameLi','modTypeLi','gems_sizesLi','gems_cutLi','toShowStatuses','cT','dcT',
             'gems_namesLi','gems_colorLi','vc_namesLI','permittedFields','collections_len','mainImage','images','setPrevImg','notes','modelPrices','gradingSystem','countRepairs',
             'row','stl_file','rhino_file','ai_file','repairs','materials', 'gemsRow','dopVCs','num3DVC_LI','save','changeCost',
-            'dataArrays','materialsData','coveringsData','handlingsData', 'statusesWorkingCenters','material','covering','labels','complected',
+            'dataArrays','materialsData','coveringsData','handlingsData', 'statusesWorkingCenters','material','covering','labels','complected','toDellLastStatus',
         ]);
         return $this->render('addEdit', $compact2);
     }
@@ -523,6 +537,45 @@ JS;
         }
         if ( $res )
             exit( json_encode($res) );
+
+        exit( json_encode(['error'=>AppCodes::getMessage(AppCodes::MODEL_OUTDATED)]) );
+    }
+
+    /**
+     * @param string $modelID
+     * @throws \Exception
+     */
+    protected function dellCurrentStatus( string $modelID )
+    {
+        if ( !$modelID )
+            exit( json_encode(['error'=>AppCodes::getMessage(AppCodes::MODEL_DOES_NOT_EXIST)]) );
+
+        $id = Crypt::strDecode($modelID);
+
+        $s = new Statuses($id);
+
+        if ( $s->isSingle() )
+            exit(json_encode(['error' => 'Нельзя удалить единственный статус.']));
+
+        $lastStatusArray = $s->findLastStatus();
+
+        if ( $s->checkStatusBelongUser($lastStatusArray['status']) )
+        {
+
+            if ( $s->deleteStatus( $lastStatusArray['id'] ) )
+            {
+                $lastStatusArray = $s->findLastStatus();
+                if ( $s->updateStockStatus($lastStatusArray) )
+                    exit(json_encode(['ok' => 'Статус успешно удален.']));
+
+
+                exit(json_encode(['error' => 'Ошибка при обновлении статуса.']));
+            }
+
+            exit(json_encode(['error' => 'Ошибка при удалении из истории статусов.']));
+
+        }
+
 
         exit( json_encode(['error'=>AppCodes::getMessage(AppCodes::MODEL_OUTDATED)]) );
     }

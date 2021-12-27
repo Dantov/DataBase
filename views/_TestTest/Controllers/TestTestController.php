@@ -86,11 +86,14 @@ class TestTestController extends GeneralController
             ->asOne('countSt')
             ->exe();
 
+        $statuses = $aq->registerTable('statuses');
+        $count3 = $statuses->count('c')->where(['pos_id','=',2515])->asOne('c')->exe();
+
         //$testform1 = $stock->findAll()->where(['id','>',70],['email','like','dant'])->with('files')->orderby('name')->limit(2)->go();
         //$testform1 = $stock->findAll()->limit(1)->go();
         //$testform1 = $stock->findOne()->where(['id','<',72])->with('files')->go();
 
-        $compacted = compact(['hello','res', 'res2', 'build', 'where','old_style']);
+        $compacted = compact(['hello','res', 'res2', 'build', 'where','old_style', 'count3']);
         return $this->render('test', $compacted);
     }
 

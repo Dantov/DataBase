@@ -6,7 +6,8 @@ if (!defined( '_WORK_PLACE_') ) define('_WORK_PLACE_', false); // true - раб�
 
 define('_rootDIR_', $_SERVER['DOCUMENT_ROOT'].'/');  // подключить скрипты
 
-define('_stockDIR_', _rootDIR_.'Stock/');
+//define('_stockDIR_', _rootDIR_.'Stock/');
+define('_stockDIR_', implode('/', array_splice(explode('/',_rootDIR_),0,-2) ).'/HufDB.stock/Stock/');
 define('_viewsDIR_', _rootDIR_.'Views/');  // подключить скрипты
 define('_globDIR_', _viewsDIR_.'_Globals/');  // подключить скрипты
 
@@ -20,7 +21,8 @@ define('_webDIR_HTTP_', _rootDIR_HTTP_ . 'web/'); // для ссылок
 
 define('_views_HTTP_', _rootDIR_HTTP_.'Views/'); // для ссылок
 define('_glob_HTTP_', _views_HTTP_.'/_Globals/'); // для ссылок
-define('_stockDIR_HTTP_', _rootDIR_HTTP_.'Stock/'); // http://192.168.0.245/HUF_DB/Stock/
+//define('_stockDIR_HTTP_', _rootDIR_HTTP_.'Stock/'); // http://192.168.0.245/HUF_DB/Stock/
+define('_stockDIR_HTTP_', 'https://hufdb.stock/Stock/'); // http://192.168.0.245/HUF_DB/Stock/
 
 
 if ( _DEV_MODE_ )

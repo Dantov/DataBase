@@ -1047,14 +1047,20 @@ $permittedFields = User::permissions();
             <!-- Statuses -->
             <div class="col-xs-12 status" id="workingCenters">
                 <p title="Текущий статус изделия" style="cursor: default;">
-                <span>
-                    <span class="glyphicon glyphicon-ok"></span>
-                    &#160;Текущий статус изделия:
-                </span>
+                    <span>
+                        <span class="glyphicon glyphicon-ok"></span>
+                        &#160;Текущий статус изделия:
+                    </span>
                     <span class="label label-warning" style="font-weight: bold;font-size: medium;" title="<?= $row['status']['title']??'' ?>" >
-                    <span style="color: #1C1C1C" class="glyphicon glyphicon-<?= $row['status']['glyphi']??''?>"></span>
-                    <span id="currentStatus" ><?=$row['status']['name_ru']??''?></span>
-                </span>
+                        <span style="color: #1C1C1C" class="glyphicon glyphicon-<?= $row['status']['glyphi']??''?>"></span>
+                        <span id="currentStatus" ><?=$row['status']['name_ru']??''?></span>
+                    </span>
+                    <?php if ( $toDellLastStatus ): ?>
+                        <button id="dellCurrentStatus" title="Удалить текущий статус" onclick="" class="btn btn-sm btn-default ml-2 mb-1">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    <?php endif; ?>
+
                     <button id="openAll" title="Раскрыть Все" onclick="event.preventDefault()" style="margin-bottom: 10px" class="pull-right btn btn-sm btn-info"><span class="glyphicon glyphicon-menu-left"></span> Раскрыть Все</button>
                     <button id="closeAll" title="Закрыть Все" onclick="event.preventDefault()" style="margin-bottom: 10px" class="pull-right hidden btn btn-sm btn-primary"><span class="glyphicon glyphicon-menu-down"></span> Закрыть Все</button>
                 <div class="clearfix"></div>

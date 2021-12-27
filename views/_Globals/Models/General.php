@@ -313,7 +313,7 @@ class General extends Model
     {
         if ( $stockStatus = (int)$stockStatus )
         {
-            foreach ( $this->statuses as $status )
+            foreach ( $this->statuses??[] as $status )
             {
                 if ( (int)$status['id'] === $stockStatus )
                 {
@@ -418,7 +418,7 @@ class General extends Model
 
     /**
      * @param $query
-     * @param string $location
+     * @param string $location - ID участка
      * @return bool | mixed
      * @throws \Exception
      */
@@ -496,6 +496,28 @@ class General extends Model
 
 		return false;
 	}
+
+    /**
+     * Вернет массив с данными этого статуса, по его ID
+     * @param int $statusID - id искомого статуса
+     * @return array
+     * @throws \Exception
+     */
+	public function getStatusInfo( int $statusID ) : array
+    {
+
+        if( !trueIsset($this->statuses)  )
+             $this->getStatLabArr('status');
+
+        foreach ( $this->statuses as $statusArr )
+        {
+            if ( $statusArr['id'] == $statusID )
+                return $statusArr;
+        }
+
+        return [];
+    }
+
 
     /**
      * @param int $maxAllowedFiles
@@ -611,11 +633,11 @@ class General extends Model
                 'preset' => [2,9,11],
             ],
             10=>[ // В ремонте 3D
-                'notPresent' => 2,
-                'preset' => [2,9,11,8],
+                'notPresent' => 2, // Проверено
+                'preset' => [2,7,9,11,8],
             ],
             47=>[ // Готово 3д
-                'notPresent' => 101, //106
+                'notPresent' => 1, //101, 106
                 'preset' => [2,9,11],
             ],
             /*
@@ -629,7 +651,7 @@ class General extends Model
                 'preset' => [9,7],
             ],
             101=>[// Подпись технолога
-                'notPresent' => 2,
+                'notPresent' => 2, // Проверено
                 'preset' => [9,11],
             ],
             2=>[ // Проверено
@@ -655,17 +677,6 @@ class General extends Model
 
             if ( User::getAccess() !== 1 )
             {
-                //$toShowStatuses = array_key_exists(User::getAccess(),$changeStatusesAccess) && $this->isStatusPresent( $changeStatusesAccess[User::getAccess()] );
-
-//                foreach ($currentStatusesAccess as $status => $access)
-//                {
-//                    // доступ для ред. статусов только пользователям с пресетам как в массивах
-//                    if ( $this->isStatusPresent( $status ) && !$this->isStatusPresent( $access['notPresent'] ) )
-//                    {
-//                        $toShowStatuses = in_array(User::getAccess(), $access['preset']);
-//                        break;
-//                    }
-//                }
 
                 // Для этого способа нужна временная метка
                 foreach ($currentStatusesAccess as $status => $access)
@@ -675,10 +686,12 @@ class General extends Model
                     {
                         if ( $status2LastDate = $this->statusPresentLastDate($access['notPresent']) )
                         {
+
                             $status1LastDate = strtotime($status1LastDate);
                             $status2LastDate = strtotime($status2LastDate);
 //                            debug($status1LastDate,'$status1LastDate');
 //                            debug($status2LastDate,'$status2LastDate');
+
                             if ( ($status1LastDate > $status2LastDate) ) //|| ($status1LastDate == $status2LastDate)
                             {
 //                                debug($status,'$status принятия: ');

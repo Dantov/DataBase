@@ -9,6 +9,7 @@ use Views\_Globals\Controllers\GeneralController;
 use Views\_Globals\Models\{
     ProgressCounter, PushNotice, SelectionsModel, User
 };
+use Views\vendor\libs\classes\AppCodes;
 
 
 class EditStatusesController extends GeneralController
@@ -26,7 +27,9 @@ class EditStatusesController extends GeneralController
         {
 			try 
 			{
-				if ( $request->isPost() && $request->post('save') ) $this->actionSaveStatuses();
+				if ( $request->isPost() && $request->post('save') )
+				    $this->actionSaveStatuses();
+
 			} catch (\TypeError | \Error | \Exception $e) {
 				if ( _DEV_MODE_ )
                 {
@@ -96,6 +99,9 @@ class EditStatusesController extends GeneralController
         $status = $request->post('status');
         $date = date('Y-m-d');
 
+        //debugAjax($status,'status');
+
+
         $result = [
             'done'=>'',
         ];
@@ -118,8 +124,9 @@ class EditStatusesController extends GeneralController
         $payments = new HandlerPrices(false);
         $payments->connectDBLite();
 
+        //debugAjax($payments->getStatusInfo($status),'statusINFO',"end_ajax_buffer");
+
         $pricesController = new SaveModelController('1'); // Не запустит Action()
-		//debugAjax(getType(123, "123","end_ajax_buffer");
 		
         // флаги редакт. модели
         $component = 2;
@@ -135,8 +142,11 @@ class EditStatusesController extends GeneralController
 			
             // пропустим итерацию, если статусы в данной модели менять запрещено!
             $modelDate =  $payments->findOne("SELECT date FROM stock WHERE id='$modelID'")['date'];
+            //debugAjax($modelDate, "modelDate");
             if ( !$payments->statusesChangePermission($modelDate, $component) ) //
                 continue;
+
+            //debugAjax($model, "model-END", END_AB);
 				
             $isCurrentStatusPresent = $payments->isStatusPresent($status);
             $statusT = [
@@ -167,6 +177,7 @@ class EditStatusesController extends GeneralController
             $progress->progressCount( ceil( ( ++$progressCounter * 100 ) / $overallProcesses ) );
         }
         //debug('','last',1);
+        //debugAjax(123,'END',END_AB);
 
 		// Изменим статусы в табл. Stock
         $update = false;
@@ -178,7 +189,6 @@ class EditStatusesController extends GeneralController
             $update = $payments->baseSql($sql);
         }
 
-        //$payments->closeDB();
 
         if ( $update )
         {

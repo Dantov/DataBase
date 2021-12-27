@@ -16,4 +16,5 @@
 
 <?php debug($res,"new style");?>
 <?php debug($res2,"COUNT");?>
+<?php debug($count3,"COUNT 3");?>
 <?php debug($old_style,"old_style");?>

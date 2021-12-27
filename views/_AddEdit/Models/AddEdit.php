@@ -2,6 +2,7 @@
 namespace Views\_AddEdit\Models;
 use Views\_Globals\Models\General;
 use Views\_SaveModel\Models\ImageConverter;
+use Views\vendor\core\ActiveQuery;
 
 class AddEdit extends General
 {
@@ -357,49 +358,6 @@ class AddEdit extends General
         return $this->findAsArray( " SELECT * FROM model_prices WHERE pos_id='$this->id' ");
     }
 
-	/*	Старый вариант
-	public function getMaterial($str_material) 
-	{
-		$material = array();
-		if ( !empty($str_material) ) {
-			$material_arr = explode(";",$str_material);
-			foreach ( $material_arr as &$value ) {
-				if ( "Золото" == $value )       $material['metall_gold'] = "checked";
-				if ( "Серебро" == $value )      $material['metall_silv'] = "checked";
-				
-				if ( "585" == $value )          $material['probe585'] = "checked";
-				if ( "750" == $value )          $material['probe750'] = "checked";
-				
-				if ( "Белое" == $value )        $material['gold_white'] = "checked";
-				if ( "Красное" == $value )      $material['gold_red'] = "checked";
-				if ( "Желтое(евро)" == $value ) $material['gold_yellow'] = "checked";
-			}
-		} else {
-			$material['metall_silv'] = "checked";
-		}
-		return $material;
-	}
-	public function getCovering($str_covering) {
-		$covering = array();
-		if ( !empty($str_covering) ) {
-			$covering_arr = explode(";",$str_covering);
-			foreach ( $covering_arr as &$value ) {
-				if ( "Родирование" == $value )      $covering['rhodium']  = "checked";
-				if ( "Золочение" == $value )        $covering['golding']  = "checked";
-				if ( "Чернение" == $value )         $covering['blacking'] = "checked";
-				
-				if ( "Полное" == $value )           $covering['full']     = "checked";
-				if ( "Частичное" == $value )        $covering['onPartical']    = "checked";
-				if ( "По крапанам" == $value )      $covering['onProngs'] = "checked";
-				if ( "Отдельные части" == $value )  $covering['parts'] = "checked";
-			}
-			$covering_part = explode("-",$str_covering);
-			if ( $covering_part[1] ) $covering['partsStr'] = $covering_part[1];
-		}
-
-		return $covering;
-	}
-	*/
     /**
      * @param bool $row
      * @param bool $complected
@@ -693,9 +651,43 @@ class AddEdit extends General
         return $result;
     }
 
+    /**
+     * вернет массив разрешенных статусов для текущего пользователя
+     * @param array $uD
+     * @return array
+     */
+    public function getPermittedStatuses( array $uD = [] ) : array
+    {
+        $userData = $this->user;
+        if ( $uD )
+            $userData = $uD;
+
+        $locations = explode(',',$userData['location']); // ID участки к которому относится юзер
+
+        $statuses = $this->statuses; // все возможные статусы
+        $permittedStatuses = []; // разрешенные статусы на участок
+
+        if ( $userData['access'] > 1 )
+        {
+            foreach ( $statuses as $status )
+            {
+                foreach ( $locations as $location )
+                {
+                    // возьмем статусы которые подходят этому юзеру
+                    if ( (int)$status['location'] === (int)$location ) $permittedStatuses[] = $status;
+                }
+            }
+        } else {
+            //иначе возьмем все статусы
+            $permittedStatuses = $statuses;
+        }
+
+        return $permittedStatuses;
+    }
 
 	public function getStatus($stockStatusID='', $selMode='')
     {
+        /*
 		$locations = explode(',',$this->user['location']); // ID участки к которому относится юзер
 
 		$statuses = $this->statuses; // все возможные статусы
@@ -715,6 +707,9 @@ class AddEdit extends General
             //иначе возьмем все статусы
             $permittedStatuses = $statuses;
         }
+        */
+
+        $permittedStatuses = $this->getPermittedStatuses(); // разрешенные статусы на участок
 
 		// Этот код ставит галочку на текущем статусе в соответствии со статусом в таблице Stock
 		if ( !empty($stockStatusID) )
@@ -872,6 +867,5 @@ class AddEdit extends General
 
         return $resp;
     }
-
 
 }

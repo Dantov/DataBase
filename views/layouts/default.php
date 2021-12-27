@@ -309,6 +309,7 @@ JS;
     {
         debug($_GET,'$_GET');
         //debug($_SERVER,'$_SERVER');
+        debug(_stockDIR_,'_stockDIR_');
         debug($this->getQueryParams(),'QueryParams');
         debug($_SESSION,'$_SESSION');
         debug($_COOKIE,'$_COOKIE');

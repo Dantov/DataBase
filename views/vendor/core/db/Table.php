@@ -16,19 +16,22 @@ namespace Views\vendor\core\db;
 class Table extends QueryBuilder
 {
 
-    protected $tableName = '';
-    protected $linkedTables = [];
+    //protected $tableName = '';
+    //protected $linkedTables = [];
 
 
-
-    public $alias = '';
+    //public $alias = '';
     /**
      * список полей таблицы
      * @var array
      */
-    protected $fields = [];
+    //protected $fields = [];
 
-
+    /**
+     * Table constructor.
+     * @param string $tableName
+     * @throws \Exception
+     */
     public function __construct( string $tableName )
     {
         parent::__construct();
@@ -44,7 +47,7 @@ class Table extends QueryBuilder
 
     public function getStatementQuery() : string
     {
-        return $this->statementQuery;
+        return $this->buildedQuery;
     }
 
 

@@ -36,8 +36,12 @@ function submitForm() {
 		},
 		success:function(resp) {
 			resp = JSON.parse(resp);
-			//debug(resp);
-			//debugModal(resp.debug);
+			debug(resp);
+			if (resp.debug)
+			{
+                debugModal(resp.debug);
+			}
+
 			if ( resp.error )
             {
                 AR.setDefaultMessage( 'error', 'subtitle', "Ошибка при сохранении." );
