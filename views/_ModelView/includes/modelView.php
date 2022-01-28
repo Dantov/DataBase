@@ -14,7 +14,7 @@ $isView = true;
                 <a href="#" role="tab" id="butt3D" data-toggle="tab" ><span class="button-3D-pict"></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Просмотр</a>
                 <form method="POST" id="extractForm" class="hidden">
                     <input type="hidden" name="zip_name" value="<?=$button3D?>" />
-                    <input type="hidden" name="zip_id" value="<?=$row['id']?>" />
+                    <input type="hidden" name="zip_id" value="<?=$id?>" />
                     <input type="hidden" name="zip_num3d" value="<?=$row['number_3d']?>" />
                     <input type="hidden" name="zipExtract" value="1" />
                 </form>

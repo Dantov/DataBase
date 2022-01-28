@@ -214,7 +214,7 @@ JS;
         $filePath = $pathAbsolute.$zip_name;
         if ( !file_exists($filePath) )
         {
-            $resp_arr['errMessage'] = 'ExtractZip: Zip archive '.$zip_name.' not found.';
+            $resp_arr['errMessage'] = 'ExtractZip: Zip archive '.$filePath.' not found.';
             echo json_encode($resp_arr);
             exit;
         }

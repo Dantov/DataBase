@@ -23,7 +23,7 @@ return [
         'logs'   => '/runtime/logs', // false - отключает логи
         'mode'   => _DEV_MODE_ ? 3 : 0,
     ],
-	'https' => true, //false
+	'https' => false, //false
     'csrf' => false, // валидация данных для форм и JS
     'classes' => [  // подключаемые классы
         //'cache' => 'dtw\Cache',

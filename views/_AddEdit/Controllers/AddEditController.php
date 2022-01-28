@@ -315,12 +315,17 @@ JS;
 
 
         $gradingSystem = $addEdit->gradingSystem();
-        if ( User::permission('MA_modeller3D') )
+        if ( User::permission('MA_modeller3D'))
         {
             $gradingSystem3D = $addEdit->gradingSystem(1);
             $gradingSystem3DRep = $addEdit->gradingSystem(8);
             $this->includePHPFile('grade3DModal.php', compact(['gradingSystem3D','gradingSystem3DRep']) );
+        } elseif ( User::permission('MA_modellerJew') )
+        {
+            $this->includePHPFile('grade3DModal.php');
         }
+
+
         if ( User::permission('modelAccount') )
             $this->includeJSFile('gradingSystem.js', ['defer','timestamp'] );
 
