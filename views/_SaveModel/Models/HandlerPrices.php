@@ -2,7 +2,9 @@
 namespace Views\_SaveModel\Models;
 
 use Views\_Globals\Models\User;
+use Views\vendor\core\ActiveQuery;
 use Views\vendor\libs\classes\AppCodes;
+use Views\vendor\libs\classes\Validator;
 
 class HandlerPrices extends Handler
 {
@@ -231,6 +233,7 @@ class HandlerPrices extends Handler
     }
 
     /**
+     * Манипуляции с прайсами модельеров-доработчиков
      * @param string $priceType
      * @param array $price
      * @param string $jewelerName
@@ -239,30 +242,64 @@ class HandlerPrices extends Handler
      */
     public function addModJewPrices(string $priceType, array $price = [], string $jewelerName = '')
     {
-        //debugAjax( $price,'$price' , END_AB );
+        //debugAjax( $price,'$price');
+
+        // пришло на удаление
+        if ( isset($price['toDell']) )
+        {
+            $toDell = $price['toDell'];
+            unset($price['toDell']);
+            $inD  = '';
+            foreach ($toDell as $toDellID)
+            {
+                if ( !trueIsset($toDellID) ) continue;
+                $inD .= $toDellID . ',';
+            }
+            if ($inD)
+            {
+                $inD = '(' . rtrim($inD, ',') . ')';
+                $this->baseSql(" DELETE FROM model_prices WHERE id IN $inD ");
+            }
+        }
+
+        //debugAjax( $this->parseRecords($price),'parsed' , END_AB );
+
+        $prices = $this->parseRecords($price);
+
         if ( $priceType === 'add' )
         {
             // Взяли моделлера из Инпута (по другому никак), нашли его ID из табл
-            $userID = $this->getUserIDFromSurname( explode(" ", $jewelerName)[0] );
-            if ( !$userID ) return -1;
+            $modellerJewID = $this->getUserIDFromSurname( explode(" ", $jewelerName)[0] );
+            if ( !$modellerJewID ) return -1;
 
-            $queryGS = $this->findOne("SELECT id as gs_id, grade_type as is3d_grade, description as cost_name, points as value FROM grading_system WHERE id='95'");
-            $jewPriceID = $this->findOne("SELECT id FROM model_prices WHERE pos_id='$this->id' AND (is3d_grade='6' AND status='0')");
+            $validator = new Validator();
 
-            $queryGS['id'] = $jewPriceID['id']??'';
-            //$queryGS['id'] = $price['id']??null;
-            //if ( trueIsset($price['id']) ) $queryGS['id'] = (int)$price['id'];
+            $costNameRule = [
+                'cost_name' => [
+                    'name' => "Название стоимости",
+                    'rules' => [
+                        'required' => true,
+                        'maxLength' => 100,
+                    ]
+                ]
+            ];
+            foreach ($prices as &$gsRow)
+            {
+                $validator->validateField('cost_name',$gsRow['cost_name'], $costNameRule);
 
-            $queryGS['value'] = (int)$price['value'];
-            $queryGS['user_id'] = $userID;
-            $queryGS['pos_id'] = $this->id;
-            $queryGS['date'] = $this->date;
+                $gsRow['gs_id'] = 95;
+                $gsRow['is3d_grade'] = 6;
+                $gsRow['user_id'] = $modellerJewID;
+                $gsRow['value'] = (int)$gsRow['value'];
+                $gsRow['pos_id'] = $this->id;
 
-            $row = [$queryGS];
+                $gsRow['date'] = $this->date;
+            }
+            if ( $validator->getLastError() )
+                exit( json_encode($validator->getAllErrors()) );
 
-            //debugAjax( $row,'$row' , END_AB );
-
-            $this->insertUpdateRows($row, 'model_prices');
+            //debugAjax( $prices,'$prices' , END_AB );
+            $this->insertUpdateRows($prices, 'model_prices');
         }
 
         if ( $priceType === 'signalDone' )
@@ -332,10 +369,17 @@ class HandlerPrices extends Handler
         if ( !User::permission('paymentManager') )
             return ['error'=>AppCodes::getMessage(AppCodes::NO_PERMISSION_TO_PAY)];
 
-        $in = "(";
-        foreach ($priceIDs as $pID) $in .= $pID.',';
-        $in = rtrim($in,',') . ")";
+        $in = "";
+        foreach ($priceIDs as $pID)
+        {
+            if ( empty($pID) ) continue;
+            $in .= $pID.',';
+        }
+        $in = rtrim($in,',');
+        if ( empty($in) )
+            return ['error'=>AppCodes::getMessage(AppCodes::PAYING_ERROR)];
 
+        $in = "(" . $in . ")";
         $userID = User::getID();
         $sql = " UPDATE model_prices SET paid='1', paid_date='$this->date', who_paid='$userID' WHERE id IN $in ";
         $this->baseSql($sql);
@@ -346,4 +390,47 @@ class HandlerPrices extends Handler
         return ['error'=>AppCodes::getMessage(AppCodes::PAYING_ERROR)];
     }
 
+    /**
+     * @param array $priceIDs
+     * @return array
+     * @throws \Exception
+     */
+    public function enrollAndPayPrices(array $priceIDs ) : array
+    {
+        $in = "";
+        foreach ($priceIDs as $pID)
+        {
+            if ( empty($pID) ) continue;
+            $in .= $pID.',';
+        }
+        $in = rtrim($in,',');
+        if ( empty($in) )
+            return ['error'=>AppCodes::getMessage(AppCodes::PAYING_ERROR)];
+
+        $in = "(" . $in . ")";
+        $userID = User::getID();
+        $sql = "UPDATE model_prices SET status='1', status_date='$this->date', paid='1', paid_date='$this->date', who_paid='$userID' WHERE id IN $in ";
+        $this->baseSql($sql);
+
+        if ( mysqli_affected_rows($this->connection) )
+            return ['success'=>AppCodes::getMessage(AppCodes::PAY_SUCCESS)];
+
+        return ['error'=>AppCodes::getMessage(AppCodes::PAYING_ERROR)];
+    }
+
+    /**
+     * Проверим есть ли прайс с таким ID
+     * @param int $priceID
+     * @return bool
+     * @throws \Exception
+     */
+    public function isPriceExist( int $priceID ) : bool
+    {
+        $aq = new ActiveQuery();
+
+        $model_prices = $aq->registerTable('model_prices');
+        $res = $model_prices->count()->where('id','=',$priceID)->asOne()->exe();
+
+        return $res ? true : false;
+    }
 }

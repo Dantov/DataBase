@@ -944,7 +944,7 @@ $permittedFields = User::permissions();
                             <div class="panel-heading" title="Стоимость Доработки">
                                 <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
                                 <strong>Доработка модели</strong>
-                                <?php if ( !$this->isCredited($modelPrices, 6) ): //!count($modelPrices) ?>
+                                <?php if ( !$this->isPayed($modelPrices??[], 6) ): //!count($modelPrices) ?>
                                     <button class="btn btn-sm btn-default pull-right addModellerJewPrice" style="top:-5px !important; position:relative;" type="button" title="Добавить стоимость">
                                         <span class="glyphicon glyphicon-plus"></span>
                                     </button>
@@ -970,26 +970,23 @@ $permittedFields = User::permissions();
                                         <?php $modelPricePaid = (int)$modelPrice['paid'] ?>
                                         <tr>
                                             <td style="width: 30px"><?= ++$priceNum ?></td>
-                                            <td><?= $modelPrice['cost_name'] ?></td>
                                             <td>
-                                                <?php if ( $modelPriceStatus === 1 ): ?>
-                                                    <?= $modelPrice['value'] ?>
+                                                <?php if ( $modelPriceStatus === 1 ): // Зачислено (инпут не выводим)?>
+                                                    <?= $modelPrice['cost_name'] ?>
                                                 <?php else: ?>
-                                                    <input class="form-control"  name="modellerJewPrice[value]" value="<?= $modelPrice['value'] ?>" />
-                                                    <input hidden class="hidden" name="modellerJewPrice[id]" value="<?= $modelPrice['id'] ?>" />
+                                                    <input class="form-control jewPriceName"  name="modellerJewPrice[cost_name][]" value="<?= $modelPrice['cost_name'] ?>" />
                                                 <?php endif; ?>
                                             </td>
-                                            <td></td>
-                                            <td style="width:100px;"></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                    <tr class="active text-bold t-total">
-                                        <td style="width: 30px"></td>
-                                        <td>Всего: </td>
-                                        <td><?= $pr_total; ?></td>
-                                        <?php $wholeTotal += $pr_total; ?>
-                                        <td>
-                                            <?php if ( $priceNum ): ?>
+                                            <td>
+                                                <?php if ( $modelPriceStatus === 1 ): // Зачислено (инпут не выводим)?>
+                                                    <?= $modelPrice['value'] ?>
+                                                <?php else: ?>
+                                                    <input class="form-control jewPriceValue"  name="modellerJewPrice[value][]" value="<?= $modelPrice['value'] ?>" />
+                                                    <input hidden class="hidden jewPriceID" name="modellerJewPrice[id][]" value="<?= $modelPrice['id'] ?>" />
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <!-- Статус  -->
                                                 <?php if ( $modelPriceStatus === 1 ): ?>
                                                     <span class="label label-primary ">Зачислено!</span>
                                                 <?php else: ?>
@@ -999,9 +996,30 @@ $permittedFields = User::permissions();
                                                     <span class="label label-success ">Оплачено!</span>
                                                 <?php else: ?>
                                                     <span class="label label-default ">Не Оплачено!</span>
+
                                                 <?php endif; ?>
-                                            <?php endif; ?>
-                                        </td>
+
+                                            </td>
+                                            <td style="width:100px;">
+                                                <?php if ( $modelPricePaid !== 1 ): ?>
+                                                    <?php if ( User::getID() === 53 ): // Жуковская?>
+                                                        <button type="button" data-toggle="" data-prices="single" data-priceID="<?=$modelPrice['id']?>" data-target="" class="btn btn-sm btn-success payJewPriceBtn"  title="Оплатить">
+                                                            <span class="glyphicon glyphicon-usd"></span>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                    <button class="btn btn-sm btn-default maJewPriceDell" type="button" onclick="deleteRow(this);" title="Удалить Стоимость">
+                                                        <span class="glyphicon glyphicon-trash"></span>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    <tr class="active text-bold t-total">
+                                        <td style="width: 30px"></td>
+                                        <td>Всего: </td>
+                                        <td><?= $pr_total; ?></td>
+                                        <?php $wholeTotal += $pr_total; ?>
+                                        <td></td>
                                         <td></td>
                                     </tr>
                                 </tbody>

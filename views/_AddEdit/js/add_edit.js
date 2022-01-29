@@ -464,7 +464,7 @@ if ( dellCurrStat )
     dellCurrStat.addEventListener("click", function (event) {
         event.preventDefault();
 
-        if ( confirm("Удалмть текущий статус?") )
+        if ( confirm("Удалить текущий статус?") )
 		{
 			let modelID = document.getElementById("edit").previousElementSibling.getAttribute('value');
             $.ajax({

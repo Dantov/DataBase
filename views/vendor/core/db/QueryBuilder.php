@@ -205,6 +205,7 @@ class QueryBuilder extends Model
 
         if ( $field )
         {
+            //throw new \Error($field . " at once!");
             $this->checkField($field);
             $this->statement_SELECT .= "(" . ($this->alias ? $this->alias . "." :"") . $field . ")" . $alias;
         } else {

@@ -98,12 +98,15 @@ class SaveModelController extends GeneralController
      */
     public function action()
     {
+
         $progress = $this->progress;
         //============= CP ==============//
         $progress->count();
 
         chdir(_stockDIR_);
         $request = $this->request;
+
+        //debugAjax($request->post,"post",END_AB);
 
         $this->stockID = (int)Crypt::strDecode($request->post('id'));
         $handler = $this->h = new Handler($this->stockID);

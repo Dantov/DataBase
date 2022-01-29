@@ -905,6 +905,31 @@ class Handler extends General
         return $result;
     }
 
+    /**
+     *  Преобразует:
+        [name] => Array
+            (
+                [0] => строка
+            )
+        [value] => Array
+            (
+                [0] => 150
+            )
+
+        [id] => Array
+            (
+                [0] => 2196
+            )
+     *  В:
+        [0] => Array
+            (
+                [name] => строка
+                [value] => 150
+                [id] => 2196
+            )
+     * @param $records
+     * @return array
+     */
 	public function parseRecords($records)
     {
         if ( !is_array($records) ) return [];

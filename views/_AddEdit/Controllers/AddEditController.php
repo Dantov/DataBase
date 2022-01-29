@@ -6,6 +6,7 @@ use Views\_AddEdit\Models\Statuses;
 use Views\_SaveModel\Models\Handler;
 use Views\_Globals\Controllers\GeneralController;
 use Views\_Globals\Models\User;
+use Views\_SaveModel\Models\HandlerPrices;
 use Views\_SaveModel\Models\ImageConverter;
 use Views\vendor\core\Crypt;
 use Views\vendor\core\Files;
@@ -57,6 +58,9 @@ class AddEditController extends GeneralController
 
                 if ( $request->post('dellCurrentStatus') && $modelID = $request->post('modelID') )
                     $this->dellCurrentStatus($modelID);
+
+                if ( $request->post('countCurrentJewPrice') && $priceID = (int)$request->post('priceID') )
+                    $this->countCurrentJewPrice($priceID);
 
 
             } catch (\TypeError | \Error | \Exception $e) {
@@ -521,6 +525,23 @@ JS;
     }
 
     /**
+     * Проверим есть ли оплаченные прайсы
+     * @param array $modelPrices
+     * @param int $gradeType
+     * @return bool
+     */
+    protected function isPayed( array $modelPrices = [], int $gradeType ) : bool
+    {
+        //debug($modelPrices,'$modelPrices',1);
+        foreach ( $modelPrices as $modelPrice )
+        {
+            if ( (int)$modelPrice['is3d_grade'] !== $gradeType ) continue;
+            if ( $modelPrice['paid'] ) return true;
+        }
+        return false;
+    }
+
+    /**
      * @param int $which
      * @throws \Exception
      */
@@ -585,4 +606,26 @@ JS;
         exit( json_encode(['error'=>AppCodes::getMessage(AppCodes::MODEL_OUTDATED)]) );
     }
 
+    /**
+     * @param int $priceID
+     * @throws \Exception
+     */
+    protected function countCurrentJewPrice( int $priceID )
+    {
+        if ( !$priceID )
+            exit( json_encode(['error'=>AppCodes::getMessage(AppCodes::PAYING_ERROR)]) );
+
+        //$id = Crypt::strDecode($modelID);
+
+        $hp = new HandlerPrices();
+
+
+        if ( $hp->isPriceExist($priceID) )
+        {
+            exit( json_encode( $hp->enrollAndPayPrices([$priceID]) ) );
+        }
+
+
+        exit( json_encode(['error'=>AppCodes::getMessage(AppCodes::PRICE_DOES_NOT_EXIST)]) );
+    }
 }

@@ -16,6 +16,7 @@ switch ($whichRepair)
         $repairRow['whichName']   =  'Ремонт 3Д №';
         $repairRow['panelColor']  =  '#5fd7f5';
         $repairRow['panelIcon']   =  'fa-draw-polygon';
+        $repairRow['is3d_grade']   =  8;
 
         $whichName = '3d';
     } break;
@@ -25,6 +26,7 @@ switch ($whichRepair)
         $repairRow['whichName']   =  'Ремонт Мастер модели №';
         $repairRow['panelColor']  =  '#c1b467';
         $repairRow['panelIcon']   =  'fa-screwdriver';
+        $repairRow['is3d_grade']   =  9;
 
         $whichName = 'jew';
     } break;
@@ -34,6 +36,7 @@ switch ($whichRepair)
         $repairRow['whichName']   =  'Ремонт модели на производстве №';
         $repairRow['panelColor']  =  '#c2b497';
         $repairRow['panelIcon']   =  'fa-hammer';
+        $repairRow['is3d_grade']   =  10;
 
         $whichName = 'prod';
     } break;
@@ -140,7 +143,7 @@ $collapseID = "repairCollapse_" . $repair['id'];
             <li class="list-group-item">
                 <i class="fas fa-dollar-sign"></i>
                 <strong><i>Стоимость ремонта</i></strong>
-                <?php if ( !$this->isCredited($repair['prices']??[], 8) ): ?>
+                <?php if ( !$this->isCredited($repair['prices']??[], $repairRow['is3d_grade']) ): ?>
                     <button class="btn btn-sm btn-default pull-right repairPriceAdd" style="top:-5px !important; position:relative;" data-toggle="modal" data-target="#repairPricesModal" type="button" title="Добавить оценку">
                         <span class="glyphicon glyphicon-plus"></span>
                     </button>

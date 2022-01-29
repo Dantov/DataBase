@@ -9,6 +9,8 @@ function GradingSystem()
 
     this.init();
     this.deleteGS3DRow();
+    this.deleteJewPriceRow();
+    this.payJewPriceBtn();
 }
 
 GradingSystem.prototype.init = function()
@@ -29,7 +31,7 @@ GradingSystem.prototype.init = function()
         {
             addButton.addEventListener('click', function() {
                 that.addModellerJewPrice();
-                this.classList.add('hidden');
+                //this.classList.add('hidden'); // не будем скрывать кнопку + (добавляем несколько стоимостей для доработки)
             });
         }
     }
@@ -44,26 +46,131 @@ GradingSystem.prototype.init = function()
     debug('GradingSystem3D init ok!');
 };
 
+/**
+ * Добавление строки стоимости в Доработка модели
+ */
 GradingSystem.prototype.addModellerJewPrice = function()
 {
 
+    let row_number = this.table_modellerJewPrices.querySelectorAll("tr").length;
+
+    let input_name = document.createElement('input');
+        input_name.setAttribute('name', 'modellerJewPrice[cost_name][]');
+        input_name.setAttribute('class', 'form-control');
+        input_name.setAttribute('value', "Доработка модели");
+        input_name.setAttribute('type', 'string');
+
     let input_value = document.createElement('input');
-    input_value.setAttribute('name', 'modellerJewPrice[value]');
-    input_value.setAttribute('class', 'form-control');
-    input_value.setAttribute('value', 0);
-    input_value.setAttribute('type', 'number');
-    input_value.value = 0;
+        input_value.setAttribute('name', 'modellerJewPrice[value][]');
+        input_value.setAttribute('class', 'form-control');
+        input_value.setAttribute('value', '0');
+        input_value.setAttribute('type', 'number');
+        input_value.value = '0';
+
+    let input_id = document.createElement('input');
+        input_id.setAttribute('name', 'modellerJewPrice[id][]');
+        input_id.setAttribute('class', 'hidden');
+        input_id.setAttribute('value', "");
+        input_id.setAttribute('hidden', '');
 
     let newRow = document.querySelector('.gs_protoModJewRow').cloneNode(true);
-    newRow.removeAttribute('class');
-    newRow.children[1].innerHTML = "Доработка модели";
-    newRow.children[2].appendChild(input_value);
+        newRow.removeAttribute('class');
+        newRow.children[0].innerHTML = row_number;
+        newRow.children[1].appendChild(input_name);
+        newRow.children[2].appendChild(input_value);
+        newRow.children[2].appendChild(input_id);
 
     let last = this.table_modellerJewPrices.querySelector('.t-total');
 
     this.table_modellerJewPrices.insertBefore(newRow,last);
 
 };
+/**
+ * Создать инпут на удаление
+ */
+GradingSystem.prototype.deleteJewPriceRow = function()
+{
+    let that = this;
+    if ( this.table_modellerJewPrices )
+    {
+        let dellButtons = this.table_modellerJewPrices.querySelectorAll('.maJewPriceDell');
+        $.each(dellButtons, function(i, button) {
+
+            button.addEventListener('click', function() {
+                let id = this.parentElement.previousElementSibling.previousElementSibling.children[1].value;
+                let priceValue = this.parentElement.previousElementSibling.previousElementSibling.children[0].value;
+
+                if ( !id ) return;
+                let input = document.createElement('input');
+                    input.setAttribute('hidden', '');
+                    input.setAttribute('value', id);
+                    input.setAttribute('name', 'modellerJewPrice[toDell][]');
+                    input.classList.add('hidden');
+
+                let tTotal = that.table_modellerJewPrices.querySelector('.t-total');
+                    tTotal.firstElementChild.appendChild(input);
+                    // изменение общего прайса
+                    tTotal.children[2].innerHTML -= priceValue;
+
+            }, false);
+        });
+    }
+};
+/**
+ * Накидывает обработчик оплаты на кнопку payJewPriceBtn
+ */
+GradingSystem.prototype.payJewPriceBtn = function()
+{
+    let payJewButtons = this.table_modellerJewPrices.querySelectorAll('.payJewPriceBtn');
+    if ( !payJewButtons.length ) return;
+
+    $.each(payJewButtons, function(i, button) {
+        button.addEventListener('click', function () {
+            let priceID = this.parentElement.parentElement.querySelector('.jewPriceID').value;
+            let priceName = this.parentElement.parentElement.querySelector('.jewPriceName').value;
+            let priceValue = this.parentElement.parentElement.querySelector('.jewPriceValue').value;
+
+            if ( confirm("Зачислить и отметить оплату этой стоимости: " + priceName + " - " + priceValue +  " ?") )
+            {
+                $.ajax({
+                    url: "/add-edit/countCurrentJewPrice",
+                    type: "POST",
+                    data: {
+                        countCurrentJewPrice: 1,
+                        priceID: priceID,
+                    },
+                    //dataType:"json",
+                    success:function(result) {
+
+                        //debug(result);
+                        result = JSON.parse(result);
+
+                        debug(result);
+                        if ( result.debug )
+                            debugModal( result.debug );
+
+                        if ( result.success )
+                        {
+                            alert(result.success.message);
+                            reload();
+                        }
+                        if ( result.error )
+                        {
+                            let err = result.error;
+                            alert("Code: " + err.code + '\n' + err.message);
+                        }
+
+                    },
+                    error:function(error) {
+                        debug(error,"count price error");
+                    }
+                });
+            }
+        }, false);
+    });
+};
+
+
 
 GradingSystem.prototype.selectGrade3DChange = function(select)
 {
@@ -138,16 +245,17 @@ GradingSystem.prototype.selectGrade3DChange = function(select)
     insertedRow.children[2].appendChild(inputPoints);
     insertedRow.children[3].appendChild(inputIDmp);
     insertedRow.children[3].appendChild(inputID);
+
     let dellButton = insertedRow.children[4].querySelector('.ma3DgsDell');
-    dellButton.addEventListener('click', function() {
+        dellButton.addEventListener('click', function() {
 
-        let totalRow = that.table_3Dmodeller.querySelector('.t-total');
-        let overallValue = +totalRow.children[2].innerHTML;
-        let priceValue = insertedRow.children[2].firstElementChild.value;
+            let totalRow = that.table_3Dmodeller.querySelector('.t-total');
+            let overallValue = +totalRow.children[2].innerHTML;
+            let priceValue = insertedRow.children[2].firstElementChild.value;
 
-        insertedRow.remove();
+            insertedRow.remove();
 
-        totalRow.children[2].innerHTML = (overallValue - priceValue) + '';
+            totalRow.children[2].innerHTML = (overallValue - priceValue) + '';
     },false);
     //this.setEventListener(dellButton);
 
@@ -197,6 +305,7 @@ GradingSystem.prototype.setEventListener = function( button )
 
     }, false);
 };
+
 
 
 let gs = new GradingSystem();
