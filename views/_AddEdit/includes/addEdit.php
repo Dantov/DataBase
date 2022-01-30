@@ -944,11 +944,11 @@ $permittedFields = User::permissions();
                             <div class="panel-heading" title="Стоимость Доработки">
                                 <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
                                 <strong>Доработка модели</strong>
-                                <?php if ( !$this->isPayed($modelPrices??[], 6) ): //!count($modelPrices) ?>
+                                <?php ;/*if ( !$this->isPayed($modelPrices??[], 6) ):*/ ?>
                                     <button class="btn btn-sm btn-default pull-right addModellerJewPrice" style="top:-5px !important; position:relative;" type="button" title="Добавить стоимость">
                                         <span class="glyphicon glyphicon-plus"></span>
                                     </button>
-                                <?php endif; ?>
+                                <?php ;/*endif;*/ ?>
                             </div>
                             <table class="table">
                                 <thead>
@@ -962,9 +962,9 @@ $permittedFields = User::permissions();
                                 </thead>
                                 <tbody class="modellerJewPrices">
                                 <!-- // автозаполнение -->
-                                <?php $pr_total = 0; $modelPriceStatus = 0; $modelPricePaid = 0; $priceNum = 0; ?>
+                                <?php $pr_total = 0; $modelPriceStatus = 0; $modelPricePaid = 0; $priceNum = 0; $trustedPrices=[6,9,10]; ?>
                                     <?php foreach ( $modelPrices??[] as $modelPrice ): ?>
-                                        <?php if ( (int)$modelPrice['is3d_grade'] !== 6 ) continue; ?>
+                                        <?php if ( !in_array( (int)$modelPrice['is3d_grade'], $trustedPrices) ) continue; ?>
                                         <?php $pr_total += $modelPrice['value']; ?>
                                         <?php $modelPriceStatus = (int)$modelPrice['status'] ?>
                                         <?php $modelPricePaid = (int)$modelPrice['paid'] ?>
@@ -974,16 +974,19 @@ $permittedFields = User::permissions();
                                                 <?php if ( $modelPriceStatus === 1 ): // Зачислено (инпут не выводим)?>
                                                     <?= $modelPrice['cost_name'] ?>
                                                 <?php else: ?>
-                                                    <input class="form-control jewPriceName"  name="modellerJewPrice[cost_name][]" value="<?= $modelPrice['cost_name'] ?>" />
+                                                    <input class="form-control"  name="modellerJewPrice[cost_name][]" value="<?= $modelPrice['cost_name'] ?>" />
                                                 <?php endif; ?>
+                                                <input hidden class="hidden jewPriceName" value="<?= $modelPrice['cost_name'] ?>" />
                                             </td>
                                             <td>
                                                 <?php if ( $modelPriceStatus === 1 ): // Зачислено (инпут не выводим)?>
                                                     <?= $modelPrice['value'] ?>
                                                 <?php else: ?>
-                                                    <input class="form-control jewPriceValue"  name="modellerJewPrice[value][]" value="<?= $modelPrice['value'] ?>" />
-                                                    <input hidden class="hidden jewPriceID" name="modellerJewPrice[id][]" value="<?= $modelPrice['id'] ?>" />
+                                                    <input class="form-control"  name="modellerJewPrice[value][]" value="<?= $modelPrice['value'] ?>" />
+                                                    <input hidden class="hidden" name="modellerJewPrice[id][]" value="<?= $modelPrice['id'] ?>" />
                                                 <?php endif; ?>
+                                                <input hidden class="hidden jewPriceID" value="<?= $modelPrice['id'] ?>" />
+                                                <input hidden class="hidden jewPriceValue" value="<?= $modelPrice['value'] ?>" />
                                             </td>
                                             <td>
                                                 <!-- Статус  -->
@@ -1002,7 +1005,7 @@ $permittedFields = User::permissions();
                                             </td>
                                             <td style="width:100px;">
                                                 <?php if ( $modelPricePaid !== 1 ): ?>
-                                                    <?php if ( User::getID() === 53 ): // Жуковская?>
+                                                    <?php if ( User::getID() === 53 ): // Жуковская ?>
                                                         <button type="button" data-toggle="" data-prices="single" data-priceID="<?=$modelPrice['id']?>" data-target="" class="btn btn-sm btn-success payJewPriceBtn"  title="Оплатить">
                                                             <span class="glyphicon glyphicon-usd"></span>
                                                         </button>
@@ -1174,3 +1177,5 @@ $permittedFields = User::permissions();
 
 <img src="" id="imageBoxPrev" width="200px" class="img-thumbnail hidden"/>
 <?php $switchTableRow = 'notes'; require _viewsDIR_."_AddEdit/includes/protoRows.php";?>
+
+
