@@ -51,7 +51,7 @@ GradingSystem.prototype.init = function()
  */
 GradingSystem.prototype.addModellerJewPrice = function()
 {
-
+	if ( !this.table_modellerJewPrices ) return;
     let row_number = this.table_modellerJewPrices.querySelectorAll("tr").length;
 
     let input_name = document.createElement('input');
@@ -121,6 +121,7 @@ GradingSystem.prototype.deleteJewPriceRow = function()
  */
 GradingSystem.prototype.payJewPriceBtn = function()
 {
+	if ( !this.table_modellerJewPrices ) return;
     let payJewButtons = this.table_modellerJewPrices.querySelectorAll('.payJewPriceBtn');
     if ( !payJewButtons.length ) return;
 
