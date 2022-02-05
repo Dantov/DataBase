@@ -1,5 +1,8 @@
 <?php
 namespace Views\_UserPouch\Controllers;
+
+
+use Views\_Globals\Models\User;
 use Views\_UserPouch\Models\UserPouch;
 use Views\_Globals\Controllers\GeneralController;
 use Views\vendor\core\Cookies;
@@ -28,9 +31,16 @@ class UserPouchController extends GeneralController
 
     public $searchForPM = '';
 
+    /**
+     * @throws \Exception
+     */
     public function beforeAction() : void
     {
         $request = $this->request;
+
+        if ( !User::permission('paymentManager') )
+            if ( !User::permission('userPouch') )
+                $this->redirect('main/');
 
         $this->ppCount = (int)$request->get('ppCount') ?: 30;
         $this->page = (int)$request->get('page');

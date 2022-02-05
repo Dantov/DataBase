@@ -1,5 +1,6 @@
 <?php
 namespace Views\_PaymentManager\Models;
+use Views\_Globals\Models\User;
 use Views\_UserPouch\Models\UserPouch;
 use Views\vendor\core\Registry;
 use Views\vendor\libs\classes\URLCrypt;
@@ -7,12 +8,59 @@ use Views\vendor\libs\classes\URLCrypt;
 class PaymentManager extends UserPouch
 {
 
+    /**
+     * @var array - Список разрешенных пользователей(участков) для загрузки прайсов
+     */
+    protected $permittedAccess = [];
+
 	public function __construct( string $paidTab='', int $worker = 0, int $month = 0, int $year = 0, string $searchInput='' )
 	{
 		parent::__construct( $paidTab, $worker, $month, $year, $searchInput );
+
+		$this->permittedAreas();
+
+        if ( !$worker )
+            $this->setWorkerIds();
 	}
 
     /**
+     * Определим массив с доступими юзеров,
+     * на основагии разрешений текущего пользователя
+     * @throws \Exception
+     */
+	protected function permittedAreas()
+    {
+        $uPerm = User::permissions();
+        $permissionAreasAccess = [
+            // разрешение    => user access
+
+            "PM_modeller3D"  => 2,
+            "PM_3dPrinting"  => 3,
+            "PM_modellerJew" => 5,
+            "PM_techJew"     => 7,
+            "PM_techCoord"   => 9,
+            "PM_design"      => 11,
+        ];
+
+        if ( User::permission('PM_all') )
+        {
+            foreach ( $permissionAreasAccess as $location )
+                    $this->permittedAccess[] = $location;
+        } else {
+
+            foreach ( $uPerm as $ruleName => $perm )
+            {
+                if ( array_key_exists($ruleName,$permissionAreasAccess) )
+                    if ( (bool)$perm === true )
+                        $this->permittedAccess[] = $permissionAreasAccess[$ruleName];
+            }
+        }
+
+    }
+
+    /**
+     * Определим массив пользователей для зашрузки прайсов
+     * на основагии массива разрешений
      * @return array
      * @throws \Exception
      */
@@ -20,23 +68,43 @@ class PaymentManager extends UserPouch
     {
         $allUsers = $this->getUsers();
 
-        // ID раб. участков из которых нужны юзеры
-        $areas = [28,1,2,3,4];
+
         $users = [];
         foreach ($allUsers as &$user)
         {
-            $user['location'] = explode(',', $user['location']);
-            foreach ($user['location'] as $location) 
-            {
-                if ( in_array($location, $areas) ) 
-                {
-                    $users[] = $user;
-                    continue 2;
-                }
-            }
+            if ( in_array($user['access'],$this->permittedAccess) )
+                $users[] = $user;
         }
+
         return $users;
     }
+
+    /**
+     * заполнит $this->worker. Подставит в выборку ID всех доступных пользователей.
+     * @throws \Exception
+     */
+    public function setWorkerIds()
+    {
+        $activeUsers = $this->getActiveUsers();
+
+        $w = '';
+        foreach ( $activeUsers as $aUser )
+        {
+            if ( !trueIsset($aUser['id']) )
+                continue;
+
+            $w .= $aUser['id'] . ',';
+        }
+
+        if ( !empty($w) )
+        {
+            $w = rtrim($w,',');
+            $this->worker = "user_id IN (". $w .")";
+        }
+    }
+
+
+
 
     /**
      * Для AJAX

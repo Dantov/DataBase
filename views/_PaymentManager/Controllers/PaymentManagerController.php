@@ -23,6 +23,10 @@ class PaymentManagerController extends UserPouchController
     {
         $request = $this->request;
 
+        /** проверка права юзера запускать этот манагер! */
+        if ( !User::permission('paymentManager') )
+            $this->redirect('main/');
+
         if ( $request->isAjax() )
         {
             try {

@@ -62,6 +62,7 @@ class UserPouch extends Main
         }
 
         $this->worker = !$worker ? 1 : 'user_id=' . $worker; // WHERE 1 - все работники
+
         $this->addQueryByDate($month, $year);
     }
 
@@ -114,6 +115,7 @@ class UserPouch extends Main
     public function getModelPrices() : array
     {
         $sql = "SELECT * FROM model_prices WHERE $this->worker $this->paidTab $this->date AND pos_id IN $this->inModels";
+        //debug($sql,'$sql',1);
         $modelPricesQuery = $this->findAsArray($sql);
         //debug($modelPricesQuery,'$modelPricesQuery',1);
 
