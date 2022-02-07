@@ -804,7 +804,7 @@ class AddEdit extends General
     public function gradingSystem(int $gradeType = 0 ) : array
     {
         if ( empty($this->gsArray) )
-            $this->gsArray = $this->findAsArray("SELECT * FROM grading_system");
+            $this->gsArray = $this->findAsArray("SELECT * FROM grading_system ORDER BY work_name");
 
         if ( !$gradeType ) return $this->gsArray;
     
