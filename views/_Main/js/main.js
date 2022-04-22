@@ -9,6 +9,8 @@ function Main() {
     this.parseQueryString();
     this.lightUpSomeButtons();
     this.modalStatusesInit();
+
+    this.modelsHref();
     debug('Main Init');
 }
 
@@ -343,7 +345,30 @@ Main.prototype.changeDateByStatusesHistory = function(dateInput)
             debug(e,'Ошибка!');
         }
     });
+};
 
+Main.prototype.modelsHref = function()
+{
+    let modelsContent = document.getElementById('loadeding_cont');
+    if ( !modelsContent ) return;
+
+    //let protoLabels = document.querySelectorAll('.main-label-new');
+    let prj = modelsContent.querySelectorAll('.prj-thumbnail');
+
+    /*
+    $.each(prj, function(i, model)
+    {
+        model.addEventListener('click', function (e) {
+
+            if ( e.target.classList.contains('selectionCheck') )
+                return;
+
+            let href = this.querySelector('.model-href').getAttribute('href');
+            //redirect(href);
+            debug(href);
+        }, true);
+    });
+    */
 };
 
 if ( main !== 'object' ) main = new Main();

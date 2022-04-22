@@ -29,7 +29,7 @@ class Controller
      * @string $layoutPath
      * дефолтный путь к шаблону
      * */
-    public $layoutPath = _rootDIR_."views/layouts/";
+    public $layoutPath = _rootDIR_."Views/layouts/";
 
     /**
      * @array $varBlock

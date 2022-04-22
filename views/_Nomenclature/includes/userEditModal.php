@@ -45,6 +45,7 @@ try {
                                 <div class="form-group">
                                     <label for="userPass">Пароль: </label>
                                     <input type="text" class="form-control" title="Логин" id="userPass" name="userPass" value="">
+                                    <small>(Enter new for rewrite)</small>
                                 </div>
                             </div>
                             

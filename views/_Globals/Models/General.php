@@ -40,7 +40,7 @@ class General extends Model
         $this->server = $_SERVER;
         $this->setDirs();
 
-        $this->IP_visiter = _WORK_PLACE_ ? $_SERVER['HTTP_X_REAL_IP'] : $_SERVER['REMOTE_ADDR'];
+        $this->IP_visiter = $_SERVER['REMOTE_ADDR'];
         $this->localSocket = _WORK_PLACE_ ? 'tcp://192.168.0.245:1234' : 'tcp://127.0.0.1:1234';
 
         $this->session = new Sessions();

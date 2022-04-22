@@ -170,8 +170,18 @@ class UsersModel extends Handler
         } else {
             exit(json_encode(['error' => UserCodes::getMessage(UserCodes::LOGIN_EMPTY)]));
         }
-        if ( empty($userPass) )
+
+        if ( empty($userPass) && $add )
             exit(json_encode(['error' => UserCodes::getMessage(UserCodes::PASSWORD_EMPTY)]));
+
+        /** Now when pwd is empty on editing put there old pwd */
+        if ( empty($userPass) )
+        {
+            $userPass = $this->findOne("SELECT pass AS p FROM users WHERE id='$userID' ",'p');
+        } else {
+            // Or get a hash of new one
+            $userPass = password_hash($userPass,PASSWORD_DEFAULT);
+        }
 
         /** Раб. участки **/
         $wcList = array_unique($data['wcList']??[]);

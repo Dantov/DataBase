@@ -431,6 +431,11 @@ if ( allTabs )
 {
     let lastActiveTab = JSON.parse( sessionStorage.getItem('activeTab') );
     //debug(lastActiveTab, "saved lastActiveTab");
+	if ( !lastActiveTab )
+        lastActiveTab = {
+            'tab': '',
+            'url': window.location.href,
+        };
 
     // сохранение этой вкладки
     $.each(allTabs, function(i, a) {

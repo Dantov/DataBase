@@ -355,6 +355,10 @@ JS;
         if ( empty($userRes) )
             exit(json_encode(['error'=>UserCodes::getMessage(UserCodes::NO_SUCH_USER), 'code'=>UserCodes::NO_SUCH_USER]));
 
+        //debugAjax($userRes,'userRes',END_AB);
+        // Hide password hash
+        $userRes['pass'] = '';
+
         // Пока только админ может раздавать разрешения, остальные только пресетами
         if ( User::permission('nomUsers_permissions') )
             $usersModel->addUserPermissions( $userRes );

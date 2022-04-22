@@ -130,7 +130,7 @@ class MainController extends GeneralController
         if ( $this->isQueryParam('selected-models-show') || $session->getKey('selectionMode')['showModels'] )
         {
             //$selections = new SelectionsModel($session);
-            $this->foundRows = (new SelectionsModel($session))->getSelectedModels();
+            $this->foundRows = (new SelectionsModel($session, $this))->getSelectedModels();
         }
 
 
@@ -267,7 +267,8 @@ class MainController extends GeneralController
 		'activeWorkingCenters2','activeList','collectionName','collectionList','status','selectedStatusName',
 		'toggleSelectedGroup','selectedModelsByLi','showModels','drawBy_','iter','wholePos','statsbottom',
 		'posIter','ComplShown','workingCenters','workCentersSort','pagination']);
-		
+
+        $this->varBlock['activeMenu'] = 'active';
 		return $this->render('main', $compacted);
 	}
 

@@ -224,6 +224,8 @@ ProgressModal.prototype.onModalOpen = function(that, event)
 
                 download.setAttribute('href', _ROOT_ + 'Pdfs/' + fileName );
             }
+
+            //that.ProgressBar(100);
         },
         error: function (error) {
             AR.serverError( error.status, error.responseText );

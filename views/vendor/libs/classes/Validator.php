@@ -106,6 +106,24 @@ class Validator
         }
 
         $this->fieldRules = [
+            'login'=> [
+                'name'=> 'Login',
+                'rules' => [
+                    'required' => true,
+                    'minLength' => 3,
+                    'maxLength' => 24,
+                    'forbiddenChars' => true,
+                ],
+            ],
+            'password'=> [
+                'name'=> 'Login',
+                'rules' => [
+                    'required' => true,
+                    'minLength' => 5,
+                    'maxLength' => 24,
+                    'forbiddenChars' => true,
+                ],
+            ],
             'number_3d'=> [
                 'name'=> '№ 3Д',
                 'rules' => [

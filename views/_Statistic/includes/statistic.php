@@ -15,28 +15,34 @@
                     <tr>
                         <th>№</th>
                         <th>ФИО</th>
+                        <th>Пред посдедний запрос</th>
+                        <th>Посдедний запрос</th>
+                        <th>Устройство</th>
+                        <th>Просмотров</th>
+                        <th>Дата первого визита</th>
                         <th>Дата последнего визита</th>
                         <th>IP адрес</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <?php for ( $i = 0; $i < count($users); $i++ ) {
-                        $datearr = explode(' ', $users[$i]['putdate']);
-                        $userDate = date_create( $datearr[0] )->Format('d.m.Y');
-                        $userTime = $datearr[1];
-                    ?>
+                    <?php if ( is_array($usersOnline) ): ?>
+                    <?php foreach ( $usersOnline as $num => $userOnline ): ?>
                         <tr>
-                            <td><?=$i+1;?></td>
-                            <td><?=$users[$i]['user'];?></td>
-                            <td><?=$userDate.' - '.$userTime;?></td>
-                            <td><?=$users[$i]['ip'];?></td>
+                            <td><?= ++$num ?></td>
+                            <td>(<?= "id_".$userOnline['user_id'] ?>) <?= $userOnline['fio'] ?></td>
+                            <td><?= $userOnline['referer'] ?></td>
+                            <td><?= $userOnline['last_uri'] ?></td>
+                            <td><?= $userOnline['device'] ?></td>
+                            <td><?= $userOnline['views_count'] ?></td>
+                            <td><?= $userOnline['first_connect'] ?></td>
+                            <td><?= $userOnline['update_connect'] ?></td>
+                            <td><?= $userOnline['user_ip'] ?></td>
                         </tr>
-                    <?php } ?>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+
                     <tr class="warning">
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td colspan="9"></td>
                     </tr>
                     </tbody>
                 </table>
@@ -54,22 +60,6 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <?php
-                    $complAll = 0;
-                    $modelsAll = 0;
-                    for ( $i = 0; $i < count($models); $i++ ) {
-                        $complAll += $models[$i]['wholeCompl'];
-                        $modelsAll += $models[$i]['wholePos'];
-                        ?>
-                        <tr>
-                            <td><?=$i+1;?></td>
-                            <td><a href="../Main/controllers/setSort.php?sCollId=<?=$models[$i]['id'];?>" id="collection"><?=$models[$i]['name'];?></a></td>
-                            <td><?=$models[$i]['wholeCompl'];?></td>
-                            <td><?=$models[$i]['wholePos'];?></td>
-                        </tr>
-                        <?php
-                    }
-                    ?>
                     <tr class="warning">
                         <td></td>
                         <td><b>Всего:</b></td>
@@ -90,20 +80,6 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <?php
-                            $i=1;
-                            foreach($likes['likes'] as $key => $value) {
-                                if ( $i > 10 ) break;
-                                $arr = explode(';',$key);
-                                ?>
-                                <tr>
-                                    <td><?=$i++;?></td>
-                                    <td><a href="../ModelView/index.php?id=<?=$arr[0];?>" id="collection"><?=$arr[1]?></a></td>
-                                    <td><?=$value;?></td>
-                                </tr>
-                                <?php
-                            }
-                            ?>
                             <tr class="warning">
                                 <td></td>
                                 <td><b></b></td>
@@ -122,20 +98,6 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <?php
-                            $i=1;
-                            foreach($likes['dislikes'] as $key => $value) {
-                                if ( $i > 10 ) break;
-                                $arr = explode(';',$key);
-                                ?>
-                                <tr>
-                                    <td><?=$i++;?></td>
-                                    <td><a href="../ModelView/index.php?id=<?=$arr[0];?>" id="collection"><?=$arr[1]?></a></td>
-                                    <td><?=$value;?></td>
-                                </tr>
-                                <?php
-                            }
-                            ?>
                             <tr class="warning">
                                 <td></td>
                                 <td><b></b></td>
@@ -161,28 +123,6 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <?php
-                            $complAll = 0;
-                            $modelsAll = 0;
-                            for ( $i = 0; $i < count($modelsBy3Dmodellers); $i++ )
-                            {
-                                $complAll += $modelsBy3Dmodellers[$i]['wholeCompl'];
-                                $modelsAll += $modelsBy3Dmodellers[$i]['wholePos'];
-                                ?>
-                                <tr>
-                                    <td><?=$i+1;?></td>
-                                    <td>
-                                        <form action="../Glob_Controllers/search.php" method="post" >
-                                            <input type="hidden" name="searchFor" value="<?=$modelsBy3Dmodellers[$i]['name'];?>">
-                                            <input class="btn btn-link" type="submit" name="search" value="<?=$modelsBy3Dmodellers[$i]['name'];?>">
-                                        </form>
-                                    </td>
-                                    <td><?=$modelsBy3Dmodellers[$i]['wholeCompl'];?></td>
-                                    <td><?=$modelsBy3Dmodellers[$i]['wholePos'];?></td>
-                                </tr>
-                                <?php
-                            }
-                            ?>
                             <tr class="warning">
                                 <td></td>
                                 <td><b>Всего</b></td>
@@ -204,27 +144,6 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <?php
-                            $complAll = 0;
-                            $modelsAll = 0;
-                            for ( $i = 0; $i < count($modelsByAuthors); $i++ ) {
-                                $complAll += $modelsByAuthors[$i]['wholeCompl'];
-                                $modelsAll += $modelsByAuthors[$i]['wholePos'];
-                                ?>
-                                <tr>
-                                    <td><?=$i+1;?></td>
-                                    <td>
-                                        <form action="../Glob_Controllers/search.php" method="post" >
-                                            <input type="hidden" name="searchFor" value="<?=$modelsByAuthors[$i]['name'];?>">
-                                            <input class="btn btn-link" type="submit" name="search" value="<?=$modelsByAuthors[$i]['name'];?>">
-                                        </form>
-                                    </td>
-                                    <td><?=$modelsByAuthors[$i]['wholeCompl'];?></td>
-                                    <td><?=$modelsByAuthors[$i]['wholePos'];?></td>
-                                </tr>
-                                <?php
-                            }
-                            ?>
                             <tr class="warning">
                                 <td></td>
                                 <td><b>Всего</b></td>
@@ -242,5 +161,4 @@
         </div><!-- end of Tab content -->
     </div>
 
-    <a class="btn btn-default" type="button" href="<?=$_SESSION['prevPage'];?>"><span class="glyphicon glyphicon-triangle-left"></span> Назад</a>
 </div><!--row-->

@@ -226,7 +226,7 @@ UsersEditing.prototype.showUserEditModal = function(e)
                 userPass.setAttribute('value', data.pass);
                 userPass.value = data.pass;
             } else {
-                userPass.setAttribute('disabled', '');
+                //userPass.setAttribute('disabled', ''); // hided it because of pwd_hash
             }
 
             /** LOCATIONS **/

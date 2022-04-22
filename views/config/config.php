@@ -9,7 +9,7 @@ return [
     'defaultController' => 'main',
     'version' => '2.203',
     'dataCompression' => true,
-	'assistUpdate' => 2,
+	'assistUpdate' => 3,
 
     /**
      *  mode
@@ -38,7 +38,7 @@ return [
     ],
     'css' => [
         'css/stylesTest.css?ver='.time(),
-        'css/style.css?ver=105',
+        'css/style.css?ver='.time(),
     ],
     'js' => [
         'js/scrpt.js?ver='.time(),

@@ -254,6 +254,44 @@ class Model extends BaseSQL
         return $this->sql($sqlStr);
     }
 
+    public function insert( string $table, array $row )
+    {
 
+    }
+
+    /**
+     * UPDATE `users_online` SET `id`='[value-1]',`session_id`='[value-2]',`user_id`='[value-3]',`user_ip`='[value-4]',`date_connect`='[value-5]',`date_disconnect`='[value-6]' WHERE 1
+     * @param string $table
+     * @param array $row
+     * @param array $where
+     * @return int
+     * @throws \Exception
+     */
+    public function update( string $table, array $row, array $where )
+    {
+        $schema = $this->getTableSchema($table);
+        foreach ( $row as $tField => $v )
+        {
+            if ( !in_array_recursive( $tField, $schema ) )
+                throw new \Error("Field '". $tField ."' does not exist in table '" . $table . "'  " . __METHOD__, 444 );
+        }
+
+        $data = '';
+        foreach ( $row as $field => $value )
+            $data  .= $field . "="."'". $value ."'" . ",";
+
+        $data  =  trim($data,',');
+
+        $column = isset($where[0]) ? $where[0] : '';
+        $oper = isset($where[1]) ? $where[1] : '';
+        $val = isset($where[2]) ? $where[2] : '';
+
+        if ( !$column || !$oper || !$val )
+            throw new \Error("Wrong WHERE data in " . __METHOD__, 555 );
+
+        $sql = "UPDATE $table SET $data WHERE $column $oper '$val'";
+
+        return $this->sql($sql);
+    }
 
 }

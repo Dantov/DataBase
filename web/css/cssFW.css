@@ -166,6 +166,9 @@
 .brb-3-info {
     border-bottom: 3px solid #5bc0de;
 }
+.border-radius-0 {
+    border-radius: 0!important;
+}
 .border-radius-1 {
     border-radius: 4px;
 }

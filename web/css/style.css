@@ -393,9 +393,6 @@ a:focus {
     background-color: #f2f2f2;
     padding-bottom: 100px;
 }
-.prj-item {
-    /*margin-bottom: 20px;*/
-}
 .prj-item a {
     /*display: block;*/
     position: relative;

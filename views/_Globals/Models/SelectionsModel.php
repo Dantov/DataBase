@@ -9,14 +9,19 @@ namespace Views\_Globals\Models;
 
 //use Views\vendor\core\Sessions;
 
+
+
 class SelectionsModel extends General
 {
     //public $session;
+    protected $controller;
 
-    public function __construct( $session = null )
+    public function __construct( $session = null, $controller = null )
     {
         parent::__construct();
         //$this->session = new Sessions();
+        if ( $controller && $controller instanceof \Views\_Main\Controllers\MainController)
+            $this->controller = $controller;
     }
 
     public function selectionModeToggle($selToggle)
@@ -89,7 +94,17 @@ class SelectionsModel extends General
         $selectedModels = $selectionMode['models'];
 
         if ( empty($selectionMode['models']) )
-            exit( json_encode('false') );
+        {
+            $request = $this->controller->request;
+            if ( $request->isAjax() )
+                exit( json_encode('false') );
+
+            $selectionMode = $this->session->getKey('selectionMode');
+            unset($selectionMode['showModels']);
+            $this->session->setKey('selectionMode', $selectionMode);
+            $this->controller->redirect('/main');
+        }
+
 
         $assist = $this->session->getKey('assist');
         $orderBy = $assist['reg'];

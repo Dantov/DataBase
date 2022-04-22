@@ -11,17 +11,17 @@ ini_set('memory_limit','256M'); // -1 = может использовать вс
 $session = new Sessions();
 $assist = $session->getKey('assist');
 $user = $session->getKey('user');
+$sMode = $session->getKey('selectionMode');
 $collectPDF = null;
+
 try {
-    if ( $session->hasKey('searchFor') || $session->getKey('re_search') )
+    if ( $session->hasKey('searchFor') && !$sMode['showModels'] ) //|| $session->getKey('re_search')
     {
         $search = new Search();
         $foundRows = $search->search( $session->getKey('searchFor') );
+        $collectPDF = new PDFExports( $assist, $user, $foundRows, $session->getKey('searchFor'), $assist['collectionName'] ); // Non searchFor because i don't wanna to name file from search input
 
-        $collectPDF = new PDFExports( $assist, $user, $foundRows, $session->getKey('searchFor'), $assist['collectionName'] );
-
-    } elseif ( $session->getKey('selectionMode')['showModels'] ) {
-
+    } elseif ( $sMode['showModels'] ) {
         $collectPDF = new PDFExports( $assist, $user,  (new SelectionsModel($session))->getSelectedModels() );
     } else {
         $collectPDF = new PDFExports( $assist, $user, [], '', $assist['collectionName'] );

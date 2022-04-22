@@ -199,6 +199,12 @@ class User
         return self::$userAccess = (int)self::userInstance()['access'];
     }
 
-
+    /**
+     * @return string
+     */
+    public static function getIp() : string
+    {
+        return $_SERVER['REMOTE_ADDR'];
+    }
 
 }

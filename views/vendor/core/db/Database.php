@@ -127,7 +127,8 @@ class Database
     {
         if ( $this->isConnected() )
             return $this->connection;
-        return null;
+        $this->connect();
+        return $this->connection;
     }
 
     /**

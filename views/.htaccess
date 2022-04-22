@@ -1,7 +1,3 @@
-#<IfModule mod_php7.c>
-#    php_value auto_prepend_file F:\OpenServer\OSPanel\domains\HUF-DB-DEV\Views\config\appMode.php
-#</IfModule>
-
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 

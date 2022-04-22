@@ -60,6 +60,9 @@ function PushNotice()
 }
 
 PushNotice.prototype.pushNoticeBadgeInc = function() {
+    if ( !this.pushNoticeBadge )
+        return;
+
     this.pushNoticeBadge.innerHTML = this.showedNotice.length;
 };
 
@@ -248,6 +251,7 @@ PushNotice.prototype.showingToasts = function() {
 PushNotice.prototype.noticesBadgeToggle = function() {
 	let that = this;
 	let noticesBadge = document.getElementById('noticesBadge');
+    if ( !noticesBadge ) return;
 
 	function hideNotices()
     {

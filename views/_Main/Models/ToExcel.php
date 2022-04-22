@@ -104,7 +104,8 @@ class ToExcel extends Main
 
     public function progressCount($newPercent)
     {
-        if ( !isset($this->socketClientResource) ) return;
+        if ( !$this->socketClientResource ) return;
+        if ( !is_resource($this->socketClientResource) ) return;
 
         $this->progressResponse['progressBarPercent'] = $newPercent;
 

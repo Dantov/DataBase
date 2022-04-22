@@ -26,6 +26,7 @@ class Application
         Config::initConfig($config);
 		
 		//https redirect
+        /*
 		if ( Config::get('https') === true )
 		{
 			if ( !isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' )
@@ -38,6 +39,7 @@ class Application
 			header("Location: http://". $_SERVER['HTTP_HOST'] . "/");
 			exit;
 		}
+		*/
 
         new ErrorHandler($config['errors']);
 

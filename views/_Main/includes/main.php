@@ -4,7 +4,7 @@ use Views\_Globals\Models\User;
 
 $session = $this->session;
 ?>
-<script src="/Views/_Main/js/trytoload.js?ver=004"></script>
+<script src="/Views/_Main/js/trytoload.js?ver=005"></script>
 
 <div class="row">
 	<div class="col-xs-12">
@@ -180,11 +180,19 @@ $session = $this->session;
                 <?php endif; ?>
 			</h3>
 		</div>
+        <?php if ( $this->getQueryParam('coll_show') && (int)$this->getQueryParam('coll_show') !== -1 ): ?>
+            <div class="btn-group pull-left" role="group">
+                <a href="/main/?coll_show=-1" class="btn btn-link" style="font-size: 15px; padding: 5px 8px 0 8px;" type="button" title="убрать коллекцию" >
+                    <span class="glyphicon glyphicon-remove"></span>
+                </a>
+            </div>
+        <?php endif; ?>
+
 	</div><!-- end col -->
 </div><!-- /row -->
 <div class="clearfix"></div>
 <hr/>
-<div class="row loading_cont unselectable" id="loadeding_cont">
+<div class="row unselectable" id="loadeding_cont"> <?php //loading_cont?>
 	<?php if ( !isset($_SESSION['nothing']) ): ?>
 		<?php if ( $wholePos == 0 ): ?>
 			<img src="<?=_rootDIR_HTTP_ ?>web/picts/web1.png" width="10%"/>
@@ -192,7 +200,7 @@ $session = $this->session;
 		<?php endif; ?>
 	<?php else: ?>
 		<img src="<?=_rootDIR_HTTP_ ?>web/picts/web1.png" width="10%"/>
-		<?
+		<?php
 			$showModels .= $_SESSION['nothing'];
 			unset($_SESSION['nothing']); 
 		?>

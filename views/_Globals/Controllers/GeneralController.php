@@ -1,6 +1,7 @@
 <?php
 namespace Views\_Globals\Controllers;
 use Views\_Globals\Models\{General, User};
+use Views\_Statistic\Models\Statistic;
 use Views\vendor\core\{
     Controller, Cookies, Config, db\Database
 };
@@ -25,6 +26,10 @@ class GeneralController extends Controller
 
         $this->accessControl();
         $this->navBarController();
+
+        $stat = new Statistic();
+        $stat->setUserOnline();
+        $stat->removeExpiredUsers();
 
         $wp = _WORK_PLACE_ ? 'true' : 'false';
         $js = <<<JS
@@ -102,7 +107,7 @@ JS;
         {
             $navBar['searchStyle'] = '';
             $navBar['topAddModel'] = '';
-            $navBar['navbarStatsUrl'] = _rootDIR_HTTP_ . "Statistic/";
+            $navBar['navbarStatsUrl'] = _rootDIR_HTTP_ . "statistic/";
             $navBar['navbarStatsShow'] = "";
         }
 

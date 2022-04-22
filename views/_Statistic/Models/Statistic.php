@@ -1,22 +1,123 @@
 <?php
 namespace Views\_Statistic\Models;
+use Views\_Globals\Models\User;
 use Views\_Main\Models\Main;
+use Views\vendor\core\ActiveQuery;
+use Views\vendor\libs\classes\Validator;
 
 class Statistic extends Main 
 {
 	
 	public $allModels;
 	public $allComplects;
-	/*
-	public function getUsers( $full = false ) {
-		$result = array();
-		$query = mysqli_query($this->connection, " SELECT * FROM sessions " );
 
-		while( $row = mysqli_fetch_assoc($query) ) $result[] = $row;
-		
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getUsersOnline() : array
+    {
+		$result = [];
+
+		$aq = new ActiveQuery();
+		$uo = $aq->registerTable('users_online');
+
+		$result = $uo->select(['*'])->exe();
+		$allUsers = $this->getUsers();
+
+        foreach ( $result as &$user )
+        {
+            $userID = $user['user_id'];
+            foreach ( $allUsers as $u )
+            {
+                if ( $userID == $u['id'] )
+                    $user['fio'] = $u['fio'];
+            }
+        }
+
 		return $result;
 	}
-	*/
+
+    /**
+     * Insert new user in table or update if already exist
+     * @throws \Exception
+     */
+	public function setUserOnline()
+    {
+        //$sess_path = session_save_path();
+
+        $aq = new ActiveQuery();
+        $uo = $aq->registerTable('users_online');
+        $rUo = $uo->select(['*'])->exe();
+
+        $v = new Validator();
+
+        $referer = $v->validateField('',$_SERVER['HTTP_REFERER'],['maxLength' => 254]);
+        if ( strlen($referer) > 254 )
+            $referer = substr($referer,0,253);
+
+        $requestUri = $v->validateField('',$_SERVER['REQUEST_URI'],['maxLength' => 254]);
+        if ( strlen($requestUri) > 254 )
+            $requestUri = substr($requestUri,0,253);
+
+        $device = $_SERVER['HTTP_SEC_CH_UA_PLATFORM']??'';
+
+        foreach ( $rUo as $userO )
+        {
+            if ( $userO['session_id'] === session_id() )
+            {
+                // found this user. renew
+                $row = [
+                    'user_id' => User::getID(),
+                    'referer'=>$referer,
+                    'last_uri'=>$requestUri,
+                    'device'=> $device,
+                    'views_count'=>++$userO['views_count'],
+                    'update_connect'=>date('Y-m-d H:i:s')
+                ];
+                $this->update('users_online', $row, ['session_id','=',session_id()] );
+                return;
+            }
+        }
+
+        // add new user in table
+        $newUser = [
+            'session_id' => session_id(),
+            'user_id' => User::getID(),
+            'user_ip' => $this->IP_visiter,
+            'referer' => $referer,
+            'last_uri' => $requestUri,
+            'device' => $device,
+            'views_count' => 1,
+            'first_connect' => date('Y-m-d H:i:s'),
+            'update_connect' => date('Y-m-d H:i:s'),
+        ];
+        $this->insertUpdateRows([$newUser],'users_online');
+    }
+
+    /**
+     * Will remove users from online when their update_connect more then 1 hour pass
+     * @throws \Exception
+     */
+    public function removeExpiredUsers()
+    {
+        $aq = new ActiveQuery();
+        $uo = $aq->registerTable('users_online');
+        $rUo = $uo->select(['*'])->exe();
+
+        $currentTime = time();
+        $toRemove = [];
+
+        foreach ( $rUo as $userO )
+        {
+            $lastTime = strtotime($userO['update_connect'] . " +1 hour");
+            if ( $lastTime < $currentTime )
+            {
+                $toRemove[] = $userO['id'];
+            }
+        }
+        $this->removeRows($toRemove,'users_online');
+    }
 
 	/*
 	public function getModels() {
@@ -108,7 +209,7 @@ class Statistic extends Main
 		}
 		return $result;
 	}
-	
+	/*
 	public function scanBaseFileSizes() {
 		$result = array();
 		$result['imgFileSizes'] = 0;
@@ -157,6 +258,7 @@ class Statistic extends Main
 		
 		return $result;
 	}
+	*/
 	
 	public function human_filesize($bytes, $decimals = 2) {
 	  $sz = 'BKMGTP';

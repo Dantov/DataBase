@@ -1,4 +1,5 @@
 <div class="row">
+	<div class=""><small>Developed by Vadum Bykov - dantrobin@gmail.com</small></div>
 	<p class="lead text-info text-center">Список изменений</p>
 	<div class="col-xs-12">
 		<dl>

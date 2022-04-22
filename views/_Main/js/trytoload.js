@@ -1,5 +1,4 @@
 "use strict";
-document.getElementById('navnav').children[0].setAttribute('class','active');
 
 function onImgLoad(self) {
 	let prevImg = self.previousElementSibling;

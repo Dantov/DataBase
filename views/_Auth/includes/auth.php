@@ -25,3 +25,8 @@ $session = $this->session;
         </form>
     </div>
 </div>
+
+<?php
+//debug($users,'users');
+//debug(password_hash('vadim_B',PASSWORD_DEFAULT),'pass');
+?>

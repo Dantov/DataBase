@@ -294,6 +294,7 @@ function submitForm() {
             modal.iziModal('setIcon', 'glyphicon glyphicon-floppy-saved');
             modal.iziModal('setHeaderColor', '#edaa16');
             modal.iziModal('setTitle', 'Сохранение прошло успешно!');
+            //progressModal.ProgressBar(100);
 
             if ( resp.isEdit == true )
             {

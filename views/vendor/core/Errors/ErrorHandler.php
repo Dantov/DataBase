@@ -74,6 +74,10 @@ class ErrorHandler
         set_exception_handler([$this,'exceptionHandler']);
     }
 
+    /**
+     * @param $e
+     * @throws \Exception
+     */
     public function exceptionHandler($e)
     {
         // пишем в лог, если включено
@@ -82,6 +86,9 @@ class ErrorHandler
         $this->displayError('exception', $e->getMessage(), $e->getFile(), $e->getLine(), $e->getCode(), $e->getTrace());
     }
 
+    /**
+     * @throws \Exception
+     */
     public function fatalErrorHandler()
     {
         $error = error_get_last();
@@ -163,11 +170,10 @@ class ErrorHandler
         $gen = new \Views\_Globals\Models\General();
         $gen->connectDBLite();
 
-        $user = $gen->user;
-
+        $user = $gen->getUser();
 
         $text  = "\n===========================================\n";
-        $text .= "New Error from: {$user['fio']} IP: {$user['IP']}\n";
+        $text .= "New Error from:{$user['fio']} uID:{$user['id']} IP:{$user['IP']}\n";
         $text .= "Date: [". date('Y-m-d H:i:s') ."] \n";
         $text .= "Type: [". $type ."] \n";
         $text .= "Message: ". $message ." \n";
