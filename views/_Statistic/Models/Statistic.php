@@ -52,15 +52,18 @@ class Statistic extends Main
 
         $v = new Validator();
 
-        $referer = $v->validateField('',$_SERVER['HTTP_REFERER'],['maxLength' => 254]);
+        $referer = $_SERVER['HTTP_REFERER']??" ";
+        $requestUri = $_SERVER['REQUEST_URI']??" ";
+
+        $referer = $v->validateField('',$referer,['maxLength' => 254]);
         if ( strlen($referer) > 254 )
             $referer = substr($referer,0,253);
 
-        $requestUri = $v->validateField('',$_SERVER['REQUEST_URI'],['maxLength' => 254]);
+        $requestUri = $v->validateField('',$requestUri,['maxLength' => 254]);
         if ( strlen($requestUri) > 254 )
             $requestUri = substr($requestUri,0,253);
 
-        $device = $_SERVER['HTTP_SEC_CH_UA_PLATFORM']??'';
+        $device = $this->getUserOSData();//$_SERVER['HTTP_SEC_CH_UA_PLATFORM']??'';
 
         foreach ( $rUo as $userO )
         {
@@ -93,6 +96,21 @@ class Statistic extends Main
             'update_connect' => date('Y-m-d H:i:s'),
         ];
         $this->insertUpdateRows([$newUser],'users_online');
+    }
+
+    public function getUserOSData() : string
+    {
+        $countryCode = $_SERVER['HTTP_GEOIP_COUNTRY_CODE']??"";
+        $ua = $_SERVER['HTTP_USER_AGENT']??" ";
+
+        $ua_arr = explode(' ', $ua);
+        $userBrowser = $ua_arr[count($ua_arr)-1];
+
+        $posStart = stripos($ua, '(');
+        $posEnd = stripos($ua, ')');
+        $userMachine = substr($ua,$posStart,++$posEnd-$posStart);
+
+        return $countryCode . " " .$userMachine . " " . $userBrowser;
     }
 
     /**

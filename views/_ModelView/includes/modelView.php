@@ -7,7 +7,7 @@ $isView = true;
     <!-- images block start-->
     <div class="col-xs-12 col-sm-6 pl-0 pr-1" id="images_block">
 
-        <ul class="nav nav-tabs" style="margin-left: -15px;">
+        <ul class="nav nav-tabs">
             <li role="presentation" class="active" title="Картинки 3Д модели"><a href="#images3d" role="tab" data-toggle="tab">Рендеры 3Д</a></li>
             <? if ($button3D): ?>
             <li role="presentation" title="Доступен 3D просмотр">
@@ -27,7 +27,7 @@ $isView = true;
 
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active in fade pt-1" id="images3d">
-                <div class="row">
+                <div class="row ml-1">
                     <div class="col-xs-12 pl-0">
                         <div class="panel mb-1">
                             <a id="saveMainIMG" title="Сохранить картинку" href="<?= $mainImg['src'] ?>" target="_blank" download="<?= $row['number_3d'] .'-'. $row['model_type'] ?>" class="btn btn-default absolute btnImgSave">
@@ -37,10 +37,10 @@ $isView = true;
                         </div>
                     </div>
                 </div>
-                <div class="row dopImages">
+                <div class="row dopImages ml-1">
                     <? foreach ( isset($images)?$images:[] as $image ) :?>
                         <?php $borderDopImg = isset($image['active']) ? 'border-primary-1': 'border-secondary-1' ?>
-                        <div class="col-xs-6 col-sm-3 pl-0 pr-2 mb-1">
+                        <div class="col-xs-4 col-sm-3 pl-0 pr-2 mb-1">
                             <div class="imageSmall cursorPointer border-radius-1 <?=$borderDopImg?> <?= isset($image['active']) ? 'activeImage':''?>" data-id="<?=$image['id']?>" style="background-image: url(<?= $setPrevImg($image) ?>); height: 10rem;"></div>
                         </div>
                     <? endforeach; ?>
@@ -244,35 +244,60 @@ $isView = true;
     <div class="col-xs-12 col-sm-12 col-lg-6 pl-1 pr-0">
         <div class="panel mb-1 panel-success">
             <div class="panel-heading"><i class="fab fa-codepen"></i> <b>Детали / Материалы:</b></div>
-            <ul class="list-group">
-                <?php foreach ( isset($matsCovers)?$matsCovers:[] as $material ) : ?>
-                <li class="list-group-item brb-2-secondary bg-info-light">
-                    <span class="badge badge-lg"><?=$material['probe'] ? $material['probe'] ."&deg;" : ""?></span>
-                    <span class="badge badge-lg"><?=$material['metalColor']?></span>
-                    <span class="badge badge-lg"><?=$material['type']?></span>
-                    <b><?=$material['part'] ? $material['part']." - " :"&#160;"?></b> <i><?=$material['count'] ? $material['count']." шт." : "" ?></i>
-                </li>
-                <li class="list-group-item p0">
-                    <?php if ( !empty($material['covering']) || !empty($material['area']) || !empty($material['covColor']) || !empty($material['handling']) ): ?>
-                        <table class="table table-condensed table-striped mb-0 text-small text-center">
-                            <thead>
-                                <tr class="text-muted">
-                                    <td>Покрытие</td><td>Площадь</td><td>Цвет Покрытия</td><td>Обработка</td>
-                                </tr>
-                            </thead>
-                            <tbody class="brb-2-success">
-                                <tr>
-                                    <th class="border-right-1 text-center"><?=$material['covering'];?></th>
-                                    <th class="border-right-1 text-center"><?=$material['area'];?></th>
-                                    <th class="border-right-1 text-center"><?=$material['covColor'];?></th>
-                                    <th class="text-center"><?=$material['handling'];?></th>
-                                </tr>
-                            </tbody>
-                        </table>
-                    <?php endif; ?>
-                </li>
-                <?php endforeach; ?>
-            </ul>
+            <div class="panel-body p0">
+                <div class="row pl-3 pr-3">
+                    <?php foreach ( $matsCovers??[] as $material ) : ?>
+                        <div class="col-xs-12 col-sm-6 p1">
+                            <ul class="list-group mb-0 cursorArrow">
+                                <?php if ( $material['count'] || $material['part'] ): ?>
+                                    <li class="list-group-item list-group-item-danger p1">
+                                        <span class="badge"><?=$material['count'] ? $material['count']." шт." : "" ?></span>
+                                        <b><?=$material['part'] ? $material['part'] : "&nbsp;"?></b>
+                                    </li>
+                                <?php endif; ?>
+                                <li title="Материал изделия" class="list-group-item p1">
+                                    <span class="badge"><?=$material['probe'] ? $material['probe'] ."&deg;" : ""?></span>
+                                    <span class="badge"><?=$material['metalColor']?></span>
+                                    <span class="badge"><?=$material['type']?></span>
+                                    <small>Метал:</small>
+                                </li>
+                                <?php if ( $material['covering'] || $material['area'] || $material['covColor'] || $material['handling'] ): ?>
+                                    <li class="list-group-item list-group-item-danger" style="padding: 1px!important;"></li>
+                                <?php endif; ?>
+                                <?php if ( $material['covering'] ): ?>
+                                    <li title="Покрытие" class="list-group-item p1">
+                                        <span class="badge"><?=$material['covering']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($material['covering'], $this->isMobile?18:20, true) ?>
+                                        <?= $isLongStr ? "&nbsp;" : "Покрытие" ?>
+                                    </li>
+                                <?php endif; ?>
+                                <?php if ( $material['area'] ): ?>
+                                    <li title="Площадь" class="list-group-item p1">
+                                        <span class="badge"><?=$material['area']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($material['area'], $this->isMobile?18:20, true) ?>
+                                        <?= $isLongStr ? "&nbsp;" : "Площадь" ?>
+                                    </li>
+                                <?php endif; ?>
+                                <?php if ( $material['covColor'] ): ?>
+                                    <li title="Цвет Покрытия" class="list-group-item p1">
+                                        <span class="badge"><?=$material['covColor']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($material['covColor'], $this->isMobile?18:20, true) ?>
+                                        <?= $isLongStr ? "&nbsp;" : "Цвет" ?>
+                                    </li>
+                                <?php endif; ?>
+                                <?php if ( $material['handling'] ): ?>
+                                    <li title="Обработка" class="list-group-item p1">
+                                        <span class="badge"><?=$material['handling']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($material['handling'], $this->isMobile?18:20, true) ?>
+                                        <?= $isLongStr ? "&nbsp;" : "Обработка" ?>
+                                    </li>
+                                <?php endif; ?>
+                                <li class="list-group-item list-group-item-danger" style="padding: 1px!important;"></li>
+                            </ul>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -280,62 +305,79 @@ $isView = true;
         <div class="col-xs-12 col-sm-12 col-lg-6 pl-1 pr-0">
             <div class="panel mb-1 panel-info">
                 <div class="panel-heading"><i class="far fa-gem"></i> <b>Вставки 3D:</b></div>
-                <table class="table table-condensed mb-0 text-small text-center table_gems">
-                    <thead>
-                    <tr class="text-muted">
-                        <td>Размер</td><td>Кол-во</td><td>Огранка</td><td>Сырьё</td><td>Цвет</td>
-                    </tr>
-                    </thead>
-                    <tbody class="tbody_gems">
-                    <?php foreach ( $gemsTR?:[] as $gem ) : ?>
-                        <tr class="text-bold">
-                            <td><?=$gem['gem_size']?></td>
-                            <td><?=$gem['gem_value']?></td>
-                            <td><?=$gem['gem_cut']?></td>
-                            <?php $isLongStr = $this->cutLongNames($gem['gem_name'], 20, true) ?>
-                            <td class="<?= $isLongStr?'bg-info cursorPointer':''?>">
-                                <div data-toggle="<?= $isLongStr?'tooltip':''?>" title="<?= $isLongStr?$gem['gem_name']:''?>"><?= $this->cutLongNames($gem['gem_name']) ?></div>
-                            </td>
-                            <?php $isLongStr = $this->cutLongNames($gem['gem_color'], 20, true) ?>
-                            <td class="<?= $isLongStr?'bg-info cursorPointer':''?>">
-                                <div data-toggle="<?= $isLongStr?'tooltip':''?>" title="<?= $isLongStr?$gem['gem_color']:''?>"><?= $this->cutLongNames($gem['gem_color']) ?></div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <div class="panel-body p0">
+                    <div class="row pl-3 pr-3">
+                        <?php foreach ( $gemsTR??[] as $gem ) : ?>
+                            <div class="col-xs-12 col-sm-4 p1">
+                                <ul class="list-group mb-0 cursorArrow">
+                                    <li title="Сырье" class="list-group-item list-group-item-warning p1">
+                                        <span class="badge"><?=$gem['gem_name']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($gem['gem_name'], $this->isMobile?18:18, true) ?>
+                                        <?= $isLongStr ? "<small>Сырье</small>" : "Сырье" ?>
+                                    </li>
+                                    <li title="Размер" class="list-group-item  p1">
+                                        <span class="badge"><?=$gem['gem_size']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($gem['gem_size'], $this->isMobile?12:18, true) ?>
+                                        <?= $isLongStr ? "&nbsp;" : "Размер" ?>
+                                    </li>
+                                    <li title="Кол-во" class="list-group-item p1">
+                                        <span class="badge"><?=$gem['gem_value']?></span>
+                                        Кол-во
+                                    </li>
+                                    <li title="Огранка" class="list-group-item p1">
+                                        <span class="badge"><?=$gem['gem_cut']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($gem['gem_cut'], $this->isMobile?12:18, true) ?>
+                                        <?= $isLongStr ? "&nbsp;" : "Огранка" ?>
+                                    </li>
+                                    <li title="Цвет" class="list-group-item p1">
+                                        <span class="badge"><?=$gem['gem_color']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($gem['gem_color'], $this->isMobile?11:19, true) ?>
+                                        <?= $isLongStr ? "<small>Цвет</small>" : "Цвет" ?>
+                                    </li>
+                                    <li class="list-group-item list-group-item-info" style="padding: 1px!important;"></li>
+                                </ul>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
         </div>
     <?php endif; ?>
+
+
     <?php if ( !empty($dopVCTr) ) : ?>
         <div class="col-xs-12 col-sm-12 col-lg-6 pl-1 pr-0">
             <div class="panel mb-1 panel-warning">
                 <div class="panel-heading"><span class="glyphicon glyphicon-link"></span> <b>Ссылки на другие артикулы:</b></div>
-                <table class="table table-condensed mb-0 text-small text-center table_gems table_vc_links">
-                    <thead>
-                    <tr class="text-muted">
-                        <td>Название</td><td>№3D/Арт.</td><td>Описание</td>
-                    </tr>
-                    </thead>
-                    <tbody class="tbody_vc_links">
-                    <?php foreach ( $dopVCTr?:[] as $vcLink  ) : ?>
-                        <tr class="text-bold">
-                            <?php $isLongStr = $this->cutLongNames($vcLink['vc_names'], 20, true) ?>
-                            <td class="<?= $isLongStr?'bg-info cursorPointer':''?>">
-                                <div data-toggle="<?= $isLongStr?'tooltip':''?>" title="<?= $isLongStr ? $vcLink['vc_names']:''?>"><?= $this->cutLongNames($vcLink['vc_names']) ?></div>
-                            </td>
-                            <td><?= $vcLink['vc_link'] ?></td>
-                            <?php $isLongStr = $this->cutLongNames($vcLink['vc_descript'], 20, true) ?>
-                            <td class="<?= $isLongStr?'bg-info cursorPointer':''?>">
-                                <div data-toggle="<?= $isLongStr?'tooltip':''?>" title="<?= $isLongStr ? $vcLink['vc_descript']:''?>"><?= $this->cutLongNames($vcLink['vc_descript']) ?></div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <div class="panel-body p0">
+                    <div class="row pl-3 pr-3 table_vc_links">
+                        <?php foreach ( $dopVCTr??[] as $vcLink ) : ?>
+                            <div class="col-xs-12 col-sm-6 p1">
+                                <ul class="list-group mb-0 cursorArrow">
+                                    <li title="Вид модели" class="list-group-item p1">
+                                        <span class="badge"><?=$vcLink['vc_names']?></span>
+                                        <?php $isLongStr = $this->cutLongNames($vcLink['vc_names'], $this->isMobile?18:20, true) ?>
+                                        <?= $isLongStr ? "&nbsp;" : "Вид" ?>
+                                    </li>
+                                    <li title="№3D/Арт" class="list-group-item p1">
+                                        <span class="badge" style="background-color: #265a88!important;"><?=$vcLink['vc_link']?></span>
+                                        №3D/Арт
+                                    </li>
+                                    <?php if ( $vcLink['vc_descript'] ): ?>
+                                        <li title="Описание" class="list-group-item p1">
+                                            <?=$vcLink['vc_descript']?>
+                                        </li>
+                                    <?php endif; ?>
+                                    <li class="list-group-item list-group-item-warning" style="padding: 1px!important;"></li>
+                                </ul>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
         </div>
     <?php endif; ?>
+
     <?php foreach ( isset($repairs)?$repairs:[] as $repair ): ?>
         <?php if ( empty($repair['repair_descr']) ) continue; ?>
         <? $whichRepair = $repair['which'] ? true : false ?>

@@ -46,6 +46,9 @@
                                 </label>
                                 <input class="hidden checkIdBox" <?=$checkedSM['inptAttr'] ?> checkBoxId modelId="<?=$row['id'] ?>" modelName="<?= $row['number_3d'].$vc_show ?>" modelType="<?=$row['model_type'] ?>" type="checkbox" id="checkId_<?=$row['id'] ?>">
                             </div>
+                            <?if ($btn3D):?>
+                                <i class="button-3D-pict-main fas fa-dice-d6" title="Доступен 3D просмотр"></i>
+                            <? endif; ?>
                             <b class="pull-right p1" style="background-color: #ffffff" title="<?=$row['model_type'] ?>"><?=$modTypeStr ?></b>
                         </div>
                     </div>

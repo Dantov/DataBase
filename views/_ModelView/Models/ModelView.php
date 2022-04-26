@@ -353,7 +353,8 @@ class ModelView extends General {
 
         $html = new HtmlHelper();
         return $html->tag("a")
-                    ->setAttr(['imgtoshow'=>$fileImg, 'href'=>HtmlHelper::URL('/',['id'=>$id])]) //_rootDIR_HTTP_ .'model-view/?id='.$id
+                    ->setAttr(['style'=>'color: #ffff!important;'])
+                    ->setAttr(['imgtoshow'=>$fileImg, 'href'=>HtmlHelper::URL('/',['id'=>$id])])
                     ->setTagText($vc_3dNum)
                     ->create();
     }
@@ -477,28 +478,7 @@ class ModelView extends General {
         }
 
         $c = 0;
-        /*
-        while( $statuses_row = mysqli_fetch_assoc($stats_quer) )
-        {
-            foreach ( $statuses as $status )
-            {
-                if ( $statuses_row['status'] === $status['id'] )
-                {
-                    $result[$c]['ststus_id'] = $status['id'];
-                    $result[$c]['class'] = $status['class'];
-                    $result[$c]['classMain'] = $status['name_en'];
-                    $result[$c]['glyphi'] = $status['glyphi'];
-                    $result[$c]['title'] = $status['title'];
-                    $result[$c]['status'] = $status['name_ru'];
-                    $result[$c]['name'] = $statuses_row['name'];
-                    $result[$c]['date'] = ($statuses_row['date'] == "0000-00-00") ? "" : date_create( $statuses_row['date'] )->Format('d.m.Y')."&#160;";
-                    $c++;
-                    break;
-                }
-            }
 
-        }
-        */
         foreach ( $this->statuses_Query as $statuses_row )
         {
             foreach ( $statuses as $status )
@@ -548,15 +528,26 @@ class ModelView extends General {
         return false;
     }
 
-    /**
-     * пока не нужно
-     */
-    private function setPrevPage()
+    public function removeOldStl()
     {
-        $thisPage = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-        if ( $thisPage !== $_SERVER["HTTP_REFERER"] ) {
-            $_SESSION['prevPage'] = $_SERVER["HTTP_REFERER"];
+        $path = _stockDIR_ . $this->number_3d . "/" . $this->id . "/stl/";
+        $d = dir($path);
+
+        // любой элемент каталога, чьё имя может быть выражено как false, остановит цикл.
+        while (false !== ( $entry = $d->read()) )
+        {
+            $filePath = $path . $entry;
+            if ( is_file($filePath) )
+            {
+                $info = new \SplFileInfo($filePath);
+                if ($info->getExtension() === "stl" || $info->getExtension() === "mgx" )
+                {
+                    //debug($filePath);
+                    unlink($filePath);
+                }
+            }
         }
+        $d->close();
     }
 
 }

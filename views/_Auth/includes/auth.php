@@ -27,6 +27,6 @@ $session = $this->session;
 </div>
 
 <?php
-//debug($users,'users');
+//debug($session->getAll(),'$session');
 //debug(password_hash('vadim_B',PASSWORD_DEFAULT),'pass');
 ?>

@@ -123,7 +123,8 @@ ImageViewer.prototype.init = function()
     this.mainImage.addEventListener('click', function(event)
     {
         event.preventDefault();
-        $('#modalImageViewer').iziModal('open');
+        if ( _IS_DESKTOP_ )
+            $('#modalImageViewer').iziModal('open');
     });
 
     let imageViewer = document.querySelector('#modalImageViewer');

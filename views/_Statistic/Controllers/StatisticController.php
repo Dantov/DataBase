@@ -14,9 +14,10 @@ class StatisticController extends GeneralController
     {
         $stat = new Statistic();
         $usersOnline = $stat->getUsersOnline();
+        //$userOS = $stat->getUserOSData();
 
         $compact = compact([
-            'usersOnline',
+            'usersOnline','userOS',
         ]);
 
         $this->render('statistic', $compact);

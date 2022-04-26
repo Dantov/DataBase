@@ -84,6 +84,7 @@ class ActiveQuery extends Model
      */
     public function __construct( $tables = null, string $alias='')
     {
+
         $this->validator = new Validator();
         $this->connectDB();
 

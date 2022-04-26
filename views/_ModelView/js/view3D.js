@@ -6,8 +6,11 @@ let buttClose = document.getElementById('buttClose');
 	buttClose.classList.toggle('hidden');
 let body = document.getElementById('body');
 	body.classList.add('body');
+
 let info3D = document.getElementById('info3D');
+if ( _IS_DESKTOP_ )
 	info3D.classList.toggle('hidden');
+
 let dellStlForm = document.getElementById('dellStlForm');
 let f_num = dellStlForm.children.length;
 let names = [];
@@ -366,6 +369,7 @@ let camera, scene, renderer, control;
 						gridHelper.visible = !gridHelper.visible;
 						axesHelper.visible = !axesHelper.visible;
 					};
+                buttGrid.click();
 				
 				let butt3D = document.getElementById('butt3D');
 					butt3D.onclick = function(){

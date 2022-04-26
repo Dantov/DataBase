@@ -13,6 +13,9 @@ class GeneralController extends Controller
     public $currentVersion = '';
     public $navBar;
 
+    public $isMobile = false;
+    public $isDesktop = false;
+
     /**
      * GeneralController constructor.
      * @param $controllerName
@@ -23,6 +26,8 @@ class GeneralController extends Controller
         parent::__construct($controllerName);
 
         $this->currentVersion = Config::get('version');
+        $this->isMobile = $this->isMobileCheck();
+        $this->isDesktop = !$this->isMobile;
 
         $this->accessControl();
         $this->navBarController();
@@ -30,12 +35,22 @@ class GeneralController extends Controller
         $stat = new Statistic();
         $stat->setUserOnline();
         $stat->removeExpiredUsers();
-
+        
         $wp = _WORK_PLACE_ ? 'true' : 'false';
+        $isMb = $this->isMobile ? 'true' : 'false';
+
         $js = <<<JS
+            const _IS_MOBILE_  = {$isMb};
+            const _IS_DESKTOP_ = !_IS_MOBILE_;
             const _WORK_PLACE_ = {$wp};
 JS;
         $this->includeJS($js,[],$this->HEAD);
+    }
+
+    public function isMobileCheck()
+    {
+        $ua = $_SERVER['HTTP_USER_AGENT']??" ";
+        return stripos($ua,'mobile') !== false ? true : false;
     }
 
     /**

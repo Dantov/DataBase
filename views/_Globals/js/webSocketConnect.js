@@ -1,5 +1,5 @@
 "use strict";
-debug(wsUserData);
+//debug(wsUserData);
 
 let tabName; // идентификатор текущей вкладки
 let userName = wsUserData.fio;

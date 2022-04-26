@@ -1,6 +1,7 @@
 <?php
 namespace Views\_Auth\Controllers;
 
+use Views\_Globals\Models\General;
 use Views\vendor\core\{
     ActiveQuery, Controller, Cookies, Config
 };
@@ -11,25 +12,26 @@ class AuthController extends Controller
 
     public $action = '';
 
+    protected $users = [];
+    protected $user = [];
+
     public $title = 'ХЮФ 3Д :: Вход';
     public $layout = 'auth';
 
 
     public function beforeAction()
     {
-        $session = $this->session;
-
         $action = $this->getQueryParam('a');
+
         switch ($action) {
             case "exit":
                 $this->actionExit();
                 break;
             default:
-                $this->action = $action;
+                $this->action = $action; // simply so...
                 break;
         }
-
-        if ($session->getKey('access') === true) $this->redirect('/');
+        if ($this->session->getKey('access') === true) $this->redirect('/');
         if ((int)Cookies::getOne('meme_sessA') === 1) $this->redirect('/');
     }
 
@@ -39,54 +41,81 @@ class AuthController extends Controller
      */
     public function action()
     {
-        $access = 0;
-        $userRow = [];
+        $submit = filter_has_var(INPUT_POST, 'submit');
+        $haveLogin = filter_has_var(INPUT_POST, 'login');
+        $havePass = filter_has_var(INPUT_POST, 'pass');
 
-        if (isset($_POST['submit'])) {
-            $general = new \Views\_Globals\Models\General();
-            $connection = $general->connectDBLite();
+        if ( $submit && $haveLogin && $havePass )
+        {
+            (new General())->connectDBLite(); // необходимость
 
-            /*
-            $login = htmlspecialchars( strip_tags( trim($_POST['login']) ), ENT_QUOTES );
-            $login = mysqli_real_escape_string($connection, $login);
-            */
+            $aq = new ActiveQuery(['users']);
+            $this->users = $aq->users->select(['*'])->asArray()->exe();
 
-            $v = new Validator();
-            $login = $v->ValidateField('login', $_POST['login']);
-
-            if ($v->getLastError()) {
-                $this->session->setFlash('wrongLog', ' содержит не допустимые символы!');
+            if ( $this->checkLogin($_POST['login']) )
+            {
+                if ( $this->checkPassword($_POST['pass']) )
+                    $this->actionEnter($this->user);
 
             } else {
-
-                $userRow = $general->findOne(" SELECT * FROM users WHERE login='$login' ");
-
-                if ($userRow) {
-                    $access = 1; //правильный логин
-                    $pass = trim($_POST['pass']);
-
-
-                    if (password_verify($pass, $userRow['pass'])) //$userRow['pass'] === $pass
-                    {
-                        $access = 2; //правильный пароль
-                    } else {
-                        $this->session->setFlash('wrongPass', ' не верен!');
-                        //$wrongPass = ' не верен!';
-                    }
-                } else {
-                    $this->session->setFlash('wrongLog', ' не верен!');
-                    //$wrongLog = ' не верен!';
-                }
+                $this->session->setFlash('wrongLog', ' не верен!');
             }
-
         }
 
-        if ($access === 2)
-            $this->actionEnter($userRow);
-
-        //$users = $this->passwdHash();
-        $compacted = compact(['login','users']);
+        $compacted = compact([]);
         return $this->render('auth', $compacted);
+    }
+
+    /**
+     * @param $password
+     * @return bool
+     * @throws \Exception
+     */
+    protected function checkPassword($password) : bool
+    {
+        if ( !isset($this->user['pass']) )
+            return false;
+
+        $v = new Validator();
+        $pass = $v->ValidateField('password', $password);
+        if ( password_verify($pass, $this->user['pass']) )
+        {
+            return true;
+        } else {
+            $this->session->setFlash('wrongPass', ' не верен!');
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $login
+     * @return bool
+     * @throws \Exception
+     */
+    protected function checkLogin($login) : bool
+    {
+        $v = new Validator();
+        $login = $v->ValidateField('login', $login);
+
+        if ($v->getLastError())
+            return false;
+
+        foreach ( $this->users as $user )
+        {
+            if ( isset($user['login']) )
+            {
+                //hash_equals();
+                //Крайне важно задавать строку с пользовательскими данными вторым аргументом, а не первым.
+                if ( hash_equals($user['login'], $login) )
+                {
+                    $this->user = $user;
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -150,33 +179,10 @@ class AuthController extends Controller
             Cookies::dellAllCookies();
         }
         $this->session->destroySession();
+
+        //delete user row in usersOnline table, maybe...
+
         $this->redirect('/auth/');
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function passwdHash()
-    {
-
-        $aq = new ActiveQuery();
-        $users = $aq->registerTable('users');
-
-
-        $res = $users
-            ->select(['*'])
-            ->asArray()
-            ->exe();
-
-        foreach ( $res as &$user )
-        {
-            $user['pass'] = password_hash($user['pass'],PASSWORD_DEFAULT);
-        }
-
-        if ( $aq->insertUpdateRows($res, 'users') !== -1 )
-            return true;
-
-        return false;
     }
 
 }

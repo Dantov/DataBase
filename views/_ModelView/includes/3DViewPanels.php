@@ -8,8 +8,6 @@
 		<a type="button" class="btn btn-default" id="anim" title="Анимация"><span class="glyphicon glyphicon-refresh"></span></a>
 		<a type="button" class="btn btn-default" style="padding: 3.5px 9px 3.5px 9px;" id="grid" title="Сетка"><span class="button-3D-grid"></span></a>
 	</div>
-	<div>
-		
-	</div>
+	<div></div>
 </div>
 <a type="button" class="buttClose3D hidden" id="buttClose" title="Закрыть"><span class="glyphicon glyphicon-remove"></span></a>

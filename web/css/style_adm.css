@@ -21,7 +21,7 @@ body {
 	font-family: 'Open Sans', sans-serif !important;
 	font-size: 14pt; 
 	color: #333;
-	/*about-bg.png*/
+	height: 100%;
 	background: url('../picts/bg-dot.jpg') repeat scroll 0 0 rgba(0, 0, 0, 0);
 }
 .unselectable {
@@ -308,14 +308,11 @@ body {
 	left: 7px;
 }
 .button-3D-pict-main {
-	/*display:inline-block;*/
+	font-size: 1.5em;
+	color: #4db8ee;
 	position: absolute;
-	width: 30px;
-	height: 30px;
-	background: url('../picts/3DPict.png') 0 0 no-repeat;
-	background-size: 100%;
-	bottom:0px;
-	right: 0px;
+	bottom:33px;
+	right: 5px;
 	z-index:100;
 }
 .button-3D-grid {
@@ -369,23 +366,13 @@ body {
 	margin-top: 5px;
 	z-index:1500;
 }
-/*.footer {
-	position: relative;
-	width: 100%;
-	padding-top: 10px;
-	padding-bottom: 10px;
-	margin-top: 15px;
-	border-top: 1px solid #e7e7e8;
-	font-size: 11px;
-}*/
 
 
 
-
-
-
+.wrapper {
+}
 .content {
-	min-height: calc(100vh - 132px);
+	min-height: calc(100vh - 142px);
 }
 .footer {
 	position: relative;
@@ -397,9 +384,8 @@ body {
 	font-size: 11px;
 	height: 60px;
 	border-bottom: 1px solid #0f0f0f;
+	box-shadow: 0 -1px 5px rgba(0,0,0,.075)
 }
-
-
 
 
 
@@ -1464,7 +1450,6 @@ body {
 	border: 2px solid #dfdede;
 	left: 0px;
 	top: 62px;
-
 	z-index: 200;
 }
 #collectionBlockForm a {

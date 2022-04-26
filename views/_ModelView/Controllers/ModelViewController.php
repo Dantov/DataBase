@@ -103,6 +103,7 @@ class ModelViewController extends GeneralController
         $button3D = '';
         if ( $stl_file = $modelView->getStl() )
         {
+            $modelView->removeOldStl();
             $button3D = $stl_file;
             // ПРИМЕР!!
             //$path = _webDIR_HTTP_ . 'js_lib/';
@@ -316,4 +317,5 @@ JS;
 
         exit(json_encode(['success' => AppCodes::getMessage(AppCodes::NOTHING_DONE)]));
     }
+
 }

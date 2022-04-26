@@ -36,7 +36,7 @@ JS;
     <!-- <link rel="stylesheet" href="/web/css/bootstrap-theme.min.css"> -->
     <link rel="stylesheet" href="/web/css/iziModal.min.css">
     <link rel="stylesheet" href="/web/css/iziToast.min.css">
-    <link rel="stylesheet" href="/web/fontawesome5.9.0/css/all.min.css">
+    <link rel="stylesheet" href="/web/fontawesome-5.15.4/css/all.min.css">
     <? $this->head() ?>
     <script src="/Views/_Globals/js/const.js?ver=<?=time()?>"></script>
     <script><?=$wsUserDataJS?></script>
@@ -71,7 +71,7 @@ JS;
                             <a href="/main">Main <span class="sr-only">(current)</span></a>
                         </li>
                         <li>
-                            <a id="collSelect" data-izimodal-open="#collectionsModal" type="button" title="Выбрать Коллекцию" style="font-size: 18px;" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <a id="collSelect" data-izimodal-open="#collectionsModal" type="button" title="Выбрать Коллекцию" style="font-size: 18px;" class="cursorPointer" >
                                 <i class="fas fa-gem"></i>
                             </a>
                         </li>
@@ -95,17 +95,18 @@ JS;
                         <?php endif;?>
                     </ul>
 
-                    <form class="navbar-form navbar-left" action="/globals/search=<?=$_SESSION['searchFor']?>" method="post" <?=$searchStyle?> >
+                    <form class="navbar-form navbar-right" action="/globals/search=<?=$_SESSION['searchFor']?>" method="post" <?=$searchStyle?> >
                         <?php if ( trueIsset( $session->getKey('countAmount') ) ) : ?>
                             <span class="cursorArrow" title="Найдено позиций"><?=$session->getKey('countAmount')?></span>
                         <?php endif; ?>
                         <?php if ( $session->getKey('searchFor') ): ?>
-                            <!-- /main/?search=resetSearch= -->
                             <a href="/globals/?search=resetSearch" class="btn btn-link" type="button" name="resetSearch" title="Сбросить поиск"><i class="fas fa-broom"></i></a>
                         <?php endif; ?>
-                        <button class="btn btn-link" type="submit" name="search" title="Нажать для поиска">
-                            <span class="glyphicon glyphicon-search"></span>
-                        </button>
+                        <?php if ( !$this->isMobile ): ?>
+                            <button class="btn btn-link" type="submit" name="search" title="Нажать для поиска">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        <?php endif; ?>
                         <div class="form-group">
                             <input type="text" class="form-control border-radius-0 topSearchInpt" title="Что искать" placeholder="Search..." name="searchFor" value="<?=$_SESSION['searchFor']?>" >
                             <div class="btn-group">
@@ -187,6 +188,7 @@ JS;
                                 </ul>
                             </li>
                         <?php endif; ?>
+
                         <!-- User menu -->
                         <li class="dropdown">
                             <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -225,78 +227,6 @@ JS;
             </div><!-- /.container-fluid -->
         </nav>
 
-        <!-- Блок коллекций -->
-        <div id="collection_block" coll_block class="" style="margin-top:70px; left: 50%; margin-right: -50%; transform: translate(-50%); ">
-            <div class="row collection_blockRow" coll_block>
-                <div class="col-xs-12 col-sm-6 col-md-3" style="max-height: 100%; padding: 0 5px 0 5px;">
-                    <div coll_block class=" collItem_TOP">
-                        Серебро ( <?= count($coll_silver) ?> )
-                    </div>
-                    <?php
-                    foreach ( $coll_silver as $id => $name )
-                    {
-                        ?>
-                        <a href="/main/?coll_show=<?=$id?>">
-                            <div coll_block class=" collItem"><?= $name ?></div>
-                        </a>
-                        <?php
-                    }
-                    ?>
-                </div>
-                <div class="col-xs-12 col-sm-6 col-md-3" style="border-left: 1px solid #2F4F4F; max-height: 100%; padding: 0 5px 0 5px;">
-                    <div coll_block class=" collItem_TOP">
-                        Золото ( <?= count($coll_gold) ?> )
-                    </div>
-                    <?php
-                    foreach ( $coll_gold as $id => $name )
-                    {
-                        ?>
-                        <a href="/main/?coll_show=<?=$id?>">
-                            <div coll_block class=" collItem"><?= $name ?></div>
-                        </a>
-                        <?php
-                    }
-                    ?>
-                </div>
-                <div class="col-xs-12 col-sm-6 col-md-3" style="border-left: 1px solid #2F4F4F; max-height: 100%; padding: 0 5px 0 5px;">
-                    <div coll_block class=" collItem_TOP">
-                        Бриллианты ( <?= count($coll_diamond) ?> )
-                    </div>
-                    <?php
-                    foreach ( $coll_diamond as $id => $name )
-                    {
-                        ?>
-                        <a href="/main/?coll_show=<?=$id?>">
-                            <div coll_block class=" collItem"><?= $name ?></div>
-                        </a>
-                        <?php
-                    }
-                    ?>
-                </div>
-                <div class="col-xs-12 col-sm-6 col-md-3" style="border-left: 1px solid #2F4F4F; max-height: 100%; padding: 0 5px 0 5px;">
-                    <div coll_block class=" collItem_TOP" >
-                        Разные ( <?= count($coll_other) ?> )
-                    </div>
-                    <a href="/main/?coll_show=-1">
-                        <div coll_block class="collItem">
-                            Все
-                        </div>
-                    </a>
-                    <?php
-                    foreach ( $coll_other as $id => $name )
-                    {
-                        ?>
-                        <a href="/main/?coll_show=<?=$id?>">
-                            <div coll_block class=" collItem"><?= $name ?></div>
-                        </a>
-                        <?php
-                    }
-                    ?>
-                </div>
-            </div>
-        </div>
-        <!-- END Блок коллекций -->
-
         <?php
             $container = 'container';
             if ( $this->varBlock['container'] === 2 )
@@ -314,22 +244,24 @@ JS;
     if ( _DEV_MODE_ )
     {
         //debug($_GET,'$_GET');
-        debug($_SERVER,'$_SERVER');
-        debug(_rootDIR_,'_rootDIR_');
-        debug(_coreDIR_,'_coreDIR_');
-        debug(_stockDIR_,'_stockDIR_');
-        debug($this->getQueryParams(),'QueryParams');
-        debug($_SESSION,'$_SESSION');
-        debug($_COOKIE,'$_COOKIE');
-        debug( Views\vendor\core\Config::get(), "Config");
+        //debug($_SERVER,'$_SERVER');
+//        debug(_rootDIR_,'_rootDIR_');
+//        debug(_coreDIR_,'_coreDIR_');
+//        debug(_stockDIR_,'_stockDIR_');
+//        debug($this->getQueryParams(),'QueryParams');
+//        debug($_SESSION,'$_SESSION');
+//        debug($_COOKIE,'$_COOKIE');
+//        debug( Views\vendor\core\Config::get(), "Config");
     }
 ?>
-        <footer class="footer" style="box-shadow: 0 -1px 5px rgba(0,0,0,.075)">
+        <footer class="footer">
             <div class="container">
                 <?php if ( User::permission('addModel') ): ?>
-                    <a href="/add-edit/?id=0&component=1" class="btn btn-primary">
+                    <a href="/add-edit/?id=0&component=1" title="Добавить модель" class="btn btn-primary">
                         <span class="glyphicon glyphicon-file"></span>
-                        <strong> Добавить модель</strong>
+                        <?php if ( !$this->isMobile ): ?>
+                            <strong> Добавить модель</strong>
+                        <?php endif; ?>
                     </a>
                 <?php endif; ?>
                 <i class="" style="position: absolute; right: 0; margin-right: 15px; margin-top: 10px"><a href="/versions/" title="Список изменений">ver. <?=$this->currentVersion?></a> &#160; <sapn title="dantrobin@gmail.com">developed by Vadym Bykov</sapn></i>

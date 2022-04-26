@@ -16,29 +16,32 @@ $(function () {
 
 
 //--------- Увеличит картинку на высоту правого блока ----------//
-let descr = document.getElementById('descr');
+if ( _IS_DESKTOP_ )
+{
+    let descr = document.getElementById('descr');
 
-let descrH = descr.offsetHeight;
-let images_blockH = images_block.offsetHeight;
+    let descrH = descr.offsetHeight;
+    let images_blockH = images_block.offsetHeight;
 
-if ( descrH >= images_blockH ) {
-	descr.classList.add('bordersMiddleLeft');
-	images_block.classList.remove('bordersMiddleRight');
+    if ( descrH >= images_blockH ) {
+        descr.classList.add('bordersMiddleLeft');
+        images_block.classList.remove('bordersMiddleRight');
+    }
+    if ( descrH <= images_blockH ) {
+        descr.classList.remove('bordersMiddleLeft');
+        images_block.classList.add('bordersMiddleRight');
+    }
+
+    window.addEventListener('load', function () {
+        let dPHeight = document.querySelector('.descriptionPanel').offsetHeight;
+        document.querySelector('.mainImage').style.height = dPHeight + 'px';
+
+        document.querySelectorAll('.imageSmall').forEach( image => {
+            image.style.height = image.offsetWidth + 'px';
+        } );
+
+    });
 }
-if ( descrH <= images_blockH ) {
-	descr.classList.remove('bordersMiddleLeft');
-	images_block.classList.add('bordersMiddleRight');
-}
-
-window.addEventListener('load', function () {
-    let dPHeight = document.querySelector('.descriptionPanel').offsetHeight;
-    document.querySelector('.mainImage').style.height = dPHeight + 'px';
-
-    document.querySelectorAll('.imageSmall').forEach( image => {
-       image.style.height = image.offsetWidth + 'px';
-	} );
-
-});
 
 
 //--------- отображаем превью при наведении ----------//
@@ -109,6 +112,37 @@ if ( textAreas.length )
 	appPre.remove();	
 }
 
+function registerScript( targetElem, scriptPath )
+{
+    if ( !scriptPath || typeof scriptPath !== "string" )
+    {
+        debug("Script path error");
+        return;
+    }
+
+    if ( !targetElem )
+        debug("Target element can not be empty");
+    let tElem;
+
+    if ( typeof targetElem === "string" )
+        tElem = document.querySelector(targetElem);
+
+    if ( targetElem instanceof HTMLElement )
+        tElem = targetElem;
+
+    if ( !tElem )
+    {
+        debug("Target element error");
+        return;
+    }
+
+    let scriptElem = document.createElement('script');
+        scriptElem.setAttribute('src',scriptPath);
+
+    tElem.appendChild(scriptElem);
+
+    return scriptElem;
+}
 
 let butt3D = document.getElementById('butt3D');
 if ( butt3D )
@@ -144,26 +178,26 @@ if ( butt3D )
                     formToDell.appendChild(input);
                 }
 
-                let three = document.createElement('script');
-                three.setAttribute('src','/web/js_lib/three.min.js');
-                body.appendChild(three);
-                $( three ).on('load',function()
+                //let three = document.createElement('script');
+                //three.setAttribute('src','/web/js_lib/three.min.js');
+                //body.appendChild(three);
+                $( registerScript(body, '/web/js_lib/three.min.js') ).on('load',function()
                 {
-                    let scripts = {
-                        script2: '/web/js_lib/OrbitControls.js',
-                        //script3: '/web/js_lib/TrackballControls.js',
-                        script4: '/web/js_lib/TransformControls.js',
-                        script5: '/web/js_lib/STLLoader.js',
-                        script6: '/Views/_ModelView/js/view3D.js?ver='+new Date().getMilliseconds(),
-                    };
-                    for( let src in scripts )
-                    {
-                        let script = document.createElement('script');
-                        script.setAttribute('src',scripts[src]);
-                        body.appendChild(script);
-                    }
+                    // let scripts = {
+                    //     script2: '/web/js_lib/OrbitControls.js',
+                    //     //script3: '/web/js_lib/TrackballControls.js',
+                    //     script4: '/web/js_lib/TransformControls.js',
+                    //     script5: '/web/js_lib/STLLoader.js',
+                    //     //script6: '/Views/_ModelView/js/view3D.js?ver='+new Date().getMilliseconds(),
+                    // };
+                    registerScript(body, '/web/js_lib/OrbitControls.js');
+                    registerScript(body, '/web/js_lib/TransformControls.js');
 
-                    body.classList.add('body');
+                    $( registerScript(body, '/web/js_lib/STLLoader.js') ).on('load',function()
+                    {
+                        registerScript(body, '/Views/_ModelView/js/view3D.js?ver='+new Date().getMilliseconds());
+                    });
+
                 });
             },
             error:function (err) {
