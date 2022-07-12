@@ -951,5 +951,67 @@ class General extends Model
         $userFIO = explode(' ', User::getFIO())[0];
         return $this->findOne("SELECT COUNT(modeller3D) as c FROM stock WHERE modeller3D LIKE '%$userFIO%' AND status=8  ",'c');
     }
+
+    /**
+     * @param array $tabs
+     * @return array
+     * @throws \Exception
+     */
+    public function getServiceData( array $tabs = [] )
+    {
+        $tabs_origin = [
+            'collections',
+            'author',
+            'modeller3d',
+            'jeweler',
+            'model_type',
+            'model_material',
+            'model_covering',
+            'handling',
+            'metal_color',
+            'vc_names',
+            'gems_color',
+            'gems_cut',
+            'gems_names',
+            'gems_sizes',
+        ];
+
+        if ( empty($tabs) )
+        {
+            $tabs = $tabs_origin;
+        } else {
+            foreach ( $tabs as $k => $t )
+            {
+                if (!in_array($t, $tabs_origin))
+                    throw new  \Exception("Wrong tab name ".$t." in " . __METHOD__);
+                    //unset( $tabs[$k] );
+            }
+
+            if ( empty($tabs) )
+                $tabs = $tabs_origin;
+        }
+
+        $q_tabs = '';
+        foreach ( $tabs as $t )
+            $q_tabs .= "'" . $t . "',";
+
+        $q_tabs = ' WHERE tab IN (' . trim($q_tabs,',') . ')';
+
+        $query =  "select * from service_data $q_tabs ORDER BY name";
+
+        //debug($query,"query",1);
+
+        $service_data = $this->findAsArray($query);
+
+        $tables = [];
+        foreach ( $service_data as $row )
+        {
+            foreach ( $tabs as $tab )
+            {
+                if ( $row['tab'] === $tab ) $tables[$tab][] = $row;
+            }
+        }
+        return compact(['tables']);
+    }
 	
 }

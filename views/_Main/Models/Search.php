@@ -7,15 +7,20 @@ class Search extends General
 
     public $searchFor = '';
 
+    public $params = [];
     /**
      * Search constructor.
+     * @param array $params
      * @throws \Exception
      */
-    public function __construct()
+    public function __construct( array $params = [] )
     {
         parent::__construct();
 
         $this->connectDBLite();
+
+        if ( $params )
+            $this->params = $params;
 
         $this->getStatLabArr('status');
     }
@@ -29,7 +34,11 @@ class Search extends General
     {
         if ( !is_string($searchInput) || empty($searchInput) ) return false;
         $this->searchFor = $searchFor = mb_strtolower( strip_tags( trim($searchInput) ) );
-        
+
+        // Для обновления поиска когда выбран тип модели. Нужно "запаковать" 'assist' в сессию
+        if ( isset($this->params['mt']) )
+            (new SetSortModel())->setSort($this->params);
+
         $assist = $this->session->getKey('assist');
         $statuses = $this->statuses;
 
@@ -46,17 +55,28 @@ class Search extends General
             }
         }
 
+        $and = false;
         if ( $assist['searchIn'] === 2 && isset($assist['collectionName']) && !empty($assist['collectionName']) ) 
         {
             $collectionName = $assist['collectionName'];
             $where = "WHERE collections like '%$collectionName%' ";
+            $and = true;
 
             if ( $assist['byStatHistory'] != 1 && $regStat_str != "Нет" ) $where .= "AND status='$regStat' ";
 
         } else if ( $assist['byStatHistory'] != 1 && $regStat_str != "Нет" )
         {
             $where = "WHERE status='$regStat' ";
+            $and = true;
         }
+
+        if ( $assist['modelType'] !== "Нет" )
+        {
+            $andWhere = $and ? " AND" : " WHERE";
+
+            $where .= $andWhere . " model_type='{$assist['modelType']}' ";
+        }
+
 
         $select = "SELECT * FROM stock ".$where." ORDER BY ".$assist['reg']." ".$assist['sortDirect'];
         $foundAllRows = $this->findAsArray($select);

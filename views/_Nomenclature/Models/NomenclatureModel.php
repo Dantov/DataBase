@@ -18,37 +18,13 @@ class NomenclatureModel extends General
      * @return array
      * @throws \Exception
      */
+
+
     public function getData()
     {
-        $tabs = [
-            'collections',
-            'author',
-            'modeller3d',
-            'jeweler',
-            'model_type',
-            'model_material',
-            'model_covering',
-            'handling',
-            'metal_color',
-            'vc_names',
-            'gems_color',
-            'gems_cut',
-            'gems_names',
-            'gems_sizes',
-        ];
-        $tables = [];
-
-        $service_data = $this->findAsArray("select * from service_data ORDER BY name");
-
-        foreach ( $service_data as $row )
-        {
-            foreach ( $tabs as $tab )
-            {
-                if ( $row['tab'] === $tab ) $tables[$tab][] = $row;
-            }
-        }
-        return compact(['tables']);
+        return $this->getServiceData();
 	}
+
 
     /**
      * @param $row_id

@@ -58,6 +58,9 @@ class SetSortModel extends General
                 case 'regStat':
                     return $this->sortByStatus($paramValue);
                     break;
+                case 'mt':
+                    return $this->sortByModelType($paramValue);
+                    break;
                 case 'sortDirect':
                     $this->sortDirect($paramValue);
                     break;
@@ -205,6 +208,38 @@ class SetSortModel extends General
         $assist['page'] = 0;
         $assist['startFromPage'] = 0;
         
+        $session->setKey('assist', $assist);
+        $session->setKey('re_search', true);
+    }
+
+    /**
+     * @param int $mtID
+     * @throws \Exception
+     */
+    protected function sortByModelType( int $mtID )
+    {
+        if ( $mtID > PHP_INT_MAX || $mtID < -1 ) return;
+
+        $session = $this->session;
+        $assist = $session->getKey('assist');
+
+        if ( $mtID === -1 )
+            $assist['modelType'] = "Нет";
+
+        if ( $mtID > 0 )
+        {
+            $this->connectToDB();
+            $mTypes = $this->getServiceData()['tables']['model_type'];
+            foreach ( $mTypes as $mType )
+            {
+                if ( (int)$mType['id'] === $mtID )
+                {
+                    $assist['modelType'] = $mType['name'];
+                    break;
+                }
+            }
+        }
+
         $session->setKey('assist', $assist);
         $session->setKey('re_search', true);
     }

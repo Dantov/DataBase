@@ -135,10 +135,11 @@ class AuthController extends Controller
 
         $assist['maxPos'] = 48;        // кол-во выводимых позиций по дефолту
         $assist['regStat'] = "Нет";    // выбор статуса по умоляанию
+        $assist['modelType'] = "Нет";  // выбор по типу модели
         $assist['byStatHistory'] = 0;    // искать в истории статусов
         $assist['wcSort'] = [];        // выбор рабочего участка по умоляанию
         $assist['searchIn'] = 1;
-        $assist['reg'] = "number_3d"; // сорттровка по дефолту
+        $assist['reg'] = "date"; // сорттровка по дефолту number_3d
         $assist['startfromPage'] = (int)0;        // начальная страница пагинации
         $assist['page'] = (int)0;        // устанавливаем первую страницу
         $assist['drawBy_'] = 1;        // 2 полоски, 1 квадратики

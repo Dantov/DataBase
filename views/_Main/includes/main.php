@@ -1,8 +1,13 @@
 <?php
 
 use Views\_Globals\Models\User;
+use \Views\vendor\core\HtmlHelper;
 
 $session = $this->session;
+
+/* @var $modelTypes - array  */
+$currentModelType = $this->session->getKey('assist')['modelType'];
+
 ?>
 <script src="/Views/_Main/js/trytoload.js?ver=005"></script>
 
@@ -34,12 +39,26 @@ $session = $this->session;
 			</div>
 			<?php endif; ?>
 
-			<div class="btn-group" role="group">
-				<button id="statusesSelect" type="button" class="btn btn-default dropdown-toggle trigger" data-izimodal-open="#modalStatuses" data-izimodal-transitionin="fadeInDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					<span>Статус:<?=$selectedStatusName ?></span>
-					<span class="caret"></span>
-				</button>
-			</div>
+            <div class="btn-group" role="group">
+                <button id="modelTypeSelect" type="button" class="btn btn-default dropdown-toggle trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span>Тип модели: <?= $currentModelType ?></span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="<?= HtmlHelper::URL('/main/',['mt'=>-1]) ?>">Все</a></li>
+                    <li role="separator" class="divider"></li>
+                    <?php foreach ( $modelTypes as $modelType ): ?>
+                        <li><a href="<?= HtmlHelper::URL('/main/',['mt'=>$modelType['id']]) ?>"><?= $modelType['name'] ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+
+            <div class="btn-group" role="group">
+                <button id="statusesSelect" type="button" class="btn btn-default dropdown-toggle trigger" data-izimodal-open="#modalStatuses" data-izimodal-transitionin="fadeInDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span>Статус: <?=$selectedStatusName ?></span>
+                    <span class="caret"></span>
+                </button>
+            </div>
 
 			<div class="btn-group" role="group">
 				<button type="button" class="btn btn-default dropdown-toggle" title="<?=$chevTitle; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

@@ -3,7 +3,15 @@
 	<p class="lead text-info text-center">Список изменений</p>
 	<div class="col-xs-12">
 		<dl>
-            <dt>ver. <?=$this->currentVersion?> - 26.04.22</dt>
+            <dt>ver. <?=$this->currentVersion?> - 12.07.22</dt>
+            <dd>
+                <ul>
+                    <li>
+                        Добавлен вариант сортировки по типу модели.
+                    </li>
+                </ul>
+            </dd>
+            <dt>ver. 2.3 - 26.04.22</dt>
             <dd>
                 <ul>
                     <li>

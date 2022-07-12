@@ -172,6 +172,12 @@ class Main extends General {
             $where .= ($and ? " AND " : " WHERE ") . " status='$regStat'";
         }
 
+        $modelType = $this->assist['modelType'];
+        if ( $modelType !== "Нет" )
+        {
+            $where .= ($and ? " AND " : " WHERE ") . " model_type='$modelType'";
+        }
+
 		$selectRow = "SELECT * FROM stock " . $where . " ORDER BY " .$this->assist['reg']." ".$this->assist['sortDirect'];
 		$result_sort = mysqli_query($this->connection, $selectRow);
 

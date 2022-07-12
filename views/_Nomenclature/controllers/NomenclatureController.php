@@ -141,7 +141,6 @@ class NomenclatureController extends GeneralController
 
         $compact = $nom->getData();
 
-
         $this->includePHPFile('nom_incl.php');
         $this->includeJSFile('nomenclature.js',['defer','timestamp']);
 

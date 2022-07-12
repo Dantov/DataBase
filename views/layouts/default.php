@@ -95,7 +95,7 @@ JS;
                         <?php endif;?>
                     </ul>
 
-                    <form class="navbar-form navbar-right" action="/globals/search=<?=$_SESSION['searchFor']?>" method="post" <?=$searchStyle?> >
+                    <form class="navbar-form navbar-left" action="/globals/search=<?=$_SESSION['searchFor']?>" method="post" <?=$searchStyle?> >
                         <?php if ( trueIsset( $session->getKey('countAmount') ) ) : ?>
                             <span class="cursorArrow" title="Найдено позиций"><?=$session->getKey('countAmount')?></span>
                         <?php endif; ?>
@@ -249,7 +249,7 @@ JS;
 //        debug(_coreDIR_,'_coreDIR_');
 //        debug(_stockDIR_,'_stockDIR_');
 //        debug($this->getQueryParams(),'QueryParams');
-//        debug($_SESSION,'$_SESSION');
+        debug($_SESSION,'$_SESSION');
 //        debug($_COOKIE,'$_COOKIE');
 //        debug( Views\vendor\core\Config::get(), "Config");
     }

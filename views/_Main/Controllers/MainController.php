@@ -110,7 +110,7 @@ class MainController extends GeneralController
         // ******* SEARCH ******* //
         if ( $session->hasKey('searchFor') || $session->getKey('re_search') )
         {
-            $search = new Search();
+            $search = new Search($params);
             $this->foundRows = $search->search( $session->getKey('searchFor') );
         }
 
@@ -123,8 +123,8 @@ class MainController extends GeneralController
             {
                 $this->redirect($url);
             }
-
         }
+
 
         // ******* SELECTED MODELS ******* //
         if ( $this->isQueryParam('selected-models-show') || $session->getKey('selectionMode')['showModels'] )
@@ -156,6 +156,10 @@ class MainController extends GeneralController
 		$activeWorkingCenters2 = $variables['activeWorkingCenters2'];
 		$activeList  = $variables['activeList'];
 		$collectionName = $variables['collectionName'];
+		
+		$modelTypes = $main->getServiceData(['model_type'])['tables']['model_type'];
+
+		//debug($modelTypes,'$modelTypes',1);
 
 		// выборка статусов
 		$status = $main->getStatusesSelect();
@@ -263,7 +267,7 @@ class MainController extends GeneralController
 		$this->includePHPFile('progressModal.php','','',_globDIR_. 'includes/');
 		$this->includeJSFile('Selects.js',['defer','timestamp']);
 		
-		$compacted = compact(['variables','chevron_','chevTitle','showsort','activeSquer','activeWorkingCenters',
+		$compacted = compact(['variables','modelTypes','chevron_','chevTitle','showsort','activeSquer','activeWorkingCenters',
 		'activeWorkingCenters2','activeList','collectionName','collectionList','status','selectedStatusName',
 		'toggleSelectedGroup','selectedModelsByLi','showModels','drawBy_','iter','wholePos','statsbottom',
 		'posIter','ComplShown','workingCenters','workCentersSort','pagination']);
