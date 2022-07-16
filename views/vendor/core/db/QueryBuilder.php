@@ -217,12 +217,17 @@ class QueryBuilder extends Model
         return $this;
     }
 
-    public function select( array $fields ) : QueryBuilder
+    /**
+     * @param array $fields
+     * @param bool $distinct
+     * @return QueryBuilder
+     */
+    public function select(array $fields, bool $distinct = false ) : QueryBuilder
     {
         if ( $this->statement_COUNT )
             throw new \Error("You cannot do SELECT and COUNT statements at once!");
 
-        $this->statement_SELECT = "SELECT";
+        $this->statement_SELECT = "SELECT" . ($distinct ? " DISTINCT" : "");
         $allFields = false;
 
         foreach ( $fields as $alias => $field )
@@ -293,7 +298,15 @@ class QueryBuilder extends Model
                 {
                     $statementRStr = '';
                     foreach ( $statementR as $ids )
-                        $statementRStr .= $ids . ",";
+                    {
+                        if ( is_numeric($ids) )
+                        {
+                            $statementRStr .= $ids . ",";
+                        } else {
+                            $statementRStr .= "'" . $ids . "',";
+                        }
+                    }
+
                     $statementRStr = '(' . trim($statementRStr,',') . ')';
                     $andWhere['right'] = $statementRStr;
                 }

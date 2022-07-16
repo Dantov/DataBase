@@ -36,7 +36,7 @@ class Search extends General
         $this->searchFor = $searchFor = mb_strtolower( strip_tags( trim($searchInput) ) );
 
         // Для обновления поиска когда выбран тип модели. Нужно "запаковать" 'assist' в сессию
-        if ( isset($this->params['mt']) )
+        if ( isset($this->params['mt']) || isset($this->params['mat']) || isset($this->params['gem']) )
             (new SetSortModel())->setSort($this->params);
 
         $assist = $this->session->getKey('assist');
@@ -70,11 +70,30 @@ class Search extends General
             $and = true;
         }
 
-        if ( $assist['modelType'] !== "Нет" )
+
+        if ( $assist['modelType'] !== "Все" )
         {
             $andWhere = $and ? " AND" : " WHERE";
-
             $where .= $andWhere . " model_type='{$assist['modelType']}' ";
+            $and = true;
+        }
+
+        $modelMat = $assist['modelMaterial']??"Все";
+        if ( $modelMat !== "Все" )
+        {
+            $posIDs_m = SelectBy::modelMaterial($modelMat);
+            if ( !empty($posIDs_m) ) $posIDs_m = "OR (id IN ($posIDs_m))";
+            $where .= ($and ? " AND " : " WHERE ") . " (model_material LIKE '%$modelMat%' $posIDs_m)";
+            $and = true;
+        }
+
+        $gemType = $assist['gemType']??"Все";
+        if ( $gemType !== "Все" )
+        {
+            $posIDs_g = SelectBy::gemType($gemType);
+            $posIDs_g = !empty($posIDs_g) ? " (id IN ($posIDs_g))" : "(id=-1)";
+
+            $where .= ($and ? " AND " : " WHERE ") . " $posIDs_g";
         }
 
 

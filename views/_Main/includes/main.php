@@ -6,18 +6,21 @@ use \Views\vendor\core\HtmlHelper;
 $session = $this->session;
 
 /* @var $modelTypes - array  */
+/* @var $modelMaterials - array  */
 $currentModelType = $this->session->getKey('assist')['modelType'];
+$currentModelMaterial = $this->session->getKey('assist')['modelMaterial'];
+$currentGemType = $this->session->getKey('assist')['gemType'];
 
 ?>
 <script src="/Views/_Main/js/trytoload.js?ver=005"></script>
 
 <div class="row">
 	<div class="col-xs-12">
-		<div class="btn-group pull-right" role="group" aria-label="...">
+		<div class="btn-group btn-group-sm pull-right" role="group" aria-label="...">
 
 			<?php if ( $workCentersSort === true ): ?>
 			<div class="btn-group" role="group">
-				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<button type="button" class="btn btn-group-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					<span>Участок: <?= $_SESSION['assist']['wcSort']['name'] ?: 'Нет' ?> </span>
 					<span class="caret"></span>
 				</button>
@@ -25,7 +28,7 @@ $currentModelType = $this->session->getKey('assist')['modelType'];
 					<li role="presentation">
 						<a href="/main/?wcSort=none">Нет</a></li>
 					<li role="presentation" class="divider"></li>
-					<?php foreach ( $workingCenters?:[] as $wcKey => $workingCenter ) : ?>
+					<?php foreach ( $workingCenters??[] as $wcKey => $workingCenter ) : ?>
 						<?php
 							$wcIDs = '';
 							foreach ( $workingCenter as $wcID => $wcArray ) $wcIDs .= $wcID.'-';
@@ -39,9 +42,47 @@ $currentModelType = $this->session->getKey('assist')['modelType'];
 			</div>
 			<?php endif; ?>
 
-            <div class="btn-group" role="group">
-                <button id="modelTypeSelect" type="button" class="btn btn-default dropdown-toggle trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span>Тип модели: <?= $currentModelType ?></span>
+            <!-- PURGE SELECT -->
+            <div class="btn-group btn-group-sm" role="group" aria-label="...">
+                <a href="<?= HtmlHelper::URL('/main/',['purgeselect'=>1]) ?>" type="button" title="Сбросить выборку" class="btn btn-default">
+                    <i class="fas fa-broom"></i>
+                </a>
+            </div>
+
+            <!-- MODEL GEM SELECT -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button id="modelTypeSelect" title="Тип камней" type="button" class="btn btn-default dropdown-toggle trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span><i class="far fa-gem"></i> <?= $currentGemType ?></span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="<?= HtmlHelper::URL('/main/',['gem'=>-1]) ?>">Все</a></li>
+                    <li role="separator" class="divider"></li>
+                    <?php foreach ( $modelGemTypes??[] as $gemType ): ?>
+                        <li><a href="<?= HtmlHelper::URL('/main/',['gem'=>$gemType['id']]) ?>"><?= $gemType['name'] ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+
+            <!-- MODEL MATERIAL SELECT -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button id="modelTypeSelect" title="Материал изделия" type="button" class="btn btn-default dropdown-toggle trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span><i class="fab fa-codepen"></i> <?= $currentModelMaterial ?></span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="<?= HtmlHelper::URL('/main/',['mat'=>-1]) ?>">Все</a></li>
+                    <li role="separator" class="divider"></li>
+                    <?php foreach ( $modelMaterials??[] as $modelMaterial ): ?>
+                        <li><a href="<?= HtmlHelper::URL('/main/',['mat'=>$modelMaterial['id']]) ?>"><?= $modelMaterial['name'] ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+
+            <!-- MODEL TYPE SELECT -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button id="modelTypeSelect" title="Тип модели" type="button" class="btn btn-default dropdown-toggle trigger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span><i class="fas fa-object-group"></i> <?= $currentModelType ?></span>
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
@@ -53,14 +94,14 @@ $currentModelType = $this->session->getKey('assist')['modelType'];
                 </ul>
             </div>
 
-            <div class="btn-group" role="group">
-                <button id="statusesSelect" type="button" class="btn btn-default dropdown-toggle trigger" data-izimodal-open="#modalStatuses" data-izimodal-transitionin="fadeInDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span>Статус: <?=$selectedStatusName ?></span>
+            <div class="btn-group btn-group-sm" role="group">
+                <button id="statusesSelect" title="Статус" type="button" class="btn btn-default dropdown-toggle trigger" data-izimodal-open="#modalStatuses" data-izimodal-transitionin="fadeInDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span><i class="fas fa-code-branch"></i> <?=$selectedStatusName ?></span>
                     <span class="caret"></span>
                 </button>
             </div>
 
-			<div class="btn-group" role="group">
+			<div class="btn-group btn-group-sm" role="group">
 				<button type="button" class="btn btn-default dropdown-toggle" title="<?=$chevTitle; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					<span style="font-size:9px;">
 						<span class="glyphicon glyphicon-<?=$chevron_; ?>"></span></span>
@@ -75,7 +116,7 @@ $currentModelType = $this->session->getKey('assist')['modelType'];
 				</ul>
 			</div>
 
-			<div class="btn-group" role="group">
+			<div class="btn-group btn-group-sm" role="group">
 				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					<?="Сорт. по ".$showsort; ?>
 					<span class="caret"></span>
@@ -92,7 +133,7 @@ $currentModelType = $this->session->getKey('assist')['modelType'];
 				</ul>
 			</div>
 
-			<div class="btn-group" role="group">
+			<div class="btn-group btn-group-sm" role="group">
 				<button type="button" class="btn btn-default dropdown-toggle" title="кол-во отображаемых позиций" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					<span><?=$_SESSION['assist']['maxPos']; ?></span>
 					<span class="caret"></span>
@@ -111,12 +152,12 @@ $currentModelType = $this->session->getKey('assist')['modelType'];
 				</ul>
 			</div>
 
-			<div class="btn-group" role="group" aria-label="...">
+			<div class="btn-group btn-group-sm" role="group" aria-label="...">
 				<a type="button" href="/main/?row_pos=2" class="btn btn-default <?=$activeList; ?>">
 					<span class="glyphicon glyphicon-th-list" title="Разбить по комплектам"></span></a>
 				<a type="button" href="/main/?row_pos=1" class="btn btn-default <?=$activeSquer; ?>"><span class="glyphicon glyphicon-th-large" title="Отобразить изделия плиткой"></a>
 			</div>
-			<div class="btn-group" role="group">
+			<div class="btn-group btn-group-sm" role="group">
 				<button type="button" class="btn btn-default <?=$activeWorkingCenters; ?> <?=$activeWorkingCenters2; ?> dropdown-toggle" title="кол-во отображаемых позиций" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					<span class="glyphicon glyphicon-save-file" title="Таблицы Рабочих участков"></span>
 				</button>
@@ -133,7 +174,7 @@ $currentModelType = $this->session->getKey('assist')['modelType'];
 				</ul>
 			</div>
 
-			<div class="btn-group <?=$toggleSelectedGroup; ?>" id="selectedGroup" role="group">
+			<div class="btn-group btn-group-sm <?=$toggleSelectedGroup; ?>" id="selectedGroup" role="group">
 				<button type="button" class="btn btn-default dropdown-toggle" title="Выделенные модели" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					<span class="glyphicon glyphicon-screenshot"></span>
 					<span class="caret"></span>
@@ -154,7 +195,7 @@ $currentModelType = $this->session->getKey('assist')['modelType'];
 					<?=$selectedModelsByLi; ?>
 				</ul>
 			</div>
-			<div class="btn-group" role="group" aria-label="...">
+			<div class="btn-group btn-group-sm" role="group" aria-label="...">
 				<a type="button" id="selectMode" onclick="selects.toggleSelectionMode(this);" class="btn btn-default <?=$variables['activeSelect']; ?>">
 					<span class="glyphicon glyphicon-edit" title="Режим выделения"></span></a>
 			</div>

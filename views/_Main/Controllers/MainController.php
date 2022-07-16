@@ -158,8 +158,10 @@ class MainController extends GeneralController
 		$collectionName = $variables['collectionName'];
 		
 		$modelTypes = $main->getServiceData(['model_type'])['tables']['model_type'];
+		$modelMaterials = $main->getModelMaterialsSelect();
+		$modelGemTypes = $main->getServiceData(['gems_names'])['tables']['gems_names'];
 
-		//debug($modelTypes,'$modelTypes',1);
+		//debug($modelMaterials,'$modelMaterials',1);
 
 		// выборка статусов
 		$status = $main->getStatusesSelect();
@@ -267,7 +269,7 @@ class MainController extends GeneralController
 		$this->includePHPFile('progressModal.php','','',_globDIR_. 'includes/');
 		$this->includeJSFile('Selects.js',['defer','timestamp']);
 		
-		$compacted = compact(['variables','modelTypes','chevron_','chevTitle','showsort','activeSquer','activeWorkingCenters',
+		$compacted = compact(['variables','modelGemTypes','modelTypes','modelMaterials','chevron_','chevTitle','showsort','activeSquer','activeWorkingCenters',
 		'activeWorkingCenters2','activeList','collectionName','collectionList','status','selectedStatusName',
 		'toggleSelectedGroup','selectedModelsByLi','showModels','drawBy_','iter','wholePos','statsbottom',
 		'posIter','ComplShown','workingCenters','workCentersSort','pagination']);

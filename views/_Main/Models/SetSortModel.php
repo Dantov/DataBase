@@ -1,6 +1,7 @@
 <?php
 namespace Views\_Main\Models;
 use Views\_Globals\Models\General;
+use Views\vendor\core\ActiveQuery;
 
 
 /**
@@ -47,7 +48,7 @@ class SetSortModel extends General
                     $this->showCollection($paramValue);
                     break;
                 case 'sortby':
-                    $this->setSortBy($paramValue);
+                    $this->setOrderBy($paramValue);
                     break;
                 case 'row_pos':
                     $this->setRowPos($paramValue);
@@ -59,7 +60,13 @@ class SetSortModel extends General
                     return $this->sortByStatus($paramValue);
                     break;
                 case 'mt':
-                    return $this->sortByModelType($paramValue);
+                    return $this->sortBy('type',$paramValue);
+                    break;
+                case 'mat':
+                    return $this->sortBy('material',$paramValue);
+                    break;
+                case 'gem':
+                    return $this->sortBy('gem',$paramValue);
                     break;
                 case 'sortDirect':
                     $this->sortDirect($paramValue);
@@ -69,6 +76,9 @@ class SetSortModel extends General
                     break;
                 case 'countedIds':
                     return $this->setExpiredModels($paramValue);
+                    break;
+                case 'purgeselect':
+                    return $this->purgeSort($paramValue);
                     break;
                 default:
                     //
@@ -139,7 +149,14 @@ class SetSortModel extends General
 
         if ( $collID !== -1 ) 
         {
-            $coll_row = $this->findOne(" SELECT name FROM service_data WHERE id='$collID' AND tab='collections' ");
+            //$coll_row = $this->findOne(" SELECT name FROM service_data WHERE id='$collID' AND tab='collections' ");
+            $coll_row = (new ActiveQuery('service_data'))->service_data
+                ->select(['name'])
+                ->where('id','=',$collID)
+                ->and('tab','=','collections')
+                ->asOne()
+                ->exe();
+
             $assist['collectionName'] = $coll_row['name'];
             $assist['collection_id'] = $collID;
             $assist['page'] = 0;
@@ -154,7 +171,7 @@ class SetSortModel extends General
         $this->killSearch();
     }
 
-    protected function setSortBy($column)
+    protected function setOrderBy($column)
     {
         $session = $this->session;
         $assist = $session->getKey('assist');
@@ -213,30 +230,46 @@ class SetSortModel extends General
     }
 
     /**
-     * @param int $mtID
+     * @param string $type
+     * @param int $typeID
      * @throws \Exception
      */
-    protected function sortByModelType( int $mtID )
+    protected function sortBy( string $type, int $typeID )
     {
-        if ( $mtID > PHP_INT_MAX || $mtID < -1 ) return;
+        if ( $typeID > PHP_INT_MAX || $typeID < -1 ) $typeID = -1;
 
         $session = $this->session;
         $assist = $session->getKey('assist');
 
-        if ( $mtID === -1 )
-            $assist['modelType'] = "Нет";
-
-        if ( $mtID > 0 )
+        switch ( $type )
         {
-            $this->connectToDB();
-            $mTypes = $this->getServiceData()['tables']['model_type'];
-            foreach ( $mTypes as $mType )
+            case "material":
+                $assistName = "modelMaterial";
+                $mTypes = $this->getModelMaterialsSelect();
+                break;
+            case "type":
+                $assistName = "modelType";
+                $mTypes = $this->getServiceData(['model_type'])['tables']['model_type'];
+                break;
+            case "gem":
+                $assistName = "gemType";
+                $mTypes = $this->getServiceData(['gems_names'])['tables']['gems_names'];
+                break;
+            default:
+                $assistName = "modelMaterial";
+                $mTypes = $this->getModelMaterialsSelect();
+                break;
+        }
+
+        if ( $typeID === -1 )
+            $assist[$assistName] = "Все";
+
+        foreach ( $mTypes as $mType )
+        {
+            if ( (int)$mType['id'] === $typeID )
             {
-                if ( (int)$mType['id'] === $mtID )
-                {
-                    $assist['modelType'] = $mType['name'];
-                    break;
-                }
+                $assist[$assistName] = $mType['name'];
+                break;
             }
         }
 
@@ -301,8 +334,12 @@ class SetSortModel extends General
         $session->setKey('assist', $assist);
         $session->setKey('re_search', true);
     }
-    
-    protected function sortByWorkingCenters($wcIDs) 
+
+    /**
+     * @param $wcIDs
+     * @throws \Exception
+     */
+    protected function sortByWorkingCenters($wcIDs)
     {
         $wcIDs = trim( htmlentities($wcIDs, ENT_QUOTES) );
         $wcIDs = explode('-',$wcIDs);
@@ -371,4 +408,29 @@ class SetSortModel extends General
         return '/main/';
     }
 
+    protected function purgeSort( int $param )
+    {
+        if ( $param !== 1 ) return;
+
+        $session = $this->session;
+        $assist = $session->getKey('assist');
+
+        $assist['regStat'] = "Нет";
+        $assist['byStatHistory'] = 0;
+        $assist['byStatHistoryFrom'] = '';
+        $assist['byStatHistoryTo'] = '';
+
+        $assist['modelMaterial'] = 'Все';
+        $assist['modelType'] = 'Все';
+        $assist['gemType'] = 'Все';
+
+        $assist['collectionName'] = "Все Коллекции";
+        $assist['collection_id'] = -1;
+
+        $assist['page'] = 0;
+        $assist['startFromPage'] = 0;
+
+        $session->setKey('assist', $assist);
+        $session->setKey('re_search', true);
+    }
 }

@@ -135,7 +135,9 @@ class AuthController extends Controller
 
         $assist['maxPos'] = 48;        // кол-во выводимых позиций по дефолту
         $assist['regStat'] = "Нет";    // выбор статуса по умоляанию
-        $assist['modelType'] = "Нет";  // выбор по типу модели
+        $assist['modelType'] = "Все";  // выбор по типу модели
+        $assist['modelMaterial'] = "Все";  // выбор по типу материала
+        $assist['gemType'] = "Все";  // выбор по типу Камня
         $assist['byStatHistory'] = 0;    // искать в истории статусов
         $assist['wcSort'] = [];        // выбор рабочего участка по умоляанию
         $assist['searchIn'] = 1;

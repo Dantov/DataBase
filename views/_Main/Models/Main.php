@@ -127,14 +127,21 @@ class Main extends General {
     }
 
 
-	/**
-	*  bool $showall  - Флаг исключающий коллекцию детали из выборки ( используется для выбора эсскизов со всех колл. для Богдана )
-	*/
+    /**
+     *  bool $showall  - Флаг исключающий коллекцию детали из выборки ( используется для выбора эсскизов со всех колл. для Богдана )
+     * @param bool $showall
+     * @return array|bool
+     * @throws \Exception
+     */
 	public function getModelsFormStock( $showall = false )
     {
 		//debug($showall);
 		$where = "";
 		$and = false;
+
+        $modelType = $this->assist['modelType'];
+        if ( $modelType !== "Все" ) // Если выбран тип модели, коллекцию "детали" тоже включаем
+            $showall = true;
 		
 		if ( !$showall )
 		{
@@ -147,6 +154,12 @@ class Main extends General {
 			$where = "WHERE collections like '%{$this->assist['collectionName']}%'";
 			$and = true;
 		}
+
+        if ( $modelType !== "Все" )
+        {
+            $where .= ($and ? " AND " : " WHERE ") . " model_type='$modelType'";
+            $and = true;
+        }
 
         $regStat = 0;
         foreach ( $this->statuses as $status )
@@ -172,24 +185,34 @@ class Main extends General {
             $where .= ($and ? " AND " : " WHERE ") . " status='$regStat'";
         }
 
-        $modelType = $this->assist['modelType'];
-        if ( $modelType !== "Нет" )
+        $modelMat = $this->assist['modelMaterial'];
+        if ( $modelMat !== "Все" )
         {
-            $where .= ($and ? " AND " : " WHERE ") . " model_type='$modelType'";
+            $posIDs_m = SelectBy::modelMaterial($modelMat);
+            if ( !empty($posIDs_m) ) $posIDs_m = "OR (id IN ($posIDs_m))";
+            $where .= ($and ? " AND " : " WHERE ") . " (model_material LIKE '%$modelMat%' $posIDs_m)";
+        }
+
+        $gemType = $this->assist['gemType']??"Все";
+        if ( $gemType !== "Все" )
+        {
+            $posIDs_g = SelectBy::gemType($gemType);
+            $posIDs_g = !empty($posIDs_g) ? " (id IN ($posIDs_g))" : "(id=-1)";
+
+            $where .= ($and ? " AND " : " WHERE ") . " $posIDs_g";
         }
 
 		$selectRow = "SELECT * FROM stock " . $where . " ORDER BY " .$this->assist['reg']." ".$this->assist['sortDirect'];
-		$result_sort = mysqli_query($this->connection, $selectRow);
+		//debug($selectRow,'selR',1);
+        $result_sort = mysqli_query($this->connection, $selectRow);
 
-		if ( !$result_sort ) {
-			printf( "Error SELECT: %s\n", mysqli_error($this->connection) );
-			return false;
-		}
+		if ( !$result_sort )
+		    throw  new \Exception("Error SELECT in:" . __METHOD__ . " " . mysqli_error($this->connection));
+
 		while( $row = mysqli_fetch_assoc($result_sort) ) $this->row[] = $row;
 
 		if ( $this->assist['byStatHistory'] === 1 )
         {
-
             $dates = [];
             if ( !empty($_SESSION['assist']['byStatHistoryFrom'])) $dates['from'] = $_SESSION['assist']['byStatHistoryFrom'];
             if ( !empty($_SESSION['assist']['byStatHistoryTo'])) $dates['to'] = $_SESSION['assist']['byStatHistoryTo'];
@@ -1048,4 +1071,6 @@ class Main extends General {
         $pagination .= '</nav>';
 		return $pagination;
 	}
+
+
 }

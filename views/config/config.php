@@ -7,7 +7,7 @@ return [
     'cachePath' => '/runtime/cache',
     'layout' => 'default',
     'defaultController' => 'main',
-    'version' => '2.3',
+    'version' => '2.33',
     'dataCompression' => true,
 	'assistUpdate' => 3,
 
@@ -21,7 +21,7 @@ return [
     'errors' => [
         'enable' => true, // включает перехват ошибок фреймворком DTW.  false - отключает
         'logs'   => '/runtime/logs', // false - отключает логи
-        'mode'   => _DEV_MODE_ ? 3 : 0,
+        'mode'   => _DEV_MODE_ ? 3 : 1,
     ],
 	'https' => false, //false
     'csrf' => false, // валидация данных для форм и JS

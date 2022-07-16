@@ -2,7 +2,9 @@
 namespace Views\_Globals\Models;
 
 use Views\_SaveModel\Models\ImageConverter;
-use Views\vendor\core\{Config,Model,Sessions,Request};
+use Views\vendor\core\{
+    ActiveQuery, Config, Model, Sessions, Request
+};
 use Views\vendor\core\db\Database;
 use Views\vendor\core\Errors\Exceptions\DBConnectException;
 use Views\vendor\libs\classes\AppCodes;
@@ -981,37 +983,44 @@ class General extends Model
             $tabs = $tabs_origin;
         } else {
             foreach ( $tabs as $k => $t )
-            {
                 if (!in_array($t, $tabs_origin))
                     throw new  \Exception("Wrong tab name ".$t." in " . __METHOD__);
-                    //unset( $tabs[$k] );
-            }
-
-            if ( empty($tabs) )
-                $tabs = $tabs_origin;
         }
 
-        $q_tabs = '';
-        foreach ( $tabs as $t )
-            $q_tabs .= "'" . $t . "',";
-
-        $q_tabs = ' WHERE tab IN (' . trim($q_tabs,',') . ')';
-
-        $query =  "select * from service_data $q_tabs ORDER BY name";
-
-        //debug($query,"query",1);
-
-        $service_data = $this->findAsArray($query);
+        $service_data = (new ActiveQuery('service_data'))->service_data->select(['*'])
+        ->where('tab','IN',$tabs)->orderBy('name','ASC')->exe();
 
         $tables = [];
         foreach ( $service_data as $row )
         {
             foreach ( $tabs as $tab )
-            {
                 if ( $row['tab'] === $tab ) $tables[$tab][] = $row;
-            }
         }
         return compact(['tables']);
     }
-	
+
+    /**
+     * @throws \Exception
+     */
+    public function getModelMaterialsSelect() : array
+    {
+        $mats = $this->getServiceData(['model_material'])['tables']['model_material'];
+
+        $name = '';
+        foreach ( $mats as $k => &$mat )
+        {
+            $nameO = explode(';',$mat['name'])[0];
+            if ( $nameO !== $name )
+            {
+                $name = $nameO;
+                $mat['name'] = $nameO;
+            } else {
+                unset($mats[$k]);
+            }
+        }
+
+        return $mats;
+    }
+
+
 }
