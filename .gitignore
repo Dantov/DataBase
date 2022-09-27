@@ -5,10 +5,8 @@
 /runtime/
 /Stock/
 /vendor/
-/Views/config/db_config.php
-favicon.ico
+/web/fontawesome-5.15.4/
 Apache-PHP-7.2_vhost.conf
 =======
 /nbproject/
-.htaccess
 >>>>>>> fb8351065e2cef2e01ceb905885e1ae1a997b87c
