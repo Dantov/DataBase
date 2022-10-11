@@ -1,12 +1,12 @@
 @font-face {
 font-family: "Audiowide";  
-src: url("../fonts/Audiowide-Regular.ttf") format("truetype");
+src: url("../assets/fonts/Audiowide-Regular.ttf") format("truetype");
 font-style: normal; 
 font-weight: normal;
  }
  @font-face {
 font-family: "Adobe Caslon Pro"; 
-src: url("../fonts/ACaslonPro-Regular.otf") format("OpenType");
+src: url("../assets/fonts/ACaslonPro-Regular.otf") format("OpenType");
 font-style: normal; 
 font-weight: normal;
  }

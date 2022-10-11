@@ -1,12 +1,14 @@
 <<<<<<< HEAD
 /.idea/
+/config/db_config.php
 /backup/
-/Pdfs/
 /runtime/
-/Stock/
+/web/Stock/
+/web/Pdfs/
 /vendor/
 /web/fontawesome-5.15.4/
 Apache-PHP-7.2_vhost.conf
+index.sublime-workspace
 =======
 /nbproject/
 >>>>>>> fb8351065e2cef2e01ceb905885e1ae1a997b87c

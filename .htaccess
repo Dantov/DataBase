@@ -11,6 +11,6 @@ RewriteCond %{REQUEST_FILENAME} !-d
 
 Options -Indexes
 RewriteEngine On 
-RewriteRule ^(.*)$ /Views/$1
+RewriteRule ^(.*)$ /web/$1
 
 RewriteRule ^/.htaccess$ - [F]

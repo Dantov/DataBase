@@ -1,12 +1,12 @@
 @font-face {
 font-family: "Open Sans";  
-src: url("../fonts/OpenSans-Light.ttf") format("truetype");
+src: url("../assets/fonts/OpenSans-Light.ttf") format("truetype");
 font-style: normal;
 font-weight: normal;
  }
 @font-face {
 font-family: "Open Sans semi-bold";  
-src: url("../fonts/OpenSans-SemiBold.ttf") format("truetype");
+src: url("../assets/fonts/OpenSans-SemiBold.ttf") format("truetype");
 font-style: all;
 font-weight: normal;
 }
@@ -256,7 +256,7 @@ body {
 	position: relative;
 	width: 17px;
 	height: 17px;
-	background: url('../glyphicons/png/glyphicons-544-scale-classic.png') 0 0 no-repeat;
+	background: url('../assets/glyphicons/png/glyphicons-544-scale-classic.png') 0 0 no-repeat;
 	background-size: 100%;
 	top:3px;
 }
@@ -265,7 +265,7 @@ body {
 	position: relative;
 	width: 20px;
 	height: 20px;
-	background: url('../glyphicons/png/glyphicons-779-cube-empty.png') 0 0 no-repeat;
+	background: url('../assets/glyphicons/png/glyphicons-779-cube-empty.png') 0 0 no-repeat;
 	background-size: 100%;
 	top:3px;
 }
@@ -274,7 +274,7 @@ body {
 	position: relative;
 	width: 18px;
 	height: 18px;
-	background: url('../glyphicons/png/glyphicons-780-cube-black.png') 0 0 no-repeat;
+	background: url('../assets/glyphicons/png/glyphicons-780-cube-black.png') 0 0 no-repeat;
 	background-size: 100%;
 	top:3px;
 }
@@ -283,7 +283,7 @@ body {
 	position: relative;
 	width: 14px;
 	height: 14px;
-	background: url('../glyphicons/png/glyphicons-366-restart.png') 0 0 no-repeat;
+	background: url('../assets/glyphicons/png/glyphicons-366-restart.png') 0 0 no-repeat;
 	background-size: 100%;
 	top:3px;
 }
@@ -292,7 +292,7 @@ body {
 	position: relative;
 	width: 17px;
 	height: 20px;
-	background: url('../glyphicons/png/glyphicons-272-ring.png') 0 0 no-repeat;
+	background: url('../assets/glyphicons/png/glyphicons-272-ring.png') 0 0 no-repeat;
 	background-size: 100%;
 	color: #2e6da4;
 	top:3px;

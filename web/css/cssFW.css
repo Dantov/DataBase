@@ -5,10 +5,25 @@
 
 /* HEIGHT */
 
+
+
 /* DISPLAYS */
 .d-inline {
-    display: inline!important;
+    display: inline !important;
 }
+.d-inline-block {
+    display: inline-block !important;
+}
+.d-block {
+    display: block !important;
+}
+.va-top {
+    vertical-align: top !important;
+}
+.va-bottom {
+    vertical-align: bottom !important;
+}
+
 
 /* MARGIN */
 .mrgnLeft {
@@ -58,6 +73,9 @@
 }
 .mt-3 {
     margin-top: 15px!important;
+}
+.mt-4 {
+    margin-top: 20px!important;
 }
 
 
