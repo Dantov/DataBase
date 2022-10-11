@@ -5,7 +5,6 @@
 /runtime/
 /web/Stock/
 /web/Pdfs/
-/vendor/
 /web/fontawesome-5.15.4/
 Apache-PHP-7.2_vhost.conf
 index.sublime-workspace
