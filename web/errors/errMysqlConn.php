@@ -8,8 +8,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?=$errtext;?></title>
-        <link rel="stylesheet" href="/web/css/bootstrap.min.css">
-        <link rel="icon" href="/web/favicon.ico?ver=110">
+        <link rel="stylesheet" href="/web/assets/css/bootstrap.min.css">
+        <link rel="icon" href="/web/picts/favicon_dev.ico?ver=111">
     </head>
     <body>
         <div class="container">
@@ -32,7 +32,7 @@
                 </div>
                 <div class="col-xs-2"></div>
             </div>
-            <script src="/web/js_lib/bootstrap.min.js"></script>
+            <script src="/web/assets/js_lib/bootstrap.min.js"></script>
         </div>
     </body>
 </html>

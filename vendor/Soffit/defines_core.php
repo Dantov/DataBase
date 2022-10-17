@@ -13,7 +13,12 @@ define('_soffitDIR_', _vendorDIR_. 'Soffit/');
 define('_coreDIR_', _soffitDIR_ . 'core/');
 define('_libsDIR_', _soffitDIR_ . 'libs/');
 
-define('_PROTOCOL_', strtolower(explode('/',filter_input(INPUT_SERVER, 'SERVER_PROTOCOL'))[0]) );
+$https = 'off';
+if (filter_has_var(INPUT_SERVER, 'HTTPS'))
+	$https = filter_input(INPUT_SERVER, 'HTTPS');
+
+//define('_PROTOCOL_', strtolower(explode('/',filter_input(INPUT_SERVER, 'SERVER_PROTOCOL'))[0]) );
+define('_PROTOCOL_', ($https === 'on' ? 'https' : 'http') );
 
 // EXAMPLE: http://soffit.fw/ OR https://soffit.fw/
 define('_rootDIR_HTTP_', _PROTOCOL_.'://'.filter_input(INPUT_SERVER, 'HTTP_HOST').'/'); // для совместимости, удалить после

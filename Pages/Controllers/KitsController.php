@@ -43,9 +43,9 @@ class KitsController extends MainController
 			$models = $kits->getModels();
 
 			$showModels = $models['showByRows'];
-			$wholePos   = $models['wholePos'];
-			$iter       = $models['iter'];
-			$posIter    = $models['posIter'];
+			$wholePos   = $models['wholePos']??0;
+			$iter       = $models['iter']??0;
+			$posIter    = $models['posIter']??0;
 
 			$ComplShown = $kits->totalKits();
 			$modelsFrom = $kits->start;

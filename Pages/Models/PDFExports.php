@@ -292,7 +292,8 @@ class PDFExports extends Kits
                     }
 
                     $_src = $complects[$i]['number_3d'].'/'.$complects[$i]['model_type'][$modelId]['id'].'/images/'.$imgDopVC['images'][$im_c];
-                    $img_src = file_exists(_stockDIR_.$_src) ? _stockDIR_HTTP_.$_src : _stockDIR_HTTP_."default.jpg";
+                    //$img_src = file_exists(_stockDIR_.$_src) ? _stockDIR_HTTP_.$_src : _stockDIR_HTTP_."default.jpg";
+                    $img_src = file_exists(_stockDIR_.$_src) ? _stockDIR_.$_src : _stockDIR_."default.jpg";
 
                     $pdf->Image($img_src, $X_Img, $Y_Img, $W_IMG, $H_IMG, '', '', '', true, 150, '', false, false, 0, true, false, false);
                     $X_Img += $W_IMG;

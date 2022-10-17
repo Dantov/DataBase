@@ -255,6 +255,8 @@ class SetSortModel extends General
                 break;
             }
         }
+
+        $assist['page'] = 1;        
         $session->setKey('assist', $assist);
 
         if ( $session->getKey('searchFor') )
@@ -297,7 +299,7 @@ class SetSortModel extends General
             $assist['byStatHistoryTo'] = '';
         }
 
-        $assist['page'] = 0;
+        $assist['page'] = 1;
         $session->setKey('assist', $assist);
         
         $searchFor = $session->getKey('searchFor');

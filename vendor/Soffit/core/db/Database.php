@@ -131,7 +131,11 @@ class Database implements DatabaseInterface
         } catch (\Error | \Exception | \PDOException $e ) {
             $errtext = $e->getMessage();
             $errno = $e->getCode();
-            header("location: " . _views_HTTP_ . "errors/errMysqlConn.php?errno=$errno&errtext=$errtext");
+            if ( _DEV_MODE_ ) {
+                header("location: " . _HOST_web_ . "errors/errMysqlConn.php?errno=$errno&errtext=$errtext");    
+                exit;
+            }
+            throw new \Exception($errtext,$errno);
             exit;
         }
     }

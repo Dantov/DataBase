@@ -359,11 +359,13 @@ ProgressModal.prototype.sendPDF = function()
 
     debug(this.searchValue);
     debug(this.collectionName);
-
+    
+    /*
     if ( c_name === 'Все Коллекции' && topSearchInpt === '' ) { // уходим если выбраны все коллекции
         alert('Нужно выбрать какую нибудь коллекцию!');
         return;
     }
+    */
 
     this.setProgressModal('pdf');
     $('#modalProgress').iziModal('open');

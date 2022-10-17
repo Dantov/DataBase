@@ -22,7 +22,7 @@ return [
         'logs'   => '/runtime/logs', // false - отключает логи
         'mode'   => _DEV_MODE_ ? 2 : 0,
     ],
-	'https' => false, //false
+	'https' => (_PROTOCOL_ === 'https' ? true : false), //false
     'csrf' => false, // валидация данных для форм и JS
     'classes' => [  // подключаемые классы
         'valitron' => 'libs\classes\valitron\src\Validator',

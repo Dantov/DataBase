@@ -16,6 +16,7 @@ if ( !$isRepairProto??'' )
     $repairRow['panelIcon'] = $whichRepair ? 'wrench' : 'cog';
 
 
+    $repair['paid'] = $repair['paid']??'';
 
     if ( isset($repair['rep_num']) ) $repairRow['number'] = $repair['rep_num'];
     if ( isset($repair['date']) ) $repairRow['date'] = $repair['date'];
